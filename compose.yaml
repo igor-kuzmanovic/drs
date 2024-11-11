@@ -1,0 +1,28 @@
+services:
+  api:
+    build: ./api
+    ports:
+      - 5000:5000
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-surveymasterdb}
+      POSTGRES_HOST: ${POSTGRES_DB:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+    volumes:
+      - ./api:/app
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-surveymasterdb}
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
