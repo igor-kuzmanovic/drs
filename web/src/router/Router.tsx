@@ -5,6 +5,7 @@ import { ProfilePage } from '../pages/ProfilePage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { RespondSurveyPage } from '../pages/RespondSurveyPage';
 import { SurveyPage } from '../pages/SurveyPage';
+import { PingPage } from '../pages/PingPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 
 const router = createBrowserRouter([
@@ -31,6 +32,10 @@ const router = createBrowserRouter([
 	{
 		path: '/survey',
 		element: <SurveyPage />,
+	},
+	{
+		path: '/_ping',
+		element: <PingPage />,
 	},
 	{
 		path: '*',

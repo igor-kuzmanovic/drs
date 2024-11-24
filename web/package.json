@@ -13,9 +13,10 @@
 	"scripts": {
 		"build": "tsc && vite build",
 		"dev": "vite",
-		"eslint": "eslint . --cache",
-		"prettier": "prettier --check \"**/*.{ts,tsx}\"",
-		"prettier:write": "prettier --write \"**/*.{ts,tsx}\"",
+		"eslint": "eslint .",
+		"eslint:fix": "eslint . --fix",
+		"prettier": "prettier . --check",
+		"prettier:write": "prettier . --write",
 		"preview": "vite preview"
 	},
 	"dependencies": {
