@@ -34,11 +34,7 @@ const authSlice = createSlice({
 				// Noop
 			})
 			.addMatcher(authApiSlice.endpoints.login.matchFulfilled, (state, action) => {
-				// TODO Figure out how to reuse setCredentials
-				state.token = action.payload.token;
-				state.isAuthenticated = true;
-				// Set the token to local storage
-				localStorage.setItem('token', action.payload.token);
+				authSlice.caseReducers.setCredentials(state, action);
 			})
 			.addMatcher(authApiSlice.endpoints.login.matchRejected, () => {
 				// Noop
