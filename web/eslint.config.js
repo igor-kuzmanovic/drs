@@ -27,11 +27,13 @@ export default [
 						{
 							name: 'react-redux',
 							importNames: ['useSelector', 'useStore', 'useDispatch'],
-							message: 'Please use pre-typed versions from `src/app/hooks.ts` instead.',
+							message: 'Please use pre-typed versions from `src/app/store.ts` instead.',
 						},
 					],
 				},
 			],
+			// Easier to work with Redux Toolkit if allowed
+			'@typescript-eslint/ no-explicit-any': 'off',
 		},
 	},
 	pluginReact.configs.flat['jsx-runtime'],

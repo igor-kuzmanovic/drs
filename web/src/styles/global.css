@@ -1,0 +1,4 @@
+#root {
+	/*noinspection CssInvalidFunction*/
+	background-color: light-dark(var(--mantine-color-orange-1), var(--mantine-color-orange-8));
+}
