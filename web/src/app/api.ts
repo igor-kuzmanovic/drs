@@ -1,17 +1,48 @@
+import type { BaseQueryFn } from '@reduxjs/toolkit/query';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { logOut, setCredentials } from '../features/auth/authSlice';
+import type { RootState } from './store';
 
-export const api = createApi({
-	reducerPath: 'api',
-	baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:5000/api' }),
-	endpoints: (builder) => ({
-		ping: builder.mutation({
-			query: (body) => ({
-				url: '/_ping',
-				method: 'POST',
-				body,
-			}),
-		}),
-	}),
+const baseQuery = fetchBaseQuery({
+	baseUrl: 'http://localhost:5000/api',
+	prepareHeaders: (headers, { getState }) => {
+		const token = (getState() as RootState).auth.token;
+		if (token) {
+			headers.set('Authorization', `Bearer ${token}`);
+		}
+		return headers;
+	},
 });
 
-export const { usePingMutation } = api;
+const baseQueryWithTokenRefresh: BaseQueryFn = async (args, api, extraOptions) => {
+	let result = await baseQuery(args, api, extraOptions);
+
+	if (
+		result?.error &&
+		(('status' in result.error && result.error.status === 403) ||
+			('originalStatus' in result.error && result.error.originalStatus === 403))
+	) {
+		// Send refresh token to get new access token
+		const refreshResult = await baseQuery({ url: '/refresh', method: 'POST' }, api, extraOptions);
+		if (
+			refreshResult?.data &&
+			typeof refreshResult.data === 'object' &&
+			'token' in refreshResult.data &&
+			refreshResult.data.token
+		) {
+			// Store the new token
+			api.dispatch(setCredentials({ token: refreshResult.data.token }));
+			// Retry the original query with new access token
+			result = await baseQuery(args, api, extraOptions);
+		} else {
+			api.dispatch(logOut());
+		}
+	}
+
+	return result;
+};
+
+export const api = createApi({
+	baseQuery: baseQueryWithTokenRefresh,
+	endpoints: () => ({}),
+});

@@ -8,13 +8,23 @@ CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
 
 @app.route("/", methods=["GET"])
 def hello():
-    return "Hello, World!"
+	return "Hello, World!"
 
 
-@app.route("/api/_ping", methods=["POST"])
-def ping():
-    return jsonify("pong")
+@app.route("/api/login", methods=["POST"])
+def login():
+	return jsonify({"token": "eyJ...initial"})
+
+
+@app.route("/api/refresh", methods=["POST"])
+def refresh():
+	return jsonify({"token": "eyJ...refreshed"})
+
+
+@app.route("/api/register", methods=["POST"])
+def register():
+	return jsonify({})
 
 
 if __name__ == "__main__":
-    app.run()
+	app.run()

@@ -1,8 +1,13 @@
+import '@mantine/core/styles.css';
+import './styles/global.css';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
-import { App } from './App';
+import { MantineProvider } from '@mantine/core';
+import { RouterProvider } from 'react-router-dom';
 import { store } from './app/store';
+import { theme } from './styles/theme';
+import { router } from './app/router';
 
 const container = document.getElementById('root');
 
@@ -17,7 +22,9 @@ const root = createRoot(container);
 root.render(
 	<React.StrictMode>
 		<Provider store={store}>
-			<App />
+			<MantineProvider theme={theme}>
+				<RouterProvider router={router} />
+			</MantineProvider>
 		</Provider>
 	</React.StrictMode>,
 );

@@ -28,7 +28,7 @@ markupsafe==3.0.2
     #   werkzeug
 psycopg==3.2.3
     # via -r requirements.in
-pydantic==2.10.1
+pydantic==2.10.2
     # via -r requirements.in
 pydantic-core==2.27.1
     # via pydantic

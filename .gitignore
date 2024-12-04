@@ -1,5 +1,8 @@
-# Created by https://www.toptal.com/developers/gitignore/api/webstorm+all,pycharm+all,visualstudiocode
-# Edit at https://www.toptal.com/developers/gitignore?templates=webstorm+all,pycharm+all,visualstudiocode
+# Created by https://www.toptal.com/developers/gitignore/api/webstorm+all,pycharm+all,visualstudiocode,dotenv
+# Edit at https://www.toptal.com/developers/gitignore?templates=webstorm+all,pycharm+all,visualstudiocode,dotenv
+
+### dotenv ###
+.env
 
 ### PyCharm+all ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
@@ -163,4 +166,4 @@ fabric.properties
 
 
 
-# End of https://www.toptal.com/developers/gitignore/api/webstorm+all,pycharm+all,visualstudiocode
+# End of https://www.toptal.com/developers/gitignore/api/webstorm+all,pycharm+all,visualstudiocode,dotenv
