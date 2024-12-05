@@ -23,7 +23,7 @@ const baseQueryWithTokenRefresh: BaseQueryFn = async (args, api, extraOptions) =
 			('originalStatus' in result.error && result.error.originalStatus === 403))
 	) {
 		// Send refresh token to get new access token
-		const refreshResult = await baseQuery({ url: '/refresh', method: 'POST' }, api, extraOptions);
+		const refreshResult = await baseQuery({ url: '/auth/refresh', method: 'POST' }, api, extraOptions);
 		if (
 			refreshResult?.data &&
 			typeof refreshResult.data === 'object' &&

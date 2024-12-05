@@ -1,28 +1,29 @@
-import { Center, Container, Stack, Title } from '@mantine/core';
-import { useDocumentTitle } from '@mantine/hooks';
-import { LoginForm } from './LoginForm';
 import classes from './LoginPage.module.css';
+import { Stack, Text, Title } from '@mantine/core';
+import { useDocumentTitle } from '@mantine/hooks';
+import { Link } from '../../components/Link';
+import { LoginForm } from './LoginForm';
 
 export const LoginPage = () => {
-	useDocumentTitle('Login | SurveyMaster');
+	useDocumentTitle('Log in | SurveyMaster');
 
 	return (
-		<Center mih="100vh" >
-			<Stack mt="md" mb="md">
-				<Title className={classes.pageTitle} order={1} size={'h4'}>
-					SurveyMaster
-				</Title>
+		<Stack gap="xl">
+			<Title className={classes.formTitle} order={1} size="h3">
+				Log in to <span className={classes.formTitleHighlight}>Survey Master</span>
+			</Title>
 
-				<Container className={classes.formContainer} size="sm" miw="420" mih="360" p="xl" bg="white">
-					<Stack gap="xl">
-						<Title className={classes.formTitle} order={2} size="h3">
-							Login
-						</Title>
+			<LoginForm />
 
-						<LoginForm />
-					</Stack>
-				</Container>
+			<Stack gap="xs">
+				<Text className={classes.alternateActionText} size="sm">
+					Don't have an account? <Link to="/signup">Sign up</Link>
+				</Text>
+
+				<Text className={classes.alternateActionText} size="sm">
+					<Link to="/">Forgot your password?</Link>
+				</Text>
 			</Stack>
-		</Center>
+		</Stack>
 	);
 };

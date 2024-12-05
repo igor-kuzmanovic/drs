@@ -22,7 +22,7 @@ const root = createRoot(container);
 root.render(
 	<React.StrictMode>
 		<Provider store={store}>
-			<MantineProvider theme={theme}>
+			<MantineProvider theme={theme} defaultColorScheme="light">
 				<RouterProvider router={router} />
 			</MantineProvider>
 		</Provider>
