@@ -1,19 +1,19 @@
 import { api } from '../../app/api';
 
-interface LoginQuery {
+interface LoginRequest {
 	email: string;
 	password: string;
 }
 
-interface LoginResult {
+interface LoginResponse {
 	token: string;
 }
 
 export const authApiSlice = api.injectEndpoints({
 	endpoints: (builder) => ({
-		login: builder.mutation<LoginResult, LoginQuery>({
-			query: (body: { email: string; password: string }) => ({
-				url: '/login',
+		login: builder.mutation<LoginResponse, LoginRequest>({
+			query: (body: LoginRequest) => ({
+				url: '/auth/login',
 				method: 'POST',
 				body: {
 					email: body.email,

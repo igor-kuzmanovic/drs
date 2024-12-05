@@ -2,9 +2,9 @@ import { createBrowserRouter } from 'react-router-dom';
 import { MainLayout } from '../components/MainLayout';
 import { HomePage } from '../components/HomePage';
 import { LoginPage } from '../features/auth/LoginPage';
-import { RegisterPage } from '../features/auth/RegisterPage';
+import { SignupPage } from '../features/auth/SignupPage';
 import { NotFoundPage } from '../components/NotFoundPage';
-import { AuthLayout } from '../components/AuthLayout';
+import { GuestLayout } from '../components/GuestLayout';
 import { ProtectedRoute } from '../features/auth/ProtectedRoute';
 import { GuestRoute } from '../features/auth/GuestRoute';
 import { LogoutPage } from '../features/auth/LogoutPage';
@@ -32,7 +32,7 @@ export const router = createBrowserRouter([
 	},
 	{
 		path: '/',
-		element: <AuthLayout />,
+		element: <GuestLayout />,
 		children: [
 			{
 				path: '/',
@@ -43,8 +43,8 @@ export const router = createBrowserRouter([
 						element: <LoginPage />,
 					},
 					{
-						path: '/register',
-						element: <RegisterPage />,
+						path: '/signup',
+						element: <SignupPage />,
 					},
 				],
 			},

@@ -1,8 +1,15 @@
-import { Button, Grid, Group, PasswordInput, TextInput } from '@mantine/core';
+import classes from './SignupForm.module.css';
+import { Alert, Button, Grid, Group, PasswordInput, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import classes from './RegisterForm.module.css';
+import { useNavigate } from 'react-router';
+import { useState } from 'react';
+import { isErrorWithMessage, isFetchBaseQueryError } from '../../app/helpers';
+import { usePostUserMutation } from '../user/userApiSlice';
 
-export const RegisterForm = () => {
+export const SignupForm = () => {
+	const navigate = useNavigate();
+	const [error, setError] = useState<string | null>(null);
+	const [postUser, { isLoading }] = usePostUserMutation();
 	const form = useForm({
 		mode: 'uncontrolled',
 		initialValues: {
@@ -25,12 +32,29 @@ export const RegisterForm = () => {
 			phone: (value) => (value.length > 2 ? null : 'Invalid phone'),
 			email: (value) => (value.length > 2 ? null : 'Invalid email'),
 			password: (value) => (value.length > 2 ? null : 'Invalid password'),
-			passwordConfirm: (value, values) => (value.length > 2 && value === values.password ? null : 'Invalid password'),
+			passwordConfirm: (value, values) =>
+				value.length > 2 && value === values.password ? null : 'Invalid confirm password',
 		},
 	});
 
+	const handleSubmit = async (values: typeof form.values) => {
+		try {
+			await postUser(values).unwrap();
+			navigate('/');
+		} catch (error) {
+			if (isFetchBaseQueryError(error)) {
+				// You can access all properties of `FetchBaseQueryError` here
+				const errorMessage = 'error' in error ? error.error : JSON.stringify(error.data);
+				setError(errorMessage);
+			} else if (isErrorWithMessage(error)) {
+				// You can access a string 'message' property here
+				setError(error.message);
+			}
+		}
+	};
+
 	return (
-		<form className={classes.form} onSubmit={form.onSubmit((values) => console.log(values))}>
+		<form className={classes.form} onSubmit={form.onSubmit(handleSubmit)}>
 			<Grid gutter="sm">
 				<Grid.Col span={{ base: 12, sm: 6 }}>
 					<TextInput
@@ -135,10 +159,16 @@ export const RegisterForm = () => {
 			</Grid>
 
 			<Group justify="center" mt="xl">
-				<Button type="submit" size="md">
+				<Button type="submit" size="md" loading={isLoading}>
 					Submit
 				</Button>
 			</Group>
+
+			{error && (
+				<Alert color="red" mt="xl">
+					{error}
+				</Alert>
+			)}
 		</form>
 	);
 };

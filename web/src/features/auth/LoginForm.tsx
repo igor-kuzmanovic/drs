@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Alert, Button, Grid, Group, PasswordInput, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useLoginMutation } from './authApiSlice';
 import { isErrorWithMessage, isFetchBaseQueryError } from '../../app/helpers';
+import { useLoginMutation } from './authApiSlice';
 
 export const LoginForm = () => {
 	const navigate = useNavigate();
@@ -22,9 +22,9 @@ export const LoginForm = () => {
 		},
 	});
 
-	const handleSubmit = async (values: { email: string; password: string }) => {
+	const handleSubmit = async (values: typeof form.values) => {
 		try {
-			await login({ email: values.email, password: values.password }).unwrap();
+			await login(values).unwrap();
 			navigate('/');
 		} catch (error) {
 			if (isFetchBaseQueryError(error)) {
