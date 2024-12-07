@@ -3,8 +3,8 @@ import { Alert, Button, Grid, Group, PasswordInput, TextInput } from '@mantine/c
 import { useForm } from '@mantine/form';
 import { useNavigate } from 'react-router';
 import { useState } from 'react';
-import { isErrorWithMessage, isFetchBaseQueryError } from '../../app/helpers';
-import { usePostUserMutation } from '../user/userApiSlice';
+import { isValidationError, mapValidationErrorToString } from '../../app/helpers';
+import { usePostUserMutation } from '../users/usersApiSlice';
 
 export const SignupForm = () => {
 	const navigate = useNavigate();
@@ -42,13 +42,10 @@ export const SignupForm = () => {
 			await postUser(values).unwrap();
 			navigate('/');
 		} catch (error) {
-			if (isFetchBaseQueryError(error)) {
-				// You can access all properties of `FetchBaseQueryError` here
-				const errorMessage = 'error' in error ? error.error : JSON.stringify(error.data);
-				setError(errorMessage);
-			} else if (isErrorWithMessage(error)) {
-				// You can access a string 'message' property here
-				setError(error.message);
+			if (isValidationError(error)) {
+				setError(mapValidationErrorToString(error));
+			} else {
+				setError(String(error));
 			}
 		}
 	};
@@ -56,6 +53,37 @@ export const SignupForm = () => {
 	return (
 		<form className={classes.form} onSubmit={form.onSubmit(handleSubmit)}>
 			<Grid gutter="sm">
+				<Grid.Col span={{ base: 12, sm: 6 }}>
+					<TextInput
+						label="Email"
+						placeholder="john.doe@email.com"
+						key={form.key('email')}
+						autoComplete="email"
+						type="email"
+						{...form.getInputProps('email')}
+					/>
+				</Grid.Col>
+
+				<Grid.Col span={{ base: 12, sm: 6 }}>
+					<PasswordInput
+						label="Password"
+						placeholder="p@ssw0rd"
+						key={form.key('password')}
+						autoComplete="new-password"
+						{...form.getInputProps('password')}
+					/>
+				</Grid.Col>
+
+				<Grid.Col span={{ base: 12, sm: 6 }}>
+					<PasswordInput
+						label="Password confirm"
+						placeholder="p@ssw0rd"
+						key={form.key('passwordConfirm')}
+						autoComplete="new-password"
+						{...form.getInputProps('passwordConfirm')}
+					/>
+				</Grid.Col>
+
 				<Grid.Col span={{ base: 12, sm: 6 }}>
 					<TextInput
 						label="First name"
@@ -113,47 +141,6 @@ export const SignupForm = () => {
 						key={form.key('phone')}
 						autoComplete="tel"
 						{...form.getInputProps('phone')}
-					/>
-				</Grid.Col>
-
-				<Grid.Col span={{ base: 12, sm: 6 }}>
-					<TextInput
-						label="City"
-						placeholder="London"
-						key={form.key('city')}
-						autoComplete="city"
-						{...form.getInputProps('city')}
-					/>
-				</Grid.Col>
-
-				<Grid.Col span={{ base: 12, sm: 6 }}>
-					<TextInput
-						label="Email"
-						placeholder="john.doe@email.com"
-						key={form.key('email')}
-						autoComplete="email"
-						type="email"
-						{...form.getInputProps('email')}
-					/>
-				</Grid.Col>
-
-				<Grid.Col span={{ base: 12, sm: 6 }}>
-					<PasswordInput
-						label="Password"
-						placeholder="p@ssw0rd"
-						key={form.key('password')}
-						autoComplete="new-password"
-						{...form.getInputProps('password')}
-					/>
-				</Grid.Col>
-
-				<Grid.Col span={{ base: 12, sm: 6 }}>
-					<PasswordInput
-						label="Password confirm"
-						placeholder="p@ssw0rd"
-						key={form.key('passwordConfirm')}
-						autoComplete="new-password"
-						{...form.getInputProps('passwordConfirm')}
 					/>
 				</Grid.Col>
 			</Grid>

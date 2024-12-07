@@ -1,48 +1,29 @@
 import { api } from '../../app/api';
 
-interface PostUserRequest {
-	firstName: string;
-	lastName: string;
-	address: string;
-	city: string;
-	country: string;
-	phone: string;
-	email: string;
-	password: string;
-	passwordConfirm: string;
-}
+type GetUserRequest = void;
 
-interface PostUserResponse {
+interface GetUserResponse {
 	id: string;
+	email: string;
 	firstName: string;
 	lastName: string;
 	address: string;
 	city: string;
 	country: string;
 	phone: string;
-	email: string;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export const userApiSlice = api.injectEndpoints({
 	endpoints: (builder) => ({
-		postUser: builder.mutation<PostUserResponse, PostUserRequest>({
-			query: (body: PostUserRequest) => ({
-				url: '/users',
-				method: 'POST',
-				body: {
-					firstName: body.firstName,
-					lastName: body.lastName,
-					address: body.address,
-					city: body.city,
-					country: body.country,
-					phone: body.phone,
-					email: body.email,
-					password: body.password,
-					passwordConfirm: body.passwordConfirm,
-				},
+		getUser: builder.query<GetUserResponse, GetUserRequest>({
+			query: () => ({
+				url: `/user`,
+				method: 'GET',
 			}),
 		}),
 	}),
 });
 
-export const { usePostUserMutation } = userApiSlice;
+export const { useGetUserQuery } = userApiSlice;

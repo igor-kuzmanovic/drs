@@ -11,7 +11,6 @@ COPY . /app
 
 EXPOSE 5000
 
-ENV FLASK_APP=survey_master.app:app
-ENV FLASK_ENV=development
+ENV FLASK_APP=survey_master.app
 
 CMD ["python", "flask", "run", "--host=0.0.0.0"]

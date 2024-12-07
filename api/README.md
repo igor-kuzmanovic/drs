@@ -23,7 +23,7 @@
 
 ### Server
 
-- Run `python -m flask --app survey_master.app:app run`
+- Run `python -m flask --app survey_master.app run`
 
 ### Adding dependencies
 
