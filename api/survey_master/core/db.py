@@ -1,31 +1,33 @@
 from flask import Flask
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker, declarative_base
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
 
-from .config import POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB
+from .config import SQLALCHEMY_DATABASE_URI
 
-DATABASE_URL = f"postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 
-engine = create_engine(DATABASE_URL)
-db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
+class Base(DeclarativeBase):
+    pass
 
-Base = declarative_base()
-Base.query = db_session.query_property()
+
+db = SQLAlchemy(model_class=Base)
+migrate = Migrate()
 
 
 def setup_db(app: Flask) -> None:
-    # Create tables
-    Base.metadata.create_all(engine)
+    # Set up the database
+    app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    # Teardown session
-    @app.teardown_appcontext
-    def shutdown_session(exception=None):
-        db_session.remove()
+    # Initialize the database
+    db.init_app(app)
+
+    # Initialize the migration engine
+    migrate.init_app(app, db)
 
 
 __all__ = [
-    "DATABASE_URL",
-    "db_session",
     "Base",
+    "db",
     "setup_db",
 ]

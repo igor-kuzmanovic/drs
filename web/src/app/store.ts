@@ -3,11 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { Action, ThunkAction } from '@reduxjs/toolkit';
 import { combineSlices, configureStore } from '@reduxjs/toolkit';
 import { authReducer } from '../features/auth/authSlice';
+import { userReducer } from '../features/user/userSlice';
 import { api } from './api';
 
 const rootReducer = combineSlices({
 	[api.reducerPath]: api.reducer,
 	auth: authReducer,
+	user: userReducer,
 });
 
 const createStore = () => {

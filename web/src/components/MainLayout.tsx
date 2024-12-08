@@ -1,7 +1,8 @@
 import surveyMasterLogo from '../assets/survey-master-logo.svg';
-import { AppShell, Burger, Group, Image, Skeleton } from '@mantine/core';
+import {AppShell, Burger, Group, Image, NavLink, Skeleton} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Outlet } from 'react-router-dom';
+import {Link} from "./Link";
 
 export const MainLayout = () => {
 	const [opened, { toggle }] = useDisclosure();
@@ -25,6 +26,11 @@ export const MainLayout = () => {
 					.map((_, index) => (
 						<Skeleton key={index} h={28} mt="sm" animate={false} />
 					))}
+				<NavLink
+					component={Link}
+					to="/logout"
+					label="Logout"
+				/>
 			</AppShell.Navbar>
 			<AppShell.Main>
 				<Outlet />

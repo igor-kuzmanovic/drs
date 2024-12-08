@@ -1,14 +1,14 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Flask" type="Python.FlaskServer">
     <module name="api" />
+    <selectedOptions>
+      <option name="environmentVariables" visible="false" />
+    </selectedOptions>
     <option name="target" value="$PROJECT_DIR$/survey_master/app.py" />
     <option name="targetType" value="PATH" />
     <option name="ENV_FILES" value="$PROJECT_DIR$/../.env" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
-    <envs>
-      <env name="FLASK_DEBUG" value="1" />
-    </envs>
     <option name="SDK_HOME" value="" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <option name="IS_MODULE_SDK" value="true" />

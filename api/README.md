@@ -20,10 +20,17 @@
 - Make sure virtual environment is activated 'Get-Command python'
 - Install pip tools `pip install pip-tools`
 - Install requirements `pip-sync`
+- When adding new dependencies add them to `requirements.in` and run `pip-compile` 
 
 ### Server
 
 - Run `python -m flask --app survey_master.app run`
+
+### Database
+
+- Initialize the database `python -m flask --app survey_master.app db init`
+- Migrate the database `python -m flask --app survey_master.app db upgrade`
+- When the database schema changes, generate a new migration `python -m flask --app survey_master.app db migrate -m "Message."`
 
 ### Adding dependencies
 

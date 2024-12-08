@@ -5,7 +5,7 @@
 #    pip-compile
 #
 alembic==1.14.0
-    # via -r requirements.in
+    # via flask-migrate
 annotated-types==0.7.0
     # via pydantic
 blinker==1.9.0
@@ -14,14 +14,28 @@ click==8.1.7
     # via flask
 colorama==0.4.6
     # via click
+dnspython==2.7.0
+    # via email-validator
+email-validator==2.2.0
+    # via -r requirements.in
 flask==3.1.0
     # via
     #   -r requirements.in
     #   flask-cors
+    #   flask-migrate
+    #   flask-sqlalchemy
 flask-cors==5.0.0
     # via -r requirements.in
+flask-migrate==4.0.7
+    # via -r requirements.in
+flask-sqlalchemy==3.1.1
+    # via
+    #   -r requirements.in
+    #   flask-migrate
 greenlet==3.1.1
     # via sqlalchemy
+idna==3.10
+    # via email-validator
 itsdangerous==2.2.0
     # via flask
 jinja2==3.1.4
@@ -49,8 +63,8 @@ python-dotenv==1.0.1
     # via -r requirements.in
 sqlalchemy==2.0.36
     # via
-    #   -r requirements.in
     #   alembic
+    #   flask-sqlalchemy
 typing-extensions==4.12.2
     # via
     #   alembic

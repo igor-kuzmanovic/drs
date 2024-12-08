@@ -8,10 +8,14 @@ def setup_error_handlers(app: Flask) -> None:
         return jsonify({"error": "Validation error", "messages": error.errors()}), 400
 
     @app.errorhandler(500)
-    def handle_server_error(_):
-        return jsonify({"error": "Internal server error"}), 500
+    def handle_server_error(error):
+        response = {"error": "Internal server error"}
+
+        # Only return the error message in debug mode
+        if app.debug:
+            response["message"] = str(error)
+
+        return jsonify(response), 500
 
 
-__all__ = [
-    "setup_error_handlers"
-]
+__all__ = ["setup_error_handlers"]

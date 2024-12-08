@@ -1,8 +1,9 @@
-alembic
+email-validator
 flask
 flask-cors
+flask-migrate
+flask-sqlalchemy
 psycopg[binary,pool]
 pydantic
 pyjwt
 python-dotenv
-sqlalchemy
