@@ -14,16 +14,20 @@
 
 ### Setup
 
-- Install Python
-- Create a virtual environment `python -m venv .venv`
+- Create a virtual environment `python -m venv venv`
 - Activate the virtual environment `.\.venv\Scripts\Activate.ps1`
-- Make sure virtual environment is activated 'Get-Command python'
+- Make sure virtual environment is activated `Get-Command python`
 - Install pip tools `pip install pip-tools`
 - Install requirements `pip-sync`
 - When adding new dependencies add them to `requirements.in` and run `pip-compile` 
 
 ### Server
 
+- Use the PyCharm `Flask` script
+
+or
+
+- Start the PostgreSQL service using `docker compose`
 - Run `python -m flask --app survey_master.app run`
 
 ### Database
