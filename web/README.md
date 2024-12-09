@@ -20,4 +20,8 @@
 
 ### Server
 
+- Use the WebStorm `Vite` script
+
+or
+
 - Run `npm run dev`
