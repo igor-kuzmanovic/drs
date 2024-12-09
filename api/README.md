@@ -3,6 +3,12 @@
 ## Libraries used
 
 - [Flask](https://flask.palletsprojects.com/en/stable/)
+- [Flask CORS](https://flask-cors.readthedocs.io/)
+- [Flask Migrate](https://flask-migrate.readthedocs.io/)
+- [Flask SQLAlchemy](https://flask-sqlalchemy.readthedocs.io/)
+- [PyJWT](https://pyjwt.readthedocs.io/)
+- [Python Dotenv](https://github.com/theskumar/python-dotenv/)
+
 
 ## Development
 
@@ -27,8 +33,8 @@
 
 or
 
-- Start the PostgreSQL service using `docker compose`
-- Run `python -m flask --app survey_master.app run`
+- Start the PostgreSQL service using `docker compose --env-file ..\.env -f ..\compose.yaml -p drs up -d postgres`
+- Run `python -m flask run`
 
 ### Database
 

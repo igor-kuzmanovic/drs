@@ -5,7 +5,7 @@
 ### Requirements
 
 - [Docker](https://www.docker.com/)
-- [Python 3.12](https://www.python.org/)
+- [Python](https://www.python.org/)
 - [Node.js](https://nodejs.org/en)
 
 ### Setup
