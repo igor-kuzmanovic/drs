@@ -1,5 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Flask" type="Python.FlaskServer">
+    <option name="flaskEnv" />
     <module name="api" />
     <selectedOptions>
       <option name="environmentVariables" visible="false" />
