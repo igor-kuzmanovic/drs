@@ -33,7 +33,7 @@
 
 or
 
-- Start the PostgreSQL service using `docker compose --env-file ..\.env -f ..\compose.yaml -p drs up -d postgres`
+- Start the PostgreSQL service using `docker compose -f ..\compose.yaml up -d postgres`
 - Run `python -m flask run`
 
 ### Database

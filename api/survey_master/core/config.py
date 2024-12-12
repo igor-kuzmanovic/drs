@@ -1,14 +1,22 @@
 import os
 
-WEB_ORIGIN = os.getenv("WEB_ORIGIN")
-SECRET_KEY = os.getenv("SECRET_KEY")
-TOKEN_ISSUER = os.getenv("TOKEN_ISSUER")
+def _get_env_var(name: str) -> str:
+    value = os.getenv(name)
+    
+    if value is None:
+        raise RuntimeError(f"Environment variable '{name}' is not set")
+    
+    return value
 
-POSTGRES_USER = os.getenv("POSTGRES_USER")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
-POSTGRES_HOST = os.getenv("POSTGRES_HOST")
-POSTGRES_PORT = os.getenv("POSTGRES_PORT")
-POSTGRES_DB = os.getenv("POSTGRES_DB")
+WEB_ORIGIN = _get_env_var("WEB_ORIGIN")
+SECRET_KEY = _get_env_var("SECRET_KEY")
+TOKEN_ISSUER = _get_env_var("TOKEN_ISSUER")
+
+POSTGRES_USER = _get_env_var("POSTGRES_USER")
+POSTGRES_PASSWORD = _get_env_var("POSTGRES_PASSWORD")
+POSTGRES_HOST = _get_env_var("POSTGRES_HOST")
+POSTGRES_PORT = _get_env_var("POSTGRES_PORT")
+POSTGRES_DB = _get_env_var("POSTGRES_DB")
 
 SQLALCHEMY_DATABASE_URI = (
     f"postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
