@@ -33,7 +33,7 @@ def validate_token(func: Callable) -> Callable:
         if not decoded_token.is_valid:
             return jsonify({"error": decoded_token.error}), 401
 
-        current_app.logger.debug(f"Validated the token for user {decoded_token.token['user_id']}")
+        current_app.logger.debug(f"Validated the token for user {decoded_token.token['sub']}")
 
         return func(*args, **kwargs)
 
