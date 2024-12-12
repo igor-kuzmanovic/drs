@@ -5,22 +5,32 @@ services:
     build: ./api
     env_file: ./.env
     environment:
-      WEB_ORIGIN: ${WEB_ORIGIN:?error}
-      SECRET_KEY: ${SECRET_KEY:?error}
-      TOKEN_ISSUER: ${TOKEN_ISSUER:?error}
       FLASK_ENV: ${FLASK_ENV:?error}
       FLASK_DEBUG: ${FLASK_DEBUG:?error}
-      POSTGRES_USER: ${POSTGRES_USER:?error}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?error}
-      POSTGRES_HOST: ${POSTGRES_HOST:?error}
-      POSTGRES_PORT: ${POSTGRES_PORT:?error}
-      POSTGRES_DB: ${POSTGRES_DB:?error}
+      FLASK_WEB_ORIGIN: ${FLASK_WEB_ORIGIN:?error}
+      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY:?error}
+      FLASK_TOKEN_ISSUER: ${FLASK_TOKEN_ISSUER:?error}
+      FLASK_EMAIL_API_URL: ${FLASK_EMAIL_API_URL:?error}
+      FLASK_EMAIL_API_KEY: ${FLASK_EMAIL_API_KEY:?error}
+      FLASK_SQLALCHEMY_DATABASE_URI: ${FLASK_SQLALCHEMY_DATABASE_URI:?error}
     ports:
       - ${FLASK_PORT:?error}:5000
     volumes:
       - ./api:/app
     depends_on:
       - postgres
+      - email_api
+
+  email_api:
+    build: ./email_api
+    env_file: ./.env
+    environment:
+      EMAIL_API_FLASK_API_KEY: ${EMAIL_API_FLASK_API_KEY:?error}
+    ports:
+      - ${EMAIL_API_FLASK_PORT:?error}:5000
+      - ${EMAIL_API_MAILHOG_PORT:?error}:8025
+    volumes:
+      - ./email_api:/app
 
   postgres:
     image: postgres:17

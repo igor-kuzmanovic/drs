@@ -1,11 +1,8 @@
-# Survey Master - API
+# Survey Master - Email API
 
 ## Libraries used
 
 - [Flask](https://flask.palletsprojects.com/en/stable/)
-- [Flask CORS](https://flask-cors.readthedocs.io/)
-- [Flask Migrate](https://flask-migrate.readthedocs.io/)
-- [Flask SQLAlchemy](https://flask-sqlalchemy.readthedocs.io/)
 - [PyJWT](https://pyjwt.readthedocs.io/)
 - [Python Dotenv](https://github.com/theskumar/python-dotenv/)
 
@@ -33,14 +30,7 @@
 
 or
 
-- Start the PostgreSQL service using `docker compose -f ..\compose.yaml up -d postgres`
 - Run `flask --app app.app run`
-
-### Database
-
-- Initialize the database `flask --app app.app db init`
-- Migrate the database `flask --app app.app db upgrade`
-- When the database schema changes, generate a new migration `flask --app app.app db migrate -m "Message."`
 
 ### Adding dependencies
 

@@ -3,8 +3,6 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 
-from .config import SQLALCHEMY_DATABASE_URI
-
 
 class Base(DeclarativeBase):
     pass
@@ -16,7 +14,6 @@ migrate = Migrate()
 
 def setup_db(app: Flask) -> None:
     # Set up the database
-    app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # Initialize the database

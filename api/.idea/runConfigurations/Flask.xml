@@ -5,7 +5,7 @@
     <selectedOptions>
       <option name="environmentVariables" visible="false" />
     </selectedOptions>
-    <option name="target" value="$PROJECT_DIR$/survey_master/app.py" />
+    <option name="target" value="$PROJECT_DIR$/app/app.py" />
     <option name="targetType" value="PATH" />
     <option name="ENV_FILES" value="$PROJECT_DIR$/../.env" />
     <option name="INTERPRETER_OPTIONS" value="" />

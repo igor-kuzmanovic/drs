@@ -1,7 +1,6 @@
 from flask import Flask
 
 from .auth.routes import auth_blueprint
-from .core.config import SECRET_KEY
 from .core.cors import setup_cors
 from .core.db import setup_db
 from .core.error import setup_error_handlers
@@ -10,7 +9,7 @@ from .users.routes import users_blueprint
 
 # Create a Flask app
 app = Flask(__name__)
-app.config["SECRET_KEY"] = SECRET_KEY
+app.config.from_prefixed_env("FLASK")
 
 # Set up CORS to allow requests from our Web app
 setup_cors(app)

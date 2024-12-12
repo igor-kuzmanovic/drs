@@ -6,21 +6,18 @@ from typing import Optional, Callable
 import jwt
 from flask import request, jsonify, current_app
 
-from ..core.config import TOKEN_ISSUER, SECRET_KEY
-
 
 def generate_jwt(user_id: str) -> str:
     payload = {
-        "iss": TOKEN_ISSUER,
+        "iss": current_app.config.get("TOKEN_ISSUER"),
         "user_id": user_id,
         "iat": datetime.now(tz=timezone.utc),
         "exp": datetime.now(tz=timezone.utc) + timedelta(seconds=60 * 60 * 24),
     }
 
-    with current_app.app_context():
-        current_app.logger.debug(f"Generated a JWT for user {user_id}")
+    current_app.logger.debug(f"Generated a JWT for user {user_id}")
 
-    return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+    return jwt.encode(payload, current_app.config.get("SECRET_KEY"), algorithm="HS256")
 
 
 def validate_token(func: Callable) -> Callable:
@@ -36,8 +33,7 @@ def validate_token(func: Callable) -> Callable:
         if not decoded_token.is_valid:
             return jsonify({"error": decoded_token.error}), 401
 
-        with current_app.app_context():
-            current_app.logger.debug(f"Validated the token for user {decoded_token.token['user_id']}")
+        current_app.logger.debug(f"Validated the token for user {decoded_token.token['user_id']}")
 
         return func(*args, **kwargs)
 
@@ -48,13 +44,11 @@ def get_user_id_from_token() -> Optional[str]:
     # Try to decode the token
     decoded = _decode_jwt(_get_token_from_request())
     if decoded.is_valid:
-        with current_app.app_context():
-            current_app.logger.debug(f"Got the user id from the token: {decoded.token.get('user_id')}")
+        current_app.logger.debug(f"Got the user id from the token: {decoded.token.get('user_id')}")
 
         return decoded.token.get("user_id")
 
-    with current_app.app_context():
-        current_app.logger.debug(f"Failed to get the user id from the token: {decoded.error}")
+    current_app.logger.debug(f"Failed to get the user id from the token: {decoded.error}")
 
     return None
 
@@ -83,7 +77,7 @@ class DecodedJWT:
 def _decode_jwt(encoded_token: str) -> DecodedJWT:
     try:
         # Decode the token, allowing for a 10-second leeway
-        token = jwt.decode(encoded_token, SECRET_KEY, algorithms=["HS256"], leeway=10)
+        token = jwt.decode(encoded_token, current_app.config.get("SECRET_KEY"), algorithms=["HS256"], leeway=10)
 
         return DecodedJWT(is_valid=True, token=token)
     except jwt.InvalidTokenError as e:
