@@ -10,7 +10,7 @@ from flask import request, jsonify, current_app
 def generate_jwt(user_id: str) -> str:
     payload = {
         "iss": current_app.config.get("TOKEN_ISSUER"),
-        "user_id": user_id,
+        "sub": user_id,
         "iat": datetime.now(tz=timezone.utc),
         "exp": datetime.now(tz=timezone.utc) + timedelta(seconds=60 * 60 * 24),
     }
@@ -44,9 +44,9 @@ def get_user_id_from_token() -> Optional[str]:
     # Try to decode the token
     decoded = _decode_jwt(_get_token_from_request())
     if decoded.is_valid:
-        current_app.logger.debug(f"Got the user id from the token: {decoded.token.get('user_id')}")
+        current_app.logger.debug(f"Got the user id from the token: {decoded.token.get('sub')}")
 
-        return decoded.token.get("user_id")
+        return decoded.token.get("sub")
 
     current_app.logger.debug(f"Failed to get the user id from the token: {decoded.error}")
 
