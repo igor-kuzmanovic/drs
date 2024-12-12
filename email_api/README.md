@@ -3,34 +3,16 @@
 ## Libraries used
 
 - [Flask](https://flask.palletsprojects.com/en/stable/)
-- [PyJWT](https://pyjwt.readthedocs.io/)
-- [Python Dotenv](https://github.com/theskumar/python-dotenv/)
-
 
 ## Development
 
 ### Requirements
 
 - [Docker](https://www.docker.com/)
-- [Python 3.12](https://www.python.org/)
-- [pip-tools](https://github.com/jazzband/pip-tools/)
-
-### Setup
-
-- Create a virtual environment `python -m venv venv`
-- Activate the virtual environment `.\.venv\Scripts\Activate.ps1`
-- Make sure virtual environment is activated `Get-Command python`
-- Install pip tools `pip install pip-tools`
-- Install requirements `pip-sync`
-- When adding new dependencies add them to `requirements.in` and run `pip-compile` 
 
 ### Server
 
-- Use the PyCharm `Flask` script
-
-or
-
-- Run `flask --app app.app run`
+- Use the PyCharm `Docker Compose` script
 
 ### Adding dependencies
 

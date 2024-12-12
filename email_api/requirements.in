@@ -1,7 +1,2 @@
 email-validator
 flask
-flask-cors
-psycopg[binary,pool]
-pydantic
-pyjwt
-python-dotenv
