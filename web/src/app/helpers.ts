@@ -96,7 +96,7 @@ export const isFetchError = (error: unknown): error is FetchError => {
 };
 
 export const printFetchError = (): string => {
-	return 'Failed to fetch, API is down';
+	return 'Failed to fetch, try again later';
 };
 
 export const printError = (error: unknown): string => {
