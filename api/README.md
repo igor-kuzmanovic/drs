@@ -46,3 +46,8 @@ or
 
 - Add dependencies to `requirements.in`
 - Compile `requirements.txt` with `pip-compile`
+
+### Debugging
+
+- If you get an error run `mklink /J "C:\Users\<USER>\AppData\Local\Programs\PyCharm" "C:\Users\<USER>\AppData\Local\Programs\PyCharm Professional"`
+- If it still doesn't work use the `Flask - No reload` script
