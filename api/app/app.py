@@ -1,11 +1,11 @@
 from flask import Flask
 
-from auth.routes import auth_blueprint
-from core.cors import setup_cors
-from core.db import setup_db
-from core.error import setup_error_handlers
-from user.routes import user_blueprint
-from users.routes import users_blueprint
+from .auth.routes import auth_blueprint
+from .core.cors import setup_cors
+from .core.db import setup_db
+from .core.error import setup_error_handlers
+from .user.routes import user_blueprint
+from .users.routes import users_blueprint
 
 # Create a Flask app
 app = Flask(__name__)
