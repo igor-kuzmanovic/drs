@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Alert, Button, Grid, Group, PasswordInput, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { mapErrorToString } from '../../app/helpers';
+import { printError } from '../../app/helpers';
 import { useLoginMutation } from './authApiSlice';
 
 export const LoginForm = () => {
@@ -23,11 +23,12 @@ export const LoginForm = () => {
 	});
 
 	const handleSubmit = async (values: typeof form.values) => {
+		setError(null);
 		try {
 			await login(values).unwrap();
 			navigate('/');
 		} catch (error) {
-			setError(mapErrorToString(error));
+			setError(printError(error));
 		}
 	};
 

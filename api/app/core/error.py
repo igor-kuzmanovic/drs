@@ -13,6 +13,7 @@ def setup_error_handlers(app: Flask) -> None:
 
         # Only return the error message in debug mode
         if app.debug:
+            print(error)
             response["message"] = str(error)
 
         return jsonify(response), 500

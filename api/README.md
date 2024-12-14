@@ -20,7 +20,7 @@
 
 ### Setup
 
-- Create a virtual environment `python -m venv venv`
+- Create a virtual environment `python -m venv .venv`
 - Activate the virtual environment `.\.venv\Scripts\Activate.ps1`
 - Make sure virtual environment is activated `Get-Command python`
 - Install pip tools `pip install pip-tools`

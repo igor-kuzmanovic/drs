@@ -1,7 +1,7 @@
 import { useDocumentTitle } from '@mantine/hooks';
 import { useGetUserQuery } from '../features/user/userApiSlice';
 import { selectUser } from '../features/user/userSlice';
-import { mapErrorToString } from '../app/helpers';
+import { printError } from '../app/helpers';
 import { useAppSelector } from '../app/store';
 
 export const HomePage = () => {
@@ -14,7 +14,7 @@ export const HomePage = () => {
 	return (
 		<>
 			{error ? (
-				<>{mapErrorToString(error)}</>
+				<>{printError(error)}</>
 			) : isLoading ? (
 				<>Loading...</>
 			) : user ? (

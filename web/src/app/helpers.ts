@@ -1,25 +1,13 @@
-export interface GenericError {
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+
+export interface HttpError {
 	data: {
 		error: string;
 	};
 	status: number;
 }
 
-export interface ValidationError {
-	data: {
-		error: string;
-		messages?: {
-			input: object;
-			loc: (string | number)[];
-			msg: string;
-			type: string;
-			url: string;
-		}[];
-	};
-	status: 400;
-}
-
-export const isGenericError = (error: unknown): error is GenericError => {
+export const isHttpError = (error: unknown): error is HttpError => {
 	return (
 		typeof error === 'object' &&
 		error !== null &&
@@ -33,19 +21,45 @@ export const isGenericError = (error: unknown): error is GenericError => {
 	);
 };
 
+export const printHttpError = (error: HttpError): string => {
+	return error.data.error;
+};
+
+export interface BadRequestHttpError extends HttpError {
+	status: 400;
+}
+
+export const isBadRequestHttpError = (error: unknown): error is BadRequestHttpError => {
+	return isHttpError(error) && error.status === 400;
+};
+
+export const printBadRequestHttpError = (error: BadRequestHttpError): string => {
+	return printHttpError(error);
+};
+
+export interface ValidationError extends BadRequestHttpError {
+	data: {
+		error: string;
+		messages?: {
+			input: object;
+			loc: (string | number)[];
+			msg: string;
+			type: string;
+			url: string;
+		}[];
+	};
+}
+
 export const isValidationError = (error: unknown): error is ValidationError => {
 	return (
-		isGenericError(error) &&
-		error.status === 400 &&
+		isBadRequestHttpError(error) &&
+		typeof error.data === 'object' &&
+		error.data !== null &&
 		(('messages' in error.data && Array.isArray(error.data.messages)) || !('messages' in error.data))
 	);
 };
 
-export const mapGenericErrorToString = (error: GenericError): string => {
-	return error.data.error;
-};
-
-export const mapValidationErrorToString = (error: ValidationError) => {
+export const printValidationError = (error: ValidationError): string => {
 	let messages;
 	if (error.data.messages) {
 		messages = error.data.messages
@@ -56,15 +70,50 @@ export const mapValidationErrorToString = (error: ValidationError) => {
 			.join(', \n');
 	}
 
-	return messages ? `${mapGenericErrorToString(error)}: ${messages}` : mapGenericErrorToString(error);
+	return messages ? `${printBadRequestHttpError(error)}: ${messages}` : printBadRequestHttpError(error);
 };
 
-export const mapErrorToString = (error: unknown) => {
-	if (isValidationError(error)) {
-		return mapValidationErrorToString(error);
-	} else if (isGenericError(error)) {
-		return mapGenericErrorToString(error);
+export interface InternalServerHttpError extends HttpError {
+	status: 500;
+}
+
+export const isInternalServerHttpError = (error: unknown): error is InternalServerHttpError => {
+	return isHttpError(error) && error.status === 500;
+};
+
+export const printInternalServerError = (error: InternalServerHttpError): string => {
+	if (isHttpError(error)) {
+		return printHttpError(error);
+	}
+
+	return 'Internal server error';
+};
+
+export type FetchError = FetchBaseQueryError & { status: 'FETCH_ERROR' };
+
+export const isFetchError = (error: unknown): error is FetchError => {
+	return typeof error === 'object' && error !== null && 'status' in error && error.status === 'FETCH_ERROR';
+};
+
+export const printFetchError = (): string => {
+	return 'Failed to fetch, API is down';
+};
+
+export const printError = (error: unknown): string => {
+	if (isFetchError(error)) {
+		return printFetchError();
+	} else if (isInternalServerHttpError(error)) {
+		return printInternalServerError(error);
+	} else if (isValidationError(error)) {
+		return printValidationError(error);
+	} else if (isHttpError(error)) {
+		return printHttpError(error);
+	} else if (typeof error === 'string') {
+		return error;
+	} else if (error instanceof Error) {
+		return error.message;
 	} else {
-		return String(error);
+		console.error(`Unhandled error type: ${typeof error}`, error);
+		return 'Unknown error';
 	}
 };

@@ -3,7 +3,7 @@ import { Alert, Button, Grid, Group, PasswordInput, TextInput } from '@mantine/c
 import { useForm } from '@mantine/form';
 import { useNavigate } from 'react-router';
 import { useState } from 'react';
-import { mapErrorToString } from '../../app/helpers';
+import { printError } from '../../app/helpers';
 import { usePostUserMutation } from '../users/usersApiSlice';
 
 export const SignupForm = () => {
@@ -38,11 +38,12 @@ export const SignupForm = () => {
 	});
 
 	const handleSubmit = async (values: typeof form.values) => {
+		setError(null);
 		try {
 			await postUser(values).unwrap();
 			navigate('/');
 		} catch (error) {
-			setError(mapErrorToString(error));
+			setError(printError(error));
 		}
 	};
 
