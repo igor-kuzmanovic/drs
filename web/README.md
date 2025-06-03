@@ -2,11 +2,7 @@
 
 ## Libraries used
 
-- [React](https://react.dev/)
-- [React Router](https://reactrouter.com/)
-- [Redux](https://redux.js.org/)
-- [Redux Toolkit](https://redux-toolkit.js.org/)
-- [Mantine](https://mantine.dev/)
+- [Next.js](https://nextjs.org/)
 
 ## Development
 
@@ -20,7 +16,7 @@
 
 ### Server
 
-- Use the WebStorm `Vite` script
+- Use the WebStorm `Dev` script
 
 or
 
