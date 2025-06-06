@@ -52,44 +52,30 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 						href="/"
 						className="flex items-center gap-2 text-xl font-bold text-blue-600"
 					>
-						<Image
-							src="/survey-master-logo.svg"
-							alt="Survey Master"
-							width={32}
-							height={32}
-							className="h-8 w-auto"
-							priority
-						/>
 						<span>Survey Master</span>
 					</Link>
 				</div>
 				<nav className="hidden sm:flex items-center gap-6">
 					{loading ? null : user ? (
 						<>
-							<Link
-								href="/"
-								className="text-gray-700 hover:text-blue-600 transition"
-							>
+							<Link href="/" className="text-gray-700 hover:text-blue-600">
 								Dashboard
 							</Link>
 							<Link
 								href="/logout"
-								className="text-gray-700 hover:text-blue-600 transition"
+								className="text-gray-700 hover:text-blue-600"
 							>
 								Logout
 							</Link>
 						</>
 					) : (
 						<>
-							<Link
-								href="/login"
-								className="text-gray-700 hover:text-blue-600 transition"
-							>
+							<Link href="/login" className="text-gray-700 hover:text-blue-600">
 								Login
 							</Link>
 							<Link
 								href="/signup"
-								className="text-gray-700 hover:text-blue-600 transition"
+								className="text-gray-700 hover:text-blue-600"
 							>
 								Sign up
 							</Link>
@@ -100,15 +86,14 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 			{/* Sidebar for authenticated users */}
 			{user && (
 				<aside
-					className={`fixed inset-y-0 left-0 z-20 w-64 bg-white border-r shadow-lg transform transition-transform duration-200 ease-in-out
+					className={`fixed inset-y-0 left-0 z-20 w-64 bg-white border-r shadow-lg transform
                         ${
 													sidebarOpen ? "translate-x-0" : "-translate-x-full"
 												} sm:translate-x-0 sm:static sm:shadow-none`}
 				>
-					<div className="h-16 flex items-center px-6 border-b">
-						<span className="font-semibold text-lg text-blue-600">Menu</span>
+					<div className="sm:hidden h-16 flex items-center px-6 border-b">
 						<button
-							className="ml-auto sm:hidden p-2 rounded hover:bg-gray-100"
+							className="ml-auto p-2 rounded hover:bg-gray-100"
 							onClick={() => setSidebarOpen(false)}
 							aria-label="Close sidebar"
 						>
@@ -148,11 +133,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 					aria-hidden="true"
 				/>
 			)}
-			<main
-				className={`transition-all duration-200 ${
-					user ? "sm:ml-64" : ""
-				} max-w-3xl mx-auto py-8 px-4`}
-			>
+			<main className={`${user ? "sm:ml-64" : ""} max-w-3xl mx-auto py-8 px-4`}>
 				{children}
 			</main>
 		</>

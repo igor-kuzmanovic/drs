@@ -46,7 +46,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 		setLoading(true);
 		setError(null);
 		try {
-			const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+			const res = await fetch(`${process.env.NEXT_PUBLIC_USER_API_URL}/user`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 			if (!res.ok) {

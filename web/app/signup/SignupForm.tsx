@@ -69,7 +69,7 @@ export default function SignupForm() {
 
 		setLoading(true);
 		try {
-			const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+			const res = await fetch(`${process.env.NEXT_PUBLIC_USER_API_URL}/users`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(values),
@@ -272,7 +272,7 @@ export default function SignupForm() {
 			</div>
 			<button
 				type="submit"
-				className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 transition disabled:opacity-50 mt-4"
+				className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 disabled:opacity-50 mt-4"
 				disabled={loading}
 			>
 				{loading ? "Signing up..." : "Submit"}
