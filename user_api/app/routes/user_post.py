@@ -10,7 +10,7 @@ from ..core.db import db
 from ..core.models import User
 from ..core.pydantic import PydanticBaseModel
 
-users_blueprint = Blueprint("users_routes", __name__)
+user_post_blueprint = Blueprint("user_post_routes", __name__)
 
 
 class PostUserRequest(PydanticBaseModel):
@@ -44,7 +44,7 @@ class PostUserResponse(PydanticBaseModel):
     updatedAt: datetime
 
 
-@users_blueprint.route("", methods=["POST"])
+@user_post_blueprint.route("/users", methods=["POST"])
 def post():
     # Validate the incoming data
     try:
@@ -93,4 +93,4 @@ def post():
     return response, 201
 
 
-__all__ = ["users_blueprint"]
+__all__ = ["user_post_blueprint"]

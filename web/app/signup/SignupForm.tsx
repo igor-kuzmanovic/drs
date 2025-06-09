@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { printError } from "@/lib/helpers";
-import { useUser } from "../UserContext";
+import { printError } from "../_lib/error";
+import { useUser } from "../_context/UserContext";
+import Input from "../_components/Input";
+import Button from "../_components/Button";
 
 type FormValues = {
 	firstName: string;
@@ -99,184 +101,112 @@ export default function SignupForm() {
 			noValidate
 		>
 			<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-				<div>
-					<label className="block text-sm font-medium mb-1" htmlFor="email">
-						Email
-					</label>
-					<input
-						className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-						id="email"
-						name="email"
-						type="email"
-						autoComplete="email"
-						placeholder="john.doe@email.com"
-						value={values.email}
-						onChange={handleChange}
-						disabled={loading}
-					/>
-					{errors.email && (
-						<div className="text-red-600 text-xs mt-1">{errors.email}</div>
-					)}
-				</div>
-				<div>
-					<label className="block text-sm font-medium mb-1" htmlFor="password">
-						Password
-					</label>
-					<input
-						className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-						id="password"
-						name="password"
-						type="password"
-						autoComplete="new-password"
-						placeholder="p@ssw0rd"
-						value={values.password}
-						onChange={handleChange}
-						disabled={loading}
-					/>
-					{errors.password && (
-						<div className="text-red-600 text-xs mt-1">{errors.password}</div>
-					)}
-				</div>
-				<div>
-					<label
-						className="block text-sm font-medium mb-1"
-						htmlFor="passwordConfirm"
-					>
-						Password confirm
-					</label>
-					<input
-						className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-						id="passwordConfirm"
-						name="passwordConfirm"
-						type="password"
-						autoComplete="new-password"
-						placeholder="p@ssw0rd"
-						value={values.passwordConfirm}
-						onChange={handleChange}
-						disabled={loading}
-					/>
-					{errors.passwordConfirm && (
-						<div className="text-red-600 text-xs mt-1">
-							{errors.passwordConfirm}
-						</div>
-					)}
-				</div>
-				<div>
-					<label className="block text-sm font-medium mb-1" htmlFor="firstName">
-						First name
-					</label>
-					<input
-						className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-						id="firstName"
-						name="firstName"
-						autoComplete="given-name"
-						placeholder="John"
-						value={values.firstName}
-						onChange={handleChange}
-						disabled={loading}
-					/>
-					{errors.firstName && (
-						<div className="text-red-600 text-xs mt-1">{errors.firstName}</div>
-					)}
-				</div>
-				<div>
-					<label className="block text-sm font-medium mb-1" htmlFor="lastName">
-						Last name
-					</label>
-					<input
-						className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-						id="lastName"
-						name="lastName"
-						autoComplete="family-name"
-						placeholder="Doe"
-						value={values.lastName}
-						onChange={handleChange}
-						disabled={loading}
-					/>
-					{errors.lastName && (
-						<div className="text-red-600 text-xs mt-1">{errors.lastName}</div>
-					)}
-				</div>
-				<div>
-					<label className="block text-sm font-medium mb-1" htmlFor="address">
-						Address
-					</label>
-					<input
-						className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-						id="address"
-						name="address"
-						autoComplete="street-address"
-						placeholder="221B Baker Street"
-						value={values.address}
-						onChange={handleChange}
-						disabled={loading}
-					/>
-					{errors.address && (
-						<div className="text-red-600 text-xs mt-1">{errors.address}</div>
-					)}
-				</div>
-				<div>
-					<label className="block text-sm font-medium mb-1" htmlFor="city">
-						City
-					</label>
-					<input
-						className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-						id="city"
-						name="city"
-						autoComplete="address-level-2"
-						placeholder="London"
-						value={values.city}
-						onChange={handleChange}
-						disabled={loading}
-					/>
-					{errors.city && (
-						<div className="text-red-600 text-xs mt-1">{errors.city}</div>
-					)}
-				</div>
-				<div>
-					<label className="block text-sm font-medium mb-1" htmlFor="country">
-						Country
-					</label>
-					<input
-						className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-						id="country"
-						name="country"
-						autoComplete="country-name"
-						placeholder="United Kingdom"
-						value={values.country}
-						onChange={handleChange}
-						disabled={loading}
-					/>
-					{errors.country && (
-						<div className="text-red-600 text-xs mt-1">{errors.country}</div>
-					)}
-				</div>
-				<div>
-					<label className="block text-sm font-medium mb-1" htmlFor="phone">
-						Phone
-					</label>
-					<input
-						className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-						id="phone"
-						name="phone"
-						autoComplete="tel"
-						placeholder="+1 (123) 456-7890"
-						value={values.phone}
-						onChange={handleChange}
-						disabled={loading}
-					/>
-					{errors.phone && (
-						<div className="text-red-600 text-xs mt-1">{errors.phone}</div>
-					)}
-				</div>
+				<Input
+					id="email"
+					name="email"
+					label="Email"
+					type="email"
+					autoComplete="email"
+					placeholder="john.doe@email.com"
+					value={values.email}
+					onChange={handleChange}
+					disabled={loading}
+					error={errors.email}
+				/>
+				<Input
+					id="password"
+					name="password"
+					label="Password"
+					type="password"
+					autoComplete="new-password"
+					placeholder="p@ssw0rd"
+					value={values.password}
+					onChange={handleChange}
+					disabled={loading}
+					error={errors.password}
+				/>
+				<Input
+					id="passwordConfirm"
+					name="passwordConfirm"
+					label="Password confirm"
+					type="password"
+					autoComplete="new-password"
+					placeholder="p@ssw0rd"
+					value={values.passwordConfirm}
+					onChange={handleChange}
+					disabled={loading}
+					error={errors.passwordConfirm}
+				/>
+				<Input
+					id="firstName"
+					name="firstName"
+					label="First name"
+					autoComplete="given-name"
+					placeholder="John"
+					value={values.firstName}
+					onChange={handleChange}
+					disabled={loading}
+					error={errors.firstName}
+				/>
+				<Input
+					id="lastName"
+					name="lastName"
+					label="Last name"
+					autoComplete="family-name"
+					placeholder="Doe"
+					value={values.lastName}
+					onChange={handleChange}
+					disabled={loading}
+					error={errors.lastName}
+				/>
+				<Input
+					id="address"
+					name="address"
+					label="Address"
+					autoComplete="street-address"
+					placeholder="221B Baker Street"
+					value={values.address}
+					onChange={handleChange}
+					disabled={loading}
+					error={errors.address}
+				/>
+				<Input
+					id="city"
+					name="city"
+					label="City"
+					autoComplete="address-level-2"
+					placeholder="London"
+					value={values.city}
+					onChange={handleChange}
+					disabled={loading}
+					error={errors.city}
+				/>
+				<Input
+					id="country"
+					name="country"
+					label="Country"
+					autoComplete="country-name"
+					placeholder="United Kingdom"
+					value={values.country}
+					onChange={handleChange}
+					disabled={loading}
+					error={errors.country}
+				/>
+				<Input
+					id="phone"
+					name="phone"
+					label="Phone"
+					autoComplete="tel"
+					placeholder="+1 (123) 456-7890"
+					value={values.phone}
+					onChange={handleChange}
+					disabled={loading}
+					error={errors.phone}
+				/>
 			</div>
-			<button
-				type="submit"
-				className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 disabled:opacity-50 mt-4"
-				disabled={loading}
-			>
-				{loading ? "Signing up..." : "Submit"}
-			</button>
+			<Button type="submit" fullWidth loading={loading}>
+				Submit
+			</Button>
 			{error && (
 				<div className="bg-red-100 text-red-700 px-4 py-2 rounded mt-2 text-center">
 					{error}

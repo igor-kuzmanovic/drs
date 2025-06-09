@@ -1,14 +1,13 @@
 import requests
+from app.auth.jwt import generate_jwt
+from app.core.db import db
+from app.core.models import User
+from app.core.pydantic import PydanticBaseModel
 from flask import Blueprint, jsonify, request, current_app
 from pydantic import ValidationError, EmailStr, SecretStr, Field
 from werkzeug.security import check_password_hash
 
-from ..auth.jwt import generate_jwt
-from ..core.db import db
-from ..core.models import User
-from ..core.pydantic import PydanticBaseModel
-
-auth_blueprint = Blueprint("auth_routes", __name__)
+auth_login_post_blueprint = Blueprint("auth_login_post_routes", __name__)
 
 
 class LoginRequest(PydanticBaseModel):
@@ -20,7 +19,7 @@ class LoginResponse(PydanticBaseModel):
     token: str
 
 
-@auth_blueprint.route("/login", methods=["POST"])
+@auth_login_post_blueprint.route("/auth/login", methods=["POST"])
 def login():
     # Validate the incoming data
     try:
@@ -65,4 +64,4 @@ def login():
     return response, 200
 
 
-__all__ = ["auth_blueprint"]
+__all__ = ["auth_login_post_blueprint"]

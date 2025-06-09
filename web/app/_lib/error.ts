@@ -28,13 +28,13 @@ export interface BadRequestHttpError extends HttpError {
 }
 
 export const isBadRequestHttpError = (
-	error: unknown
+	error: unknown,
 ): error is BadRequestHttpError => {
 	return isHttpError(error) && error.status === 400;
 };
 
 export const printBadRequestHttpError = (
-	error: BadRequestHttpError
+	error: BadRequestHttpError,
 ): string => {
 	return printHttpError(error);
 };
@@ -85,34 +85,19 @@ export interface InternalServerHttpError extends HttpError {
 }
 
 export const isInternalServerHttpError = (
-	error: unknown
+	error: unknown,
 ): error is InternalServerHttpError => {
 	return isHttpError(error) && error.status === 500;
 };
 
 export const printInternalServerError = (
-	error: InternalServerHttpError
+	error: InternalServerHttpError,
 ): string => {
 	if (isHttpError(error)) {
 		return printHttpError(error);
 	}
 
 	return "Internal server error";
-};
-
-export type FetchError = FetchBaseQueryError & { status: "FETCH_ERROR" };
-
-export const isFetchError = (error: unknown): error is FetchError => {
-	return (
-		typeof error === "object" &&
-		error !== null &&
-		"status" in error &&
-		error.status === "FETCH_ERROR"
-	);
-};
-
-export const printFetchError = (): string => {
-	return "Failed to fetch, try again later";
 };
 
 export const printError = (error: unknown): string => {

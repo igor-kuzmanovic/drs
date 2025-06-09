@@ -8,7 +8,7 @@ from ..core.db import db
 from ..core.models import User
 from ..core.pydantic import PydanticBaseModel
 
-user_blueprint = Blueprint("user_routes", __name__)
+user_get_blueprint = Blueprint("user_get_routes", __name__)
 
 
 class GetUserResponse(PydanticBaseModel):
@@ -25,7 +25,7 @@ class GetUserResponse(PydanticBaseModel):
 
 
 @validate_token
-@user_blueprint.route("", methods=["GET"])
+@user_get_blueprint.route("/user", methods=["GET"])
 def get():
     # Get the user ID from the token
     user_id = get_user_id_from_token()
@@ -57,4 +57,4 @@ def get():
     return response, 200
 
 
-__all__ = ["user_blueprint"]
+__all__ = ["user_get_blueprint"]

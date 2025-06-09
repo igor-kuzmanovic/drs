@@ -1,8 +1,8 @@
 "use client";
 
-import { useUser } from "./UserContext";
+import { useUser } from "./_context/UserContext";
 
-export default function Home() {
+export default function Page() {
 	const { user, loading, error } = useUser();
 
 	if (loading) return <div>Loading...</div>;

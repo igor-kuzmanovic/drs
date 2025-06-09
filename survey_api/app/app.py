@@ -3,7 +3,7 @@ from flask import Flask
 from .core.cors import setup_cors
 from .core.db import setup_db
 from .core.error import setup_error_handlers
-from .surveys.routes import surveys_blueprint
+from .routes.survey_post import survey_post_blueprint
 
 # Create a Flask app
 app = Flask(__name__)
@@ -13,7 +13,7 @@ app.config.from_prefixed_env("SURVEY_API_FLASK")
 setup_cors(app)
 
 # Register blueprints
-app.register_blueprint(surveys_blueprint, url_prefix="/api/surveys")
+app.register_blueprint(survey_post_blueprint, url_prefix="/api")
 
 # Set up error handling
 setup_error_handlers(app)
