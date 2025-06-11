@@ -6,5 +6,4 @@ flask-sqlalchemy
 psycopg[binary,pool]
 pydantic
 pyjwt
-python-dotenv
 requests

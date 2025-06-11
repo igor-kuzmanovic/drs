@@ -17,11 +17,6 @@ export default function Page() {
 						Sign up
 					</Link>
 				</p>
-				<p className="text-center text-sm">
-					<Link href="/" className="text-blue-600 underline">
-						Forgot your password?
-					</Link>
-				</p>
 			</div>
 		</div>
 	);

@@ -1,4 +1,5 @@
 import React from "react";
+import clsx from "clsx";
 
 type TextareaProps = {
 	id: string;
@@ -31,9 +32,14 @@ export default function Textarea({
 			<textarea
 				id={id}
 				name={name || id}
-				className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-				placeholder={placeholder}
 				rows={rows}
+				placeholder={placeholder}
+				className={clsx(
+					"w-full rounded border border-gray-300 px-3 py-2 focus:outline-none transition",
+					"focus:bg-blue-100 focus:ring-2 focus:ring-blue-500",
+					"hover:shadow",
+					disabled && "opacity-50 cursor-not-allowed",
+				)}
 				value={value}
 				onChange={onChange}
 				disabled={disabled}

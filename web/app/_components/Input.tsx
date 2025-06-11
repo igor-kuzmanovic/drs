@@ -1,4 +1,5 @@
 import React from "react";
+import clsx from "clsx";
 
 type InputProps = {
 	id: string;
@@ -35,7 +36,12 @@ export default function Input({
 				name={name || id}
 				type={type}
 				autoComplete={autoComplete}
-				className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+				className={clsx(
+					"w-full rounded border border-gray-300 px-3 py-2 focus:outline-none transition",
+					"focus:bg-blue-100 focus:ring-2 focus:ring-blue-500",
+					"hover:shadow",
+					disabled && "opacity-50 cursor-not-allowed",
+				)}
 				placeholder={placeholder}
 				value={value}
 				onChange={onChange}

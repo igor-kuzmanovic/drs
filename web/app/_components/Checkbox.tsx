@@ -1,37 +1,45 @@
 import React from "react";
+import clsx from "clsx";
 
-type InputCheckboxProps = {
+type CheckboxProps = {
 	id: string;
 	label: string;
-	error?: string;
 	disabled?: boolean;
 	checked: boolean;
 	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 	name?: string;
+	error?: string;
 };
 
-export default function InputCheckbox({
+export default function Checkbox({
 	id,
 	label,
-	error,
 	disabled = false,
 	checked,
 	onChange,
 	name,
-}: InputCheckboxProps) {
+	error,
+}: CheckboxProps) {
 	return (
 		<div>
 			<div className="flex items-center gap-2">
 				<input
-					type="checkbox"
 					id={id}
+					type="checkbox"
 					name={name || id}
-					className="rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
 					checked={checked}
-					onChange={onChange}
 					disabled={disabled}
+					onChange={onChange}
+					className={clsx(
+						"size-4 rounded border border-gray-300 transition focus:ring-2 focus:ring-blue-500",
+						"checked:bg-blue-500 checked:border-blue-500",
+						"disabled:cursor-not-allowed disabled:opacity-50",
+					)}
 				/>
-				<label htmlFor={id} className="text-sm font-medium">
+				<label
+					htmlFor={id}
+					className="text-sm font-medium cursor-pointer select-none"
+				>
 					{label}
 				</label>
 			</div>

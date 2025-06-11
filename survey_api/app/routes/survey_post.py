@@ -54,7 +54,7 @@ def post():
         is_anonymous=data.isAnonymous,
         owner_id=user_id,
         recipients=",".join(data.recipients),  # Store emails as comma-separated string
-        status=SurveyStatus.ACTIVE
+        status=SurveyStatus.ACTIVE,
     )
 
     # Add the survey to the session and commit
@@ -63,17 +63,11 @@ def post():
 
     # Create recipient records
     for email in data.recipients:
-        recipient = Recipient(
-            survey_id=survey.id,
-            email=email
-        )
+        recipient = Recipient(survey_id=survey.id, email=email)
         db.session.add(recipient)
 
         # Create an email task for each recipient
-        email_task = EmailTask(
-            survey_id=survey.id,
-            recipient_email=email
-        )
+        email_task = EmailTask(survey_id=survey.id, recipient_email=email)
         db.session.add(email_task)
 
     db.session.commit()

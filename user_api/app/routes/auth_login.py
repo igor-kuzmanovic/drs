@@ -7,7 +7,7 @@ from flask import Blueprint, jsonify, request, current_app
 from pydantic import ValidationError, EmailStr, SecretStr, Field
 from werkzeug.security import check_password_hash
 
-auth_login_post_blueprint = Blueprint("auth_login_post_routes", __name__)
+auth_login_blueprint = Blueprint("auth_login_routes", __name__)
 
 
 class LoginRequest(PydanticBaseModel):
@@ -19,7 +19,7 @@ class LoginResponse(PydanticBaseModel):
     token: str
 
 
-@auth_login_post_blueprint.route("/auth/login", methods=["POST"])
+@auth_login_blueprint.route("/auth/login", methods=["POST"])
 def login():
     # Validate the incoming data
     try:
@@ -64,4 +64,4 @@ def login():
     return response, 200
 
 
-__all__ = ["auth_login_post_blueprint"]
+__all__ = ["auth_login_blueprint"]

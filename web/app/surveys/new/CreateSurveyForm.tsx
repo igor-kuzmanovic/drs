@@ -6,7 +6,7 @@ import { printError } from "../../_lib/error";
 import Input from "../../_components/Input";
 import Textarea from "../../_components/Textarea";
 import Button from "../../_components/Button";
-import InputCheckbox from "../../_components/InputCheckbox";
+import Checkbox from "../../_components/Checkbox";
 
 type FormValues = {
 	name: string;
@@ -35,7 +35,15 @@ export default function CreateSurveyForm() {
 		const errs: Partial<FormValues> = {};
 		if (vals.name.length === 0) errs.name = "Name is required";
 		if (vals.question.length === 0) errs.question = "Question is required";
-		if (!vals.endDate) errs.endDate = "End date is required";
+		if (!vals.endDate) {
+			errs.endDate = "End date is required";
+		} else {
+			const selected = new Date(vals.endDate).getTime();
+			const now = Date.now();
+			if (selected < now) {
+				errs.endDate = "End date cannot be in the past";
+			}
+		}
 
 		const recipientList = vals.recipients
 			.split(",")
@@ -161,7 +169,7 @@ export default function CreateSurveyForm() {
 					disabled={loading}
 					error={errors.recipients}
 				/>
-				<InputCheckbox
+				<Checkbox
 					id="isAnonymous"
 					name="isAnonymous"
 					label="Make survey anonymous"

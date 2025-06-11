@@ -10,9 +10,13 @@
 
 - [Docker](https://www.docker.com/)
 
+### Setup
+
+- When adding new dependencies add them to `requirements.in` and run `docker compose exec email_api pip-compile`
+
 ### Server
 
-- Use the PyCharm `Docker Compose` script
+- Start the services using `docker compose -f ..\compose.yaml up`
 
 ### Adding dependencies
 

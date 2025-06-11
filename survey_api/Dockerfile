@@ -14,12 +14,16 @@ RUN pip-sync
 # Copy the application code
 COPY . /app
 
+# Copy the startup script
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+# Environment variables for Flask
+ENV FLASK_ENV=production
+ENV FLASK_DEBUG=0
+
 # Expose Flask port
 EXPOSE 5000
 
-# Environment variables for Flask
-ENV SURVEY_API_FLASK_ENV=production
-ENV SURVEY_API_FLASK_DEBUG=0
-
-# Run Flask
-CMD ["flask", "--app=app.app", "run", "--host=0.0.0.0"]
+# Run the startup script
+CMD ["/app/entrypoint.sh"]

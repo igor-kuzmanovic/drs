@@ -5,14 +5,14 @@ services:
     build: ./user_api
     env_file: ./.env
     environment:
-      USER_API_FLASK_ENV: ${USER_API_FLASK_ENV:?error}
-      USER_API_FLASK_DEBUG: ${USER_API_FLASK_DEBUG:?error}
-      USER_API_FLASK_WEB_ORIGIN: ${USER_API_FLASK_WEB_ORIGIN:?error}
-      USER_API_FLASK_SECRET_KEY: ${USER_API_FLASK_SECRET_KEY:?error}
-      USER_API_FLASK_TOKEN_ISSUER: ${USER_API_FLASK_TOKEN_ISSUER:?error}
-      USER_API_FLASK_EMAIL_API_URL: ${USER_API_FLASK_EMAIL_API_URL:?error}
-      USER_API_FLASK_EMAIL_API_KEY: ${USER_API_FLASK_EMAIL_API_KEY:?error}
-      USER_API_FLASK_SQLALCHEMY_DATABASE_URI: ${USER_API_FLASK_SQLALCHEMY_DATABASE_URI:?error}
+      FLASK_ENV: ${USER_API_FLASK_ENV:?error}
+      FLASK_DEBUG: ${USER_API_FLASK_DEBUG:?error}
+      FLASK_WEB_ORIGIN: ${USER_API_FLASK_WEB_ORIGIN:?error}
+      FLASK_SECRET_KEY: ${USER_API_FLASK_SECRET_KEY:?error}
+      FLASK_TOKEN_ISSUER: ${USER_API_FLASK_TOKEN_ISSUER:?error}
+      FLASK_EMAIL_API_URL: ${USER_API_FLASK_EMAIL_API_URL:?error}
+      FLASK_EMAIL_API_KEY: ${USER_API_FLASK_EMAIL_API_KEY:?error}
+      FLASK_SQLALCHEMY_DATABASE_URI: ${USER_API_FLASK_SQLALCHEMY_DATABASE_URI:?error}
     ports:
       - ${USER_API_FLASK_PORT:?error}:5000
     volumes:
@@ -25,14 +25,14 @@ services:
     build: ./survey_api
     env_file: ./.env
     environment:
-      SURVEY_API_FLASK_ENV: ${SURVEY_API_FLASK_ENV:?error}
-      SURVEY_API_FLASK_DEBUG: ${SURVEY_API_FLASK_DEBUG:?error}
-      SURVEY_API_FLASK_WEB_ORIGIN: ${SURVEY_API_FLASK_WEB_ORIGIN:?error}
-      SURVEY_API_FLASK_SECRET_KEY: ${SURVEY_API_FLASK_SECRET_KEY:?error}
-      SURVEY_API_FLASK_TOKEN_ISSUER: ${SURVEY_API_FLASK_TOKEN_ISSUER:?error}
-      SURVEY_API_FLASK_EMAIL_API_URL: ${SURVEY_API_FLASK_EMAIL_API_URL:?error}
-      SURVEY_API_FLASK_EMAIL_API_KEY: ${SURVEY_API_FLASK_EMAIL_API_KEY:?error}
-      SURVEY_API_FLASK_SQLALCHEMY_DATABASE_URI: ${SURVEY_API_FLASK_SQLALCHEMY_DATABASE_URI:?error}
+      FLASK_ENV: ${SURVEY_API_FLASK_ENV:?error}
+      FLASK_DEBUG: ${SURVEY_API_FLASK_DEBUG:?error}
+      FLASK_WEB_ORIGIN: ${SURVEY_API_FLASK_WEB_ORIGIN:?error}
+      FLASK_SECRET_KEY: ${SURVEY_API_FLASK_SECRET_KEY:?error}
+      FLASK_TOKEN_ISSUER: ${SURVEY_API_FLASK_TOKEN_ISSUER:?error}
+      FLASK_EMAIL_API_URL: ${SURVEY_API_FLASK_EMAIL_API_URL:?error}
+      FLASK_EMAIL_API_KEY: ${SURVEY_API_FLASK_EMAIL_API_KEY:?error}
+      FLASK_SQLALCHEMY_DATABASE_URI: ${SURVEY_API_FLASK_SQLALCHEMY_DATABASE_URI:?error}
     ports:
       - ${SURVEY_API_FLASK_PORT:?error}:5000
     volumes:
@@ -45,10 +45,10 @@ services:
     build: ./email_api
     env_file: ./.env
     environment:
-      EMAIL_API_FLASK_ENV: ${EMAIL_API_FLASK_ENV:?error}
-      EMAIL_API_FLASK_DEBUG: ${EMAIL_API_FLASK_DEBUG:?error}
-      EMAIL_API_FLASK_SECRET_KEY: ${EMAIL_API_FLASK_SECRET_KEY:?error}
-      EMAIL_API_FLASK_API_KEY: ${EMAIL_API_FLASK_API_KEY:?error}
+      FLASK_ENV: ${EMAIL_API_FLASK_ENV:?error}
+      FLASK_DEBUG: ${EMAIL_API_FLASK_DEBUG:?error}
+      FLASK_SECRET_KEY: ${EMAIL_API_FLASK_SECRET_KEY:?error}
+      FLASK_API_KEY: ${EMAIL_API_FLASK_API_KEY:?error}
     ports:
       - ${EMAIL_API_FLASK_PORT:?error}:5000
       - ${EMAIL_API_MAILPIT_PORT:?error}:8025
@@ -65,7 +65,7 @@ services:
     ports:
       - ${USER_POSTGRES_PORT:?error}:5432
     volumes:
-      - user-postgres-data:/var/_lib/postgresql/data
+      - user-postgres-data:/var/lib/postgresql/data
 
   survey_postgres:
     image: postgres:17
@@ -77,7 +77,7 @@ services:
     ports:
       - ${SURVEY_POSTGRES_PORT:?error}:5432
     volumes:
-      - survey-postgres-data:/var/_lib/postgresql/data
+      - survey-postgres-data:/var/lib/postgresql/data
 
 volumes:
   user-postgres-data:

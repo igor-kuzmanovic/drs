@@ -1,12 +1,27 @@
 import smtplib
+import sys
+import logging
+
 from email.mime.text import MIMEText
 
 from flask import Flask, Request, jsonify, request
 
 # Create a Flask app
 app = Flask(__name__)
-app.config.from_prefixed_env("EMAIL_API_FLASK")
+app.config.from_prefixed_env()
 
+# Configure logger to log to stdout
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)  # Or DEBUG, etc.
+formatter = logging.Formatter(
+    '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+)
+handler.setFormatter(formatter)
+
+# Clear default handlers and use the new one
+app.logger.handlers = []
+app.logger.addHandler(handler)
+app.logger.setLevel(logging.INFO)
 
 def authenticate(req: Request):
     auth_header = req.headers.get("Authorization")

@@ -50,8 +50,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 			if (!res.ok) {
-				setUser(null);
-				setError("Failed to fetch user");
+				if (res.status === 401) {
+					localStorage.removeItem("token");
+					setUser(null);
+					setError("Session expired. Please log in again.");
+					window.location.href = "/login";
+				} else {
+					setUser(null);
+					setError("Failed to fetch user");
+				}
 			} else {
 				const data = await res.json();
 				setUser(data);
