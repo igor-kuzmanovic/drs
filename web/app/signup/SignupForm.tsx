@@ -6,6 +6,7 @@ import { printError } from "../_lib/error";
 import { useUser } from "../_context/UserContext";
 import Input from "../_components/Input";
 import Button from "../_components/Button";
+import { signupUser } from "../_lib/api";
 
 type FormValues = {
 	firstName: string;
@@ -71,21 +72,13 @@ export default function SignupForm() {
 
 		setLoading(true);
 		try {
-			const res = await fetch(`${process.env.NEXT_PUBLIC_USER_API_URL}/users`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(values),
-			});
-			if (!res.ok) {
-				const data = await res.json();
-				setError(data.message || "Signup failed");
-			} else {
-				const data = await res.json();
-				if (data.token) {
-					localStorage.setItem("token", data.token);
-					await refreshUser();
-				}
+			const data = await signupUser(values);
+			if (data.token) {
+				localStorage.setItem("token", data.token);
+				await refreshUser();
 				router.push("/");
+			} else {
+				setError("Signup failed");
 			}
 		} catch (err) {
 			setError(printError(err));

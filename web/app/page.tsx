@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useUser } from "./_context/UserContext";
 
 export default function Page() {
-	const { user, loading, error } = useUser();
+	const { user, loading } = useUser();
 	const router = useRouter();
 
 	useEffect(() => {
@@ -15,13 +15,15 @@ export default function Page() {
 	}, [user, loading, router]);
 
 	if (loading) return <div>Loading...</div>;
-	if (error) return <div className="text-red-600">{error}</div>;
 	if (!user) return null; // Prevent flicker
 
 	return (
 		<div className="p-8">
 			<h1 className="text-2xl font-bold">
-				Welcome, {user.firstName} {user.lastName}
+				Welcome,{" "}
+				<span className="text-blue-600">
+					{user.firstName} {user.lastName}
+				</span>
 			</h1>
 		</div>
 	);

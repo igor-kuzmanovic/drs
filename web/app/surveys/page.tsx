@@ -5,18 +5,7 @@ import { useUser } from "../_context/UserContext";
 import Link from "next/link";
 import { printError } from "../_lib/error";
 import Button from "../_components/Button";
-
-type Survey = {
-	id: string;
-	name: string;
-	question: string;
-	endDate: string;
-	isAnonymous: boolean;
-	recipients: string[];
-	status: string;
-	createdAt: string;
-	updatedAt: string;
-};
+import { getSurveys, terminateSurvey, deleteSurvey, Survey } from "../_lib/api";
 
 export default function SurveysPage() {
 	const { user } = useUser();
@@ -31,20 +20,7 @@ export default function SurveysPage() {
 		setLoading(true);
 		setError(null);
 		try {
-			const token = localStorage.getItem("token");
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_SURVEY_API_URL}/surveys`,
-				{
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				},
-			);
-			if (!res.ok) {
-				const data = await res.json();
-				throw new Error(data.error || "Failed to fetch surveys");
-			}
-			const data = await res.json();
+			const data = await getSurveys();
 			setSurveys(data);
 		} catch (err) {
 			setError(printError(err));
@@ -55,7 +31,6 @@ export default function SurveysPage() {
 
 	useEffect(() => {
 		if (user) fetchSurveys();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [user]);
 
 	const handleTerminate = async (id: string) => {
@@ -63,20 +38,7 @@ export default function SurveysPage() {
 		setTerminating(id);
 		setSuccess(null);
 		try {
-			const token = localStorage.getItem("token");
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_SURVEY_API_URL}/surveys/${id}/terminate`,
-				{
-					method: "POST",
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				},
-			);
-			if (!res.ok) {
-				const data = await res.json();
-				throw new Error(data.error || "Failed to terminate survey");
-			}
+			await terminateSurvey(id);
 			setSuccess("Survey terminated successfully.");
 			await fetchSurveys();
 		} catch (err) {
@@ -96,20 +58,7 @@ export default function SurveysPage() {
 		setDeleting(id);
 		setSuccess(null);
 		try {
-			const token = localStorage.getItem("token");
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_SURVEY_API_URL}/surveys/${id}`,
-				{
-					method: "DELETE",
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				},
-			);
-			if (!res.ok) {
-				const data = await res.json();
-				throw new Error(data.error || "Failed to delete survey");
-			}
+			await deleteSurvey(id);
 			setSuccess("Survey deleted successfully.");
 			await fetchSurveys();
 		} catch (err) {
@@ -124,7 +73,9 @@ export default function SurveysPage() {
 
 	return (
 		<div className="flex flex-col gap-6">
-			<h1 className="text-2xl font-bold mb-4">Your Surveys</h1>
+			<h1 className="text-center text-3xl font-bold">
+				Your <span className="text-blue-600">Surveys</span>
+			</h1>
 			{success && (
 				<div className="bg-green-100 text-green-700 px-4 py-2 rounded text-center">
 					{success}

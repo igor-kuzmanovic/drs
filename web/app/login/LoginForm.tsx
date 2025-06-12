@@ -6,6 +6,7 @@ import { printError } from "../_lib/error";
 import { useUser } from "../_context/UserContext";
 import Input from "../_components/Input";
 import Button from "../_components/Button";
+import { loginUser } from "../_lib/api";
 
 export default function LoginForm() {
 	const router = useRouter();
@@ -19,7 +20,6 @@ export default function LoginForm() {
 		e.preventDefault();
 		setError(null);
 
-		// Simple validation
 		if (!email) {
 			setError("Invalid email");
 			return;
@@ -31,25 +31,13 @@ export default function LoginForm() {
 
 		setLoading(true);
 		try {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_USER_API_URL}/auth/login`,
-				{
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ email, password }),
-				},
-			);
-
-			const data = await res.json();
-
-			if (!res.ok) {
-				setError(data.message || "Login failed");
-			} else {
-				if (data.token) {
-					localStorage.setItem("token", data.token);
-					await refreshUser();
-				}
+			const data = await loginUser({ email, password });
+			if (data.token) {
+				localStorage.setItem("token", data.token);
+				await refreshUser();
 				router.push("/");
+			} else {
+				setError("Login failed");
 			}
 		} catch (err) {
 			setError(printError(err));

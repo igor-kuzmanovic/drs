@@ -1,19 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-
-type User = {
-	id: string;
-	email: string;
-	firstName: string;
-	lastName: string;
-	address: string;
-	city: string;
-	country: string;
-	phone: string;
-	createdAt: string;
-	updatedAt: string;
-};
+import { getUser, User } from "../_lib/api";
 
 type UserContextType = {
 	user: User | null;
@@ -46,26 +34,18 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 		setLoading(true);
 		setError(null);
 		try {
-			const res = await fetch(`${process.env.NEXT_PUBLIC_USER_API_URL}/user`, {
-				headers: { Authorization: `Bearer ${token}` },
-			});
-			if (!res.ok) {
-				if (res.status === 401) {
-					localStorage.removeItem("token");
-					setUser(null);
-					setError("Session expired. Please log in again.");
-					window.location.href = "/login";
-				} else {
-					setUser(null);
-					setError("Failed to fetch user");
-				}
+			const userData = await getUser();
+			setUser(userData);
+		} catch (err: any) {
+			if (err.message?.toLowerCase().includes("401")) {
+				localStorage.removeItem("token");
+				setUser(null);
+				setError("Session expired. Please log in again.");
+				window.location.href = "/login";
 			} else {
-				const data = await res.json();
-				setUser(data);
+				setUser(null);
+				setError("Failed to fetch user");
 			}
-		} catch {
-			setUser(null);
-			setError("Failed to fetch user");
 		} finally {
 			setLoading(false);
 		}

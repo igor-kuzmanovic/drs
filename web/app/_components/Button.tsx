@@ -37,12 +37,15 @@ export default function Button({
 			"px-4 py-2": size === "md",
 			"px-6 py-3": size === "lg",
 			"w-full": fullWidth,
-			"bg-sky-600 text-white": variant === "primary" && !disabled && !loading,
+			"bg-blue-600 text-white": variant === "primary" && !disabled && !loading,
+			"hover:bg-blue-700": variant === "primary" && !disabled && !loading,
 			"bg-gray-100 text-gray-700":
 				variant === "secondary" && !disabled && !loading,
+			"hover:bg-gray-200": variant === "secondary" && !disabled && !loading,
 			"bg-red-600 text-white": variant === "danger" && !disabled && !loading,
+			"hover:bg-red-700": variant === "danger" && !disabled && !loading,
 			"opacity-50 cursor-not-allowed": disabled || loading,
-			"!text-transparent": loading,
+			"cursor-pointer": !disabled && !loading,
 		},
 		className,
 	);

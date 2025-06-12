@@ -7,6 +7,7 @@ import Input from "../../_components/Input";
 import Textarea from "../../_components/Textarea";
 import Button from "../../_components/Button";
 import Checkbox from "../../_components/Checkbox";
+import { createSurvey } from "../../_lib/api";
 
 type FormValues = {
 	name: string;
@@ -85,36 +86,14 @@ export default function CreateSurveyForm() {
 
 		setLoading(true);
 		try {
-			const token = localStorage.getItem("token");
-			if (!token) {
-				router.push("/login");
-				return;
-			}
-
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_SURVEY_API_URL}/surveys`,
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${token}`,
-					},
-					body: JSON.stringify({
-						name: values.name,
-						question: values.question,
-						endDate: new Date(values.endDate).toISOString(),
-						isAnonymous: values.isAnonymous,
-						recipients: recipients,
-					}),
-				},
-			);
-
-			if (!res.ok) {
-				const data = await res.json();
-				setError(data.message || "Failed to create survey");
-			} else {
-				router.push("/surveys");
-			}
+			await createSurvey({
+				name: values.name,
+				question: values.question,
+				endDate: new Date(values.endDate).toISOString(),
+				isAnonymous: values.isAnonymous,
+				recipients,
+			});
+			router.push("/surveys");
 		} catch (err) {
 			setError(printError(err));
 		} finally {

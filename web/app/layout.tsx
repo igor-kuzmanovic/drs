@@ -4,7 +4,9 @@ import Link from "next/link";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { UserProvider, useUser } from "./_context/UserContext";
-import React from "react";
+import React, { useState } from "react";
+import Sidebar from "./_components/Sidebar";
+import Topbar from "./_components/Topbar";
 
 const inter = Inter({
 	variable: "--font-inter",
@@ -17,75 +19,29 @@ function LoadingScreen() {
 	);
 }
 
-function NavLink({
-	href,
-	children,
-}: {
-	href: string;
-	children: React.ReactNode;
-}) {
-	return (
-		<Link href={href} className="text-gray-700 hover:text-blue-600">
-			{children}
-		</Link>
-	);
-}
-
-function AuthLinks() {
-	return (
-		<>
-			<NavLink href="/">Dashboard</NavLink>
-			<NavLink href="/surveys">Surveys</NavLink>
-			<NavLink href="/surveys/new">Create Survey</NavLink>
-			<NavLink href="/profile">Profile</NavLink>
-			<NavLink href="/logout">Logout</NavLink>
-		</>
-	);
-}
-
-function GuestLinks() {
-	return (
-		<>
-			<NavLink href="/login">Login</NavLink>
-			<NavLink href="/signup">Sign up</NavLink>
-		</>
-	);
-}
-
-function Navbar() {
-	const { user, loading } = useUser();
-
-	return (
-		<header className="sticky top-0 z-30 bg-white border-b shadow-sm">
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div className="flex items-center justify-between h-16">
-					<Link
-						href="/"
-						className="flex items-center gap-2 text-xl font-bold text-blue-600"
-					>
-						<span>Survey Master</span>
-					</Link>
-					<nav className="flex items-center gap-6">
-						{loading ? null : user ? <AuthLinks /> : <GuestLinks />}
-					</nav>
-				</div>
-			</div>
-		</header>
-	);
-}
-
 function AppLayout({ children }: { children: React.ReactNode }) {
-	const { loading } = useUser();
+	const { loading, user } = useUser();
+	const [sidebarOpen, setSidebarOpen] = useState(false);
 
 	if (loading) {
 		return <LoadingScreen />;
 	}
 
+	const showSidebar = !!user;
+
 	return (
-		<>
-			<Navbar />
-			<main className="max-w-3xl mx-auto py-8 px-4">{children}</main>
-		</>
+		<div className="flex flex-col min-h-screen">
+			<Topbar onMenuClick={() => setSidebarOpen(true)} />
+			<div className="flex flex-1">
+				{/* Sidebar: only visible for authenticated users */}
+				{showSidebar && (
+					<div className="md:block">
+						<Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+					</div>
+				)}
+				<main className="flex-1 max-w-3xl mx-auto py-8 px-4">{children}</main>
+			</div>
+		</div>
 	);
 }
 

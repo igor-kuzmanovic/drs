@@ -5,6 +5,7 @@ import { useUser } from "../_context/UserContext";
 import Input from "../_components/Input";
 import Button from "../_components/Button";
 import { printError } from "../_lib/error";
+import { updateUser, User } from "../_lib/api";
 
 type FormValues = {
 	firstName: string;
@@ -17,16 +18,9 @@ type FormValues = {
 	passwordConfirm: string;
 };
 
-type User = {
-	firstName?: string;
-	lastName?: string;
-	address?: string;
-	city?: string;
-	country?: string;
-	phone?: string;
-};
-
-const getInitialValues = (user: User | null | undefined): FormValues => ({
+const getInitialValues = (
+	user: Partial<User> | null | undefined,
+): FormValues => ({
 	firstName: user?.firstName || "",
 	lastName: user?.lastName || "",
 	address: user?.address || "",
@@ -79,30 +73,18 @@ export default function ProfileForm() {
 
 		setLoading(true);
 		try {
-			const res = await fetch(`${process.env.NEXT_PUBLIC_USER_API_URL}/user`, {
-				method: "PUT",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${localStorage.getItem("token")}`,
-				},
-				body: JSON.stringify({
-					firstName: values.firstName,
-					lastName: values.lastName,
-					address: values.address,
-					city: values.city,
-					country: values.country,
-					phone: values.phone,
-					password: values.password ? values.password : undefined,
-				}),
+			await updateUser({
+				firstName: values.firstName,
+				lastName: values.lastName,
+				address: values.address,
+				city: values.city,
+				country: values.country,
+				phone: values.phone,
+				password: values.password ? values.password : undefined,
 			});
-			const data = await res.json();
-			if (!res.ok) {
-				setError(data.error || "Update failed");
-			} else {
-				setSuccess("Profile updated!");
-				await refreshUser();
-				setValues({ ...values, password: "", passwordConfirm: "" });
-			}
+			setSuccess("Profile updated!");
+			await refreshUser();
+			setValues({ ...values, password: "", passwordConfirm: "" });
 		} catch (err) {
 			setError(printError(err));
 		} finally {
@@ -116,7 +98,6 @@ export default function ProfileForm() {
 			onSubmit={handleSubmit}
 			noValidate
 		>
-			<h1 className="text-2xl font-bold mb-2">Edit Profile</h1>
 			<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 				<Input
 					id="firstName"
