@@ -1,0 +1,48 @@
+{
+  local_certs
+}
+
+https://api.localhost {
+  log {
+    output stdout
+    level INFO
+  }
+
+	handle_path /health/user {
+		rewrite * /health/ready
+		reverse_proxy user_api:5000
+	}
+
+	handle_path /health/survey {
+		rewrite * /health/ready
+		reverse_proxy survey_api:5000
+	}
+
+  handle /api/users* {
+    reverse_proxy user_api:5000 {
+      health_uri /health/ready
+    }
+  }
+
+  handle /api/user* {
+    reverse_proxy user_api:5000 {
+      health_uri /health/ready
+    }
+  }
+
+  handle /api/auth* {
+    reverse_proxy user_api:5000 {
+      health_uri /health/ready
+    }
+  }
+
+  handle /api/surveys* {
+    reverse_proxy survey_api:5000 {
+      health_uri /health/ready
+    }
+  }
+
+  handle {
+    respond "Not Found" 404
+  }
+}

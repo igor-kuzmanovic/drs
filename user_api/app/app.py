@@ -1,12 +1,13 @@
 import sys
 import logging
 
-from flask import Flask
+from flask import Flask, Blueprint, jsonify
 
 from .core.cors import setup_cors
 from .core.db import setup_db
 from .core.error import setup_error_handlers
 from .routes.auth_login import auth_login_blueprint
+from .routes.health import health_blueprint
 from .routes.user_get import user_get_blueprint
 from .routes.user_post import user_post_blueprint
 from .routes.user_put import user_put_blueprint
@@ -32,6 +33,7 @@ app.logger.setLevel(logging.INFO)
 setup_cors(app)
 
 # Register blueprints
+app.register_blueprint(health_blueprint)
 app.register_blueprint(auth_login_blueprint, url_prefix="/api")
 app.register_blueprint(user_get_blueprint, url_prefix="/api")
 app.register_blueprint(user_post_blueprint, url_prefix="/api")

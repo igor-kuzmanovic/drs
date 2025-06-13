@@ -1,6 +1,22 @@
 name: drs
 
 services:
+  caddy:
+    image: caddy:2
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - user_api
+      - survey_api
+
   user_api:
     build: ./user_api
     env_file: ./.env
@@ -17,6 +33,12 @@ services:
       - ${USER_API_FLASK_PORT:?error}:5000
     volumes:
       - ./user_api:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health/ready"]
+      interval: 30s
+      timeout: 10s
+      start_period: 5s
+      retries: 3
     depends_on:
       - user_postgres
       - email_api
@@ -37,6 +59,12 @@ services:
       - ${SURVEY_API_FLASK_PORT:?error}:5000
     volumes:
       - ./survey_api:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health/ready"]
+      interval: 30s
+      timeout: 10s
+      start_period: 5s
+      retries: 3
     depends_on:
       - survey_postgres
       - email_api
@@ -54,6 +82,12 @@ services:
       - ${EMAIL_API_MAILPIT_PORT:?error}:8025
     volumes:
       - ./email_api:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health/ready"]
+      interval: 30s
+      timeout: 10s
+      start_period: 5s
+      retries: 3
 
   user_postgres:
     image: postgres:17
@@ -80,5 +114,7 @@ services:
       - survey-postgres-data:/var/lib/postgresql/data
 
 volumes:
+  caddy-data:
+  caddy-config:
   user-postgres-data:
   survey-postgres-data:

@@ -57,6 +57,13 @@ def send_email():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/health/live", methods=["GET"])
+def health_live():
+    return jsonify({"status": "alive"}), 200
+
+@app.route("/health/ready", methods=["GET"])
+def health_ready():
+    return jsonify({"status": "ready"}), 200
 
 if __name__ == "__main__":
     app.run()

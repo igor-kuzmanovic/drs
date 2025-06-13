@@ -6,6 +6,7 @@ from flask import Flask
 from .core.cors import setup_cors
 from .core.db import setup_db
 from .core.error import setup_error_handlers
+from .routes.health import health_blueprint
 from .routes.survey_delete import survey_delete_blueprint
 from .routes.survey_get import survey_get_blueprint
 from .routes.survey_post import survey_post_blueprint
@@ -35,6 +36,7 @@ app.logger.setLevel(logging.INFO)
 setup_cors(app)
 
 # Register blueprints
+app.register_blueprint(health_blueprint)
 app.register_blueprint(survey_delete_blueprint, url_prefix="/api")
 app.register_blueprint(survey_get_blueprint, url_prefix="/api")
 app.register_blueprint(survey_post_blueprint, url_prefix="/api")

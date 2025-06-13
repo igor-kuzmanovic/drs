@@ -1,12 +1,5 @@
-async function apiFetch<T>(
-	url: string,
-	options: RequestInit = {},
-	api: "user" | "survey" = "user",
-): Promise<T> {
-	const base =
-		api === "user"
-			? process.env.NEXT_PUBLIC_USER_API_URL
-			: process.env.NEXT_PUBLIC_SURVEY_API_URL;
+async function apiFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
+	const base = process.env.NEXT_PUBLIC_API_URL;
 	const token =
 		typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
@@ -55,15 +48,11 @@ export type UserProfileUpdate = Partial<
 > & { password?: string };
 
 export async function getUser(): Promise<User> {
-	return apiFetch<User>("/user", { method: "GET" }, "user");
+	return apiFetch<User>("/user", { method: "GET" });
 }
 
 export async function updateUser(data: UserProfileUpdate): Promise<User> {
-	return apiFetch<User>(
-		"/user",
-		{ method: "PUT", body: JSON.stringify(data) },
-		"user",
-	);
+	return apiFetch<User>("/user", { method: "PUT", body: JSON.stringify(data) });
 }
 
 export type SignupRequest = {
@@ -80,22 +69,20 @@ export type SignupRequest = {
 export type SignupResponse = { token: string };
 
 export async function signupUser(data: SignupRequest): Promise<SignupResponse> {
-	return apiFetch<SignupResponse>(
-		"/users",
-		{ method: "POST", body: JSON.stringify(data) },
-		"user",
-	);
+	return apiFetch<SignupResponse>("/users", {
+		method: "POST",
+		body: JSON.stringify(data),
+	});
 }
 
 export type LoginRequest = { email: string; password: string };
 export type LoginResponse = { token: string };
 
 export async function loginUser(data: LoginRequest): Promise<LoginResponse> {
-	return apiFetch<LoginResponse>(
-		"/auth/login",
-		{ method: "POST", body: JSON.stringify(data) },
-		"user",
-	);
+	return apiFetch<LoginResponse>("/auth/login", {
+		method: "POST",
+		body: JSON.stringify(data),
+	});
 }
 
 // --- SURVEY API ---
@@ -129,33 +116,28 @@ export type CreateSurveyRequest = {
 export type CreateSurveyResponse = Survey;
 
 export async function getSurveys(): Promise<Survey[]> {
-	return apiFetch<Survey[]>("/surveys", { method: "GET" }, "survey");
+	return apiFetch<Survey[]>("/surveys", { method: "GET" });
 }
 
 export async function createSurvey(
 	data: CreateSurveyRequest,
 ): Promise<CreateSurveyResponse> {
-	return apiFetch<CreateSurveyResponse>(
-		"/surveys",
-		{ method: "POST", body: JSON.stringify(data) },
-		"survey",
-	);
+	return apiFetch<CreateSurveyResponse>("/surveys", {
+		method: "POST",
+		body: JSON.stringify(data),
+	});
 }
 
 export async function terminateSurvey(id: string): Promise<void> {
-	await apiFetch<void>(
-		`/surveys/${id}/terminate`,
-		{ method: "POST" },
-		"survey",
-	);
+	await apiFetch<void>(`/surveys/${id}/terminate`, { method: "POST" });
 }
 
 export async function deleteSurvey(id: string): Promise<void> {
-	await apiFetch<void>(`/surveys/${id}`, { method: "DELETE" }, "survey");
+	await apiFetch<void>(`/surveys/${id}`, { method: "DELETE" });
 }
 
 export async function getSurvey(id: string): Promise<Survey> {
-	return apiFetch<Survey>(`/surveys/${id}`, { method: "GET" }, "survey");
+	return apiFetch<Survey>(`/surveys/${id}`, { method: "GET" });
 }
 
 export type SurveyResultResponse = {
@@ -177,9 +159,7 @@ export type SurveyResultResponse = {
 export async function getSurveyResults(
 	id: string,
 ): Promise<SurveyResultResponse> {
-	return apiFetch<SurveyResultResponse>(
-		`/surveys/${id}/results`,
-		{ method: "GET" },
-		"survey",
-	);
+	return apiFetch<SurveyResultResponse>(`/surveys/${id}/results`, {
+		method: "GET",
+	});
 }

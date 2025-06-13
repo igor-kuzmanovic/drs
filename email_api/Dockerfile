@@ -28,5 +28,9 @@ ENV FLASK_DEBUG=0
 # Expose Flask port and MailPit Web UI port
 EXPOSE 5000 8025
 
+# Healthcheck to ensure the service is running
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+	CMD curl -f http://localhost:5000/health/ready || exit 1
+
 # Run the startup script
 CMD ["/app/entrypoint.sh"]
