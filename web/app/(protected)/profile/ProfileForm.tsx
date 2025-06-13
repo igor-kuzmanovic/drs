@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { useUser } from "../_context/UserContext";
-import Input from "../_components/Input";
-import Button from "../_components/Button";
-import { printError } from "../_lib/error";
-import { updateUser, User } from "../_lib/api";
+import { useUser } from "../../_context/UserContext";
+import Input from "../../_components/Input";
+import Button from "../../_components/Button";
+import Loading from "../../_components/Loading";
+import { printError } from "../../_lib/error";
+import { updateUser, User } from "../../_lib/api";
+import Alert from "../../_components/Alert";
 
 type FormValues = {
 	firstName: string;
@@ -39,7 +41,7 @@ export default function ProfileForm() {
 	const [success, setSuccess] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 
-	if (!user) return <div>Loading...</div>;
+	if (!user) return <Loading />;
 
 	const validate = (vals: FormValues) => {
 		const errs: Partial<FormValues> = {};
@@ -193,16 +195,8 @@ export default function ProfileForm() {
 			<Button type="submit" fullWidth loading={loading}>
 				Save Changes
 			</Button>
-			{error && (
-				<div className="bg-red-100 text-red-700 px-4 py-2 rounded mt-2 text-center">
-					{error}
-				</div>
-			)}
-			{success && (
-				<div className="bg-green-100 text-green-700 px-4 py-2 rounded mt-2 text-center">
-					{success}
-				</div>
-			)}
+			{error && <Alert type="error">{error}</Alert>}
+			{success && <Alert type="success">{success}</Alert>}
 		</form>
 	);
 }

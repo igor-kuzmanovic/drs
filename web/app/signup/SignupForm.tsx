@@ -7,6 +7,7 @@ import { useUser } from "../_context/UserContext";
 import Input from "../_components/Input";
 import Button from "../_components/Button";
 import { signupUser } from "../_lib/api";
+import Alert from "../_components/Alert";
 
 type FormValues = {
 	firstName: string;
@@ -200,11 +201,7 @@ export default function SignupForm() {
 			<Button type="submit" fullWidth loading={loading}>
 				Submit
 			</Button>
-			{error && (
-				<div className="bg-red-100 text-red-700 px-4 py-2 rounded mt-2 text-center">
-					{error}
-				</div>
-			)}
+			{error && <Alert type="error">{error}</Alert>}
 		</form>
 	);
 }

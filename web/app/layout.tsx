@@ -6,24 +6,19 @@ import { UserProvider, useUser } from "./_context/UserContext";
 import React, { useState } from "react";
 import Sidebar from "./_components/Sidebar";
 import Topbar from "./_components/Topbar";
+import Loading from "./_components/Loading";
 
 const inter = Inter({
 	variable: "--font-inter",
 	subsets: ["latin"],
 });
 
-function LoadingScreen() {
-	return (
-		<div className="flex justify-center items-center h-screen">Loading...</div>
-	);
-}
-
 function AppLayout({ children }: { children: React.ReactNode }) {
 	const { loading, user } = useUser();
 	const [sidebarOpen, setSidebarOpen] = useState(false);
 
 	if (loading) {
-		return <LoadingScreen />;
+		return <Loading />;
 	}
 
 	const showSidebar = !!user;

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Survey } from "../../_lib/api";
+import { Survey } from "../../../_lib/api";
 
 export default function SurveyDetails({ survey }: { survey: Survey }) {
 	return (

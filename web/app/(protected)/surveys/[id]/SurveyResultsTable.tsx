@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { SurveyResultResponse } from "../../_lib/api";
+import { SurveyResultResponse } from "../../../_lib/api";
 import { Inbox } from "lucide-react";
 
 export default function SurveyResultsTable({

@@ -61,14 +61,6 @@ function AuthSidebarLinks({
 				Dashboard
 			</NavLink>
 			<NavLink
-				href="/surveys"
-				icon={<ListChecks size={18} />}
-				onClick={onNavigate}
-				active={pathname.startsWith("/surveys") && pathname !== "/surveys/new"}
-			>
-				Surveys
-			</NavLink>
-			<NavLink
 				href="/surveys/new"
 				icon={<PlusCircle size={18} />}
 				onClick={onNavigate}

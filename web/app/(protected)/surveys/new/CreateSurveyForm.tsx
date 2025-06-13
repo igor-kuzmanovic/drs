@@ -2,12 +2,13 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { printError } from "../../_lib/error";
-import Input from "../../_components/Input";
-import Textarea from "../../_components/Textarea";
-import Button from "../../_components/Button";
-import Checkbox from "../../_components/Checkbox";
-import { createSurvey } from "../../_lib/api";
+import { printError } from "../../../_lib/error";
+import Input from "../../../_components/Input";
+import Textarea from "../../../_components/Textarea";
+import Button from "../../../_components/Button";
+import Checkbox from "../../../_components/Checkbox";
+import { createSurvey } from "../../../_lib/api";
+import Alert from "../../../_components/Alert";
 
 type FormValues = {
 	name: string;
@@ -93,7 +94,7 @@ export default function CreateSurveyForm() {
 				isAnonymous: values.isAnonymous,
 				recipients,
 			});
-			router.push("/surveys");
+			router.push("/");
 		} catch (err) {
 			setError(printError(err));
 		} finally {
@@ -170,11 +171,7 @@ export default function CreateSurveyForm() {
 					Create Survey
 				</Button>
 			</div>
-			{error && (
-				<div className="bg-red-100 text-red-700 px-4 py-2 rounded text-center">
-					{error}
-				</div>
-			)}
+			{error && <Alert type="error">{error}</Alert>}
 		</form>
 	);
 }

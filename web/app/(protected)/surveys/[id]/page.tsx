@@ -1,17 +1,17 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import React from "react";
 import {
 	getSurvey,
 	getSurveyResults,
 	Survey,
 	SurveyResultResponse,
-} from "../../_lib/api";
-import { useParams } from "next/navigation";
+} from "../../../_lib/api";
 import SurveyDetails from "./SurveyDetails";
 import SurveyStatistics from "./SurveyStatistics";
 import SurveyResultsTable from "./SurveyResultsTable";
+import Loading from "../../../_components/Loading";
 
 export default function SurveyDetailPage() {
 	const params = useParams<{ id: string }>();
@@ -19,12 +19,12 @@ export default function SurveyDetailPage() {
 
 	const [survey, setSurvey] = useState<Survey | null>(null);
 	const [results, setResults] = useState<SurveyResultResponse | null>(null);
-	const [loading, setLoading] = useState(true);
+	const [dataLoading, setDataLoading] = useState(true);
 
 	useEffect(() => {
 		getSurvey(id).then((data) => setSurvey(data));
 		getSurveyResults(id).then((data) => setResults(data));
-		setLoading(false);
+		setDataLoading(false);
 	}, [id]);
 
 	let chartData: { name: string; count: number }[] = [];
@@ -45,19 +45,12 @@ export default function SurveyDetailPage() {
 		}
 	}
 
-	if (loading || !survey || !results) {
-		return (
-			<div className="max-w-2xl mx-auto py-8 text-center text-gray-500">
-				Loading survey...
-			</div>
-		);
+	if (dataLoading || !survey || !results) {
+		return <Loading />;
 	}
 
 	return (
 		<div className="max-w-2xl mx-auto py-8">
-			<h1 className="text-3xl font-bold mb-8 text-center">
-				<span className="text-blue-600">Survey</span> Details
-			</h1>
 			<SurveyDetails survey={survey} />
 			<SurveyStatistics hasResponses={hasResponses} chartData={chartData} />
 			<SurveyResultsTable
