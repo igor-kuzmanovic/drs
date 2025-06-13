@@ -31,10 +31,20 @@ def get_surveys():
         return jsonify({"error": "Invalid token"}), 401
 
     name = request.args.get("name", "")
+    page = int(request.args.get("page", 1))
+    page_size = int(request.args.get("pageSize", 20))
+
     query = Survey.query.filter_by(owner_id=user_id)
     if name:
         query = query.filter(Survey.name.ilike(f"%{name}%"))
-    surveys = query.all()
+
+    total = query.count()
+    surveys = (
+        query.order_by(Survey.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+        .all()
+    )
 
     result = []
     email_adapter = TypeAdapter(List[EmailStr])
@@ -62,7 +72,14 @@ def get_surveys():
         )
         result.append(survey_response.model_dump())
 
-    return jsonify(result), 200
+    return jsonify(
+        {
+            "items": result,
+            "total": total,
+            "page": page,
+            "pageSize": page_size,
+        }
+    ), 200
 
 
 __all__ = ["surveys_get_blueprint"]

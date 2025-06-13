@@ -115,8 +115,19 @@ export type CreateSurveyRequest = {
 };
 export type CreateSurveyResponse = Survey;
 
-export async function getSurveys(): Promise<Survey[]> {
-	return apiFetch<Survey[]>("/surveys", { method: "GET" });
+export async function getSurveys({
+    name = "",
+    page = 1,
+    pageSize = 20,
+}: { name?: string; page?: number; pageSize?: number } = {}) {
+    const params = new URLSearchParams();
+    if (name) params.append("name", name);
+    params.append("page", String(page));
+    params.append("pageSize", String(pageSize));
+    return apiFetch<{ items: Survey[]; total: number; page: number; pageSize: number }>(
+        `/surveys?${params.toString()}`,
+        { method: "GET" }
+    );
 }
 
 export async function createSurvey(

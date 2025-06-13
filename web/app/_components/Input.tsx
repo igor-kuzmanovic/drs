@@ -3,7 +3,8 @@ import clsx from "clsx";
 
 type InputProps = {
 	id: string;
-	label: string;
+	label?: React.ReactNode;
+	labelClassName?: string;
 	error?: string;
 	disabled?: boolean;
 	placeholder?: string;
@@ -17,6 +18,7 @@ type InputProps = {
 export default function Input({
 	id,
 	label,
+	labelClassName = "",
 	error,
 	disabled = false,
 	placeholder,
@@ -28,9 +30,14 @@ export default function Input({
 }: InputProps) {
 	return (
 		<div>
-			<label htmlFor={id} className="block text-sm font-medium mb-1">
-				{label}
-			</label>
+			{label && (
+				<label
+					htmlFor={id}
+					className={clsx("block text-sm font-medium mb-1", labelClassName)}
+				>
+					{label}
+				</label>
+			)}
 			<input
 				id={id}
 				name={name || id}
