@@ -15,7 +15,7 @@ export default function Page() {
 	}, [user, loading, router]);
 
 	if (loading) return <div>Loading...</div>;
-	if (!user) return null; // Prevent flicker
+	if (!user) return null;
 
 	return (
 		<div className="p-8">

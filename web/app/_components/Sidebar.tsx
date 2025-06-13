@@ -113,10 +113,11 @@ export default function Sidebar({
 					fixed z-50 top-0 left-0 h-full w-64 bg-white transform
 					${open ? "translate-x-0" : "-translate-x-full"}
 					transition-transform duration-200
-					md:translate-x-0 md:static
+					md:translate-x-0
 					md:top-[64px] md:h-[calc(100vh-64px)] md:w-56
 					border-r border-solid
 					${open ? "block" : "hidden"} md:block
+					overflow-y-auto
 				`}
 			>
 				{/* Mobile header */}

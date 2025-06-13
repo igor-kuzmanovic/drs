@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { UserProvider, useUser } from "./_context/UserContext";
@@ -39,7 +38,9 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 						<Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 					</div>
 				)}
-				<main className="flex-1 max-w-3xl mx-auto py-8 px-4">{children}</main>
+				<main className={`flex-1 py-8 px-4 ${showSidebar ? "md:pl-60" : ""}`}>
+					{children}
+				</main>
 			</div>
 		</div>
 	);

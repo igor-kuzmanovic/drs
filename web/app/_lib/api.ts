@@ -1,4 +1,3 @@
-// Generic fetch wrapper
 async function apiFetch<T>(
 	url: string,
 	options: RequestInit = {},
@@ -111,6 +110,13 @@ export type Survey = {
 	status: string;
 	createdAt: string;
 	updatedAt: string;
+	results?: {
+		YES: number;
+		NO: number;
+		CANT_ANSWER: number;
+		[key: string]: number;
+	};
+	respondentEmails?: string[] | null;
 };
 
 export type CreateSurveyRequest = {
@@ -150,4 +156,30 @@ export async function deleteSurvey(id: string): Promise<void> {
 
 export async function getSurvey(id: string): Promise<Survey> {
 	return apiFetch<Survey>(`/surveys/${id}`, { method: "GET" }, "survey");
+}
+
+export type SurveyResultResponse = {
+	surveyId: string;
+	results: {
+		YES: number;
+		NO: number;
+		CANT_ANSWER: number;
+		[key: string]: number;
+	};
+	totalResponses: number;
+	responses: {
+		respondentEmail: string | null;
+		answer: string;
+		answeredAt: string;
+	}[];
+};
+
+export async function getSurveyResults(
+	id: string,
+): Promise<SurveyResultResponse> {
+	return apiFetch<SurveyResultResponse>(
+		`/surveys/${id}/results`,
+		{ method: "GET" },
+		"survey",
+	);
 }

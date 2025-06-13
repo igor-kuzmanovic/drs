@@ -53,7 +53,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		refreshUser();
-		// Listen for login/logout in other tabs
 		const onStorage = () => refreshUser();
 		window.addEventListener("storage", onStorage);
 		return () => window.removeEventListener("storage", onStorage);
