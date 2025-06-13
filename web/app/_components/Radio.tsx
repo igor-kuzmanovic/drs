@@ -34,7 +34,7 @@ export default function Radio({
 					disabled={disabled}
 					onChange={onChange}
 					className={clsx(
-						"size-4 rounded-full border border-gray-300 transition focus:ring-2 focus:ring-blue-500",
+						"size-4 border transition focus:ring-2 focus:ring-blue-500",
 						"checked:bg-blue-500 checked:border-blue-500",
 						"disabled:cursor-not-allowed disabled:opacity-50",
 					)}

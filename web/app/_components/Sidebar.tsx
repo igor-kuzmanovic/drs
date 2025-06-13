@@ -56,17 +56,12 @@ function AuthSidebarLinks({
 				href="/"
 				icon={<LayoutDashboard size={18} />}
 				onClick={onNavigate}
-				active={pathname === "/"}
+				active={
+					pathname === "/" ||
+					(pathname !== "/surveys/new" && pathname.startsWith("/surveys/"))
+				}
 			>
 				Dashboard
-			</NavLink>
-			<NavLink
-				href="/surveys/new"
-				icon={<PlusCircle size={18} />}
-				onClick={onNavigate}
-				active={pathname === "/surveys/new"}
-			>
-				Create Survey
 			</NavLink>
 			<NavLink
 				href="/profile"
@@ -75,6 +70,14 @@ function AuthSidebarLinks({
 				active={pathname === "/profile"}
 			>
 				Profile
+			</NavLink>
+			<NavLink
+				href="/surveys/new"
+				icon={<PlusCircle size={18} />}
+				onClick={onNavigate}
+				active={pathname === "/surveys/new"}
+			>
+				Create Survey
 			</NavLink>
 		</>
 	);

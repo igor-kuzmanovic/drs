@@ -1,6 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 import Link from "next/link";
+import { Loader } from "lucide-react";
 
 type ButtonProps = {
 	children: React.ReactNode;
@@ -28,26 +29,32 @@ export default function Button({
 	className = "",
 }: ButtonProps) {
 	const classes = clsx(
-		"rounded flex items-center justify-center gap-2 font-medium transition-colors relative",
+		"border flex items-center justify-center gap-2 font-medium transition-colors relative",
 		{
 			"text-sm": size === "sm",
 			"text-base": size === "md",
 			"text-lg": size === "lg",
-			"px-3 py-1": size === "sm",
+			"px-3 py-1.5": size === "sm",
 			"px-4 py-2": size === "md",
 			"px-6 py-3": size === "lg",
 			"w-full": fullWidth,
-			"bg-blue-600 text-white": variant === "primary" && !disabled && !loading,
+			"bg-blue-600 text-white border-blue-600":
+				variant === "primary" && !disabled && !loading,
 			"hover:bg-blue-700": variant === "primary" && !disabled && !loading,
-			"bg-gray-100 text-gray-700":
+			"bg-white text-gray-700":
 				variant === "secondary" && !disabled && !loading,
-			"hover:bg-gray-200": variant === "secondary" && !disabled && !loading,
-			"bg-red-600 text-white": variant === "danger" && !disabled && !loading,
+			"hover:bg-gray-100": variant === "secondary" && !disabled && !loading,
+			"bg-red-600 text-white border-red-600":
+				variant === "danger" && !disabled && !loading,
 			"hover:bg-red-700": variant === "danger" && !disabled && !loading,
 			"opacity-50 cursor-not-allowed": disabled || loading,
 			"cursor-pointer": !disabled && !loading,
 		},
 		className,
+	);
+
+	const spinner = (
+		<Loader className="w-5 h-5 animate-spin mr-2" aria-label="Loading" />
 	);
 
 	if (href) {
@@ -63,11 +70,7 @@ export default function Button({
 					}
 				}}
 			>
-				{loading && (
-					<div className="absolute inset-0 flex items-center justify-center">
-						<div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-					</div>
-				)}
+				{loading && spinner}
 				{children}
 			</Link>
 		);
@@ -80,11 +83,7 @@ export default function Button({
 			disabled={disabled || loading}
 			className={classes}
 		>
-			{loading && (
-				<div className="absolute inset-0 flex items-center justify-center">
-					<div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-				</div>
-			)}
+			{loading && spinner}
 			{children}
 		</button>
 	);
