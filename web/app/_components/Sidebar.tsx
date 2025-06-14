@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
 	X as CloseIcon,
 	LayoutDashboard,
-	ListChecks,
 	PlusCircle,
 	User as UserIcon,
 } from "lucide-react";
