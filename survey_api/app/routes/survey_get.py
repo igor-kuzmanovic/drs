@@ -1,11 +1,11 @@
 from datetime import datetime
 from typing import List, Optional
 
-from flask import Blueprint, jsonify, request
-from pydantic import UUID4, EmailStr, TypeAdapter, ValidationError
+from flask import Blueprint, jsonify
+from pydantic import UUID4, EmailStr, TypeAdapter
 
 from ..auth.jwt import validate_token, get_user_id_from_token
-from ..core.models import Survey, SurveyResponse
+from ..core.models import Survey, SurveyAnswer, SurveyResponse
 from ..core.pydantic import PydanticBaseModel
 
 survey_get_blueprint = Blueprint("survey_get_routes", __name__)
@@ -20,8 +20,18 @@ class GetSurveyDetailResponse(PydanticBaseModel):
     status: str
     createdAt: datetime
     updatedAt: datetime
-    results: Optional[dict]  # e.g. {"YES": 10, "NO": 5, "CANT_ANSWER": 2}
+    results: dict
     respondentEmails: Optional[List[EmailStr]]  # Only if not anonymous
+
+class GetSurveyPublicResponse(PydanticBaseModel):
+    id: UUID4
+    name: str
+    question: str
+    endDate: datetime
+    isAnonymous: bool
+    status: str
+    createdAt: datetime
+    updatedAt: datetime
 
 @validate_token
 @survey_get_blueprint.route("/surveys/<uuid:survey_id>", methods=["GET"])
@@ -43,10 +53,10 @@ def get_survey(survey_id):
         recipient_emails = []
 
     # Aggregate results
-    results = {"YES": 0, "NO": 0, "CANT_ANSWER": 0}
+    results = {SurveyAnswer.YES.value: 0, SurveyAnswer.NO.value: 0, SurveyAnswer.CANT_ANSWER.value: 0}
     respondent_emails = []
     for response in SurveyResponse.query.filter_by(survey_id=survey.id).all():
-        answer = getattr(response, "answer", None)
+        answer = response.answer.value
         if answer in results:
             results[answer] += 1
         if not survey.is_anonymous:
@@ -59,11 +69,30 @@ def get_survey(survey_id):
         endDate=survey.end_date,
         isAnonymous=survey.is_anonymous,
         recipients=recipient_emails,
-        status=survey.status.value if hasattr(survey.status, "value") else str(survey.status),
+        status=survey.status.value,
         createdAt=survey.created_at,
         updatedAt=survey.updated_at,
         results=results,
         respondentEmails=respondent_emails if not survey.is_anonymous else None,
+    )
+
+    return jsonify(response_data.model_dump()), 200
+
+@survey_get_blueprint.route("/surveys/<uuid:survey_id>/public", methods=["GET"])
+def get_survey_public(survey_id):
+    survey = Survey.query.filter_by(id=survey_id).first()
+    if not survey:
+        return jsonify({"error": "Survey not found"}), 404
+
+    response_data = GetSurveyPublicResponse(
+        id=survey.id,
+        name=survey.name,
+        question=survey.question,
+        endDate=survey.end_date,
+        isAnonymous=survey.is_anonymous,
+        status=survey.status.value if hasattr(survey.status, "value") else str(survey.status),
+        createdAt=survey.created_at,
+        updatedAt=survey.updated_at,
     )
 
     return jsonify(response_data.model_dump()), 200

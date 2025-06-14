@@ -5,36 +5,44 @@ import { useRouter } from "next/navigation";
 import { printError } from "../../../_lib/error";
 import Input from "../../../_components/Input";
 import Textarea from "../../../_components/Textarea";
-import Button from "../../../_components/Button";
+import Action from "../../../_components/Action";
 import Checkbox from "../../../_components/Checkbox";
 import { createSurvey } from "../../../_lib/api";
 import Alert from "../../../_components/Alert";
+import EmailChips from "../../../_components/EmailChips";
 
 type FormValues = {
 	name: string;
 	question: string;
 	endDate: string;
-	recipients: string;
+	recipients: string[];
 	isAnonymous: boolean;
+};
+
+type FormErrors = {
+	name?: string;
+	question?: string;
+	endDate?: string;
+	recipients?: string;
 };
 
 const initialValues: FormValues = {
 	name: "",
 	question: "",
 	endDate: "",
-	recipients: "",
+	recipients: [],
 	isAnonymous: false,
 };
 
 export default function CreateSurveyForm() {
 	const router = useRouter();
 	const [values, setValues] = useState<FormValues>(initialValues);
-	const [errors, setErrors] = useState<Partial<FormValues>>({});
+	const [errors, setErrors] = useState<FormErrors>({});
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 
 	const validate = (vals: FormValues) => {
-		const errs: Partial<FormValues> = {};
+		const errs: FormErrors = {};
 		if (vals.name.length === 0) errs.name = "Name is required";
 		if (vals.question.length === 0) errs.question = "Question is required";
 		if (!vals.endDate) {
@@ -46,18 +54,11 @@ export default function CreateSurveyForm() {
 				errs.endDate = "End date cannot be in the past";
 			}
 		}
-
-		const recipientList = vals.recipients
-			.split(",")
-			.map((email) => email.trim())
-			.filter((email) => email.length > 0);
-
-		if (recipientList.length === 0) {
+		if (vals.recipients.length === 0) {
 			errs.recipients = "At least one recipient is required";
-		} else if (recipientList.length > 50) {
+		} else if (vals.recipients.length > 50) {
 			errs.recipients = "Maximum 50 recipients are allowed";
 		}
-
 		return errs;
 	};
 
@@ -80,11 +81,6 @@ export default function CreateSurveyForm() {
 		setErrors(validationErrors);
 		if (Object.keys(validationErrors).length > 0) return;
 
-		const recipients = values.recipients
-			.split(",")
-			.map((email) => email.trim())
-			.filter((email) => email.length > 0);
-
 		setLoading(true);
 		try {
 			await createSurvey({
@@ -92,7 +88,7 @@ export default function CreateSurveyForm() {
 				question: values.question,
 				endDate: new Date(values.endDate).toISOString(),
 				isAnonymous: values.isAnonymous,
-				recipients,
+				recipients: values.recipients,
 			});
 			router.push("/");
 		} catch (err) {
@@ -139,15 +135,12 @@ export default function CreateSurveyForm() {
 					disabled={loading}
 					error={errors.endDate}
 				/>
-				<Textarea
-					id="recipients"
-					name="recipients"
-					label="Recipients (comma-separated emails)"
-					placeholder="email1@example.com, email2@example.com"
+				<EmailChips
 					value={values.recipients}
-					onChange={handleChange}
+					onChange={(recipients) => setValues({ ...values, recipients })}
 					disabled={loading}
 					error={errors.recipients}
+					label="Recipients"
 				/>
 				<Checkbox
 					id="isAnonymous"
@@ -159,17 +152,17 @@ export default function CreateSurveyForm() {
 				/>
 			</div>
 			<div className="flex justify-end gap-4">
-				<Button
+				<Action
 					type="button"
 					variant="secondary"
 					disabled={loading}
 					onClick={() => router.push("/surveys")}
 				>
 					Cancel
-				</Button>
-				<Button type="submit" loading={loading}>
+				</Action>
+				<Action type="submit" loading={loading}>
 					Create Survey
-				</Button>
+				</Action>
 			</div>
 			{error && <Alert type="error">{error}</Alert>}
 		</form>

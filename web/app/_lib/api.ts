@@ -4,6 +4,7 @@ async function apiFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
 		typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
 	const headers: HeadersInit = {
+		Accept: "application/json",
 		"Content-Type": "application/json",
 		...(token ? { Authorization: `Bearer ${token}` } : {}),
 		...(options.headers || {}),
@@ -13,14 +14,19 @@ async function apiFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
 		...options,
 		headers,
 	});
+	const contentType = res.headers.get("content-type");
+	let errorData: unknown = null;
 	if (!res.ok) {
-		let error;
-		try {
-			error = await res.json();
-		} catch {
-			error = { message: res.statusText };
+		if (contentType && contentType.includes("application/json")) {
+			errorData = await res.json();
+		} else {
+			errorData = { error: res.statusText };
 		}
-		throw new Error(error.message || "API error");
+		console.log(errorData);
+		throw {
+			status: res.status,
+			data: errorData,
+		};
 	}
 	return res.json();
 }
@@ -94,15 +100,10 @@ export type Survey = {
 	endDate: string;
 	isAnonymous: boolean;
 	recipients: string[];
-	status: string;
+	status: SurveyStatusType;
 	createdAt: string;
 	updatedAt: string;
-	results?: {
-		YES: number;
-		NO: number;
-		CANT_ANSWER: number;
-		[key: string]: number;
-	};
+	results: Record<SurveyAnswerType, number>;
 	respondentEmails?: string[] | null;
 };
 
@@ -116,18 +117,20 @@ export type CreateSurveyRequest = {
 export type CreateSurveyResponse = Survey;
 
 export async function getSurveys({
-    name = "",
-    page = 1,
-    pageSize = 20,
+	name = "",
+	page = 1,
+	pageSize = 20,
 }: { name?: string; page?: number; pageSize?: number } = {}) {
-    const params = new URLSearchParams();
-    if (name) params.append("name", name);
-    params.append("page", String(page));
-    params.append("pageSize", String(pageSize));
-    return apiFetch<{ items: Survey[]; total: number; page: number; pageSize: number }>(
-        `/surveys?${params.toString()}`,
-        { method: "GET" }
-    );
+	const params = new URLSearchParams();
+	if (name) params.append("name", name);
+	params.append("page", String(page));
+	params.append("pageSize", String(pageSize));
+	return apiFetch<{
+		items: Survey[];
+		total: number;
+		page: number;
+		pageSize: number;
+	}>(`/surveys?${params.toString()}`, { method: "GET" });
 }
 
 export async function createSurvey(
@@ -153,16 +156,11 @@ export async function getSurvey(id: string): Promise<Survey> {
 
 export type SurveyResultResponse = {
 	surveyId: string;
-	results: {
-		YES: number;
-		NO: number;
-		CANT_ANSWER: number;
-		[key: string]: number;
-	};
+	results: Record<SurveyAnswerType, number>;
 	totalResponses: number;
 	responses: {
 		respondentEmail: string | null;
-		answer: string;
+		answer: SurveyAnswerType;
 		answeredAt: string;
 	}[];
 };
@@ -172,5 +170,52 @@ export async function getSurveyResults(
 ): Promise<SurveyResultResponse> {
 	return apiFetch<SurveyResultResponse>(`/surveys/${id}/results`, {
 		method: "GET",
+	});
+}
+
+export type PublicSurvey = {
+	id: string;
+	name: string;
+	question: string;
+	endDate: string;
+	isAnonymous: boolean;
+	status: SurveyStatusType;
+	createdAt: string;
+	updatedAt: string;
+};
+
+export async function getPublicSurvey(id: string): Promise<PublicSurvey> {
+	return apiFetch<PublicSurvey>(`/surveys/${id}/public`, { method: "GET" });
+}
+
+export const SurveyStatus = {
+	Active: "ACTIVE",
+	Closed: "CLOSED",
+	Deleted: "DELETED",
+} as const;
+
+export type SurveyStatusType = (typeof SurveyStatus)[keyof typeof SurveyStatus];
+
+export const SurveyAnswer = {
+	Yes: "YES",
+	No: "NO",
+	CantAnswer: "CANT_ANSWER",
+} as const;
+
+export type SurveyAnswerType = (typeof SurveyAnswer)[keyof typeof SurveyAnswer];
+
+export type SurveyRespondRequest = {
+	email: string;
+	answer: SurveyAnswerType;
+};
+export type SurveyRespondResponse = { message: string };
+
+export async function respondSurvey(
+	surveyId: string,
+	data: SurveyRespondRequest,
+): Promise<SurveyRespondResponse> {
+	return apiFetch<SurveyRespondResponse>(`/surveys/${surveyId}/respond`, {
+		method: "POST",
+		body: JSON.stringify(data),
 	});
 }

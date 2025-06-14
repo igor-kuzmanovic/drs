@@ -1,0 +1,47 @@
+"use client";
+
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { getPublicSurvey, PublicSurvey, SurveyStatus } from "../../_lib/api";
+import Loading from "../../_components/Loading";
+import { SurveyRespondForm } from "./SurveyRespondForm";
+
+export default function RespondSurveyPage() {
+	const params = useParams<{ id: string }>();
+	const id = params.id;
+
+	const [survey, setSurvey] = useState<PublicSurvey | null>(null);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		getPublicSurvey(id)
+			.then(setSurvey)
+			.finally(() => setLoading(false));
+	}, [id]);
+
+	if (loading) return <Loading />;
+	if (!survey)
+		return <div className="text-center text-lg mt-12">Survey not found.</div>;
+	if (survey.status === SurveyStatus.Closed) {
+		return (
+			<div className="flex flex-col items-center justify-center min-h-[60vh]">
+				<h1 className="text-3xl font-bold mb-4 text-center">{survey.name}</h1>
+				<div className="text-red-700 text-lg font-semibold bg-red-100 px-6 py-4">
+					This survey is closed. You can no longer submit a response.
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<div className="flex flex-col gap-8 items-center justify-center min-h-[60vh]">
+			<div className="w-full max-w-md">
+				<h1 className="text-3xl font-bold mb-2 text-center">{survey.name}</h1>
+				<p className="text-lg text-gray-700 mb-6 text-center">
+					{survey.question}
+				</p>
+				<SurveyRespondForm surveyId={id} isAnonymous={survey.isAnonymous} />
+			</div>
+		</div>
+	);
+}

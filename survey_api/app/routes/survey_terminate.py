@@ -21,7 +21,7 @@ def terminate_survey(survey_id: UUID4):
     if not survey:
         return jsonify({"error": "Survey not found"}), 404
 
-    survey.status = SurveyStatus.CLOSED
+    survey.status = SurveyStatus.CLOSED.value
     db.session.commit()
     return jsonify({"message": "Survey terminated"}), 200
 

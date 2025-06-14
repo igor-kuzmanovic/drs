@@ -1,0 +1,28 @@
+import clsx from "clsx";
+import { SurveyStatusType, SurveyStatus } from "../_lib/api";
+
+export function StatusBadge({ status }: { status: SurveyStatusType }) {
+	const color = (() => {
+		switch (status) {
+			case SurveyStatus.Active:
+				return "bg-green-100 text-green-800 border-green-300";
+			case SurveyStatus.Closed:
+				return "bg-gray-100 text-gray-700 border-gray-300";
+			case SurveyStatus.Deleted:
+				return "bg-red-100 text-red-800 border-red-300";
+			default:
+				return "bg-gray-100 text-gray-700 border-gray-300";
+		}
+	})();
+	const label = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+	return (
+		<span
+			className={clsx(
+				"inline-block px-2 py-0.5 text-xs font-semibold border",
+				color,
+			)}
+		>
+			{label}
+		</span>
+	);
+}

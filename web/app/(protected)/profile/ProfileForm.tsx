@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useUser } from "../../_context/UserContext";
 import Input from "../../_components/Input";
-import Button from "../../_components/Button";
+import Action from "../../_components/Action";
 import Loading from "../../_components/Loading";
 import { printError } from "../../_lib/error";
 import { updateUser, User } from "../../_lib/api";
@@ -192,9 +192,9 @@ export default function ProfileForm() {
 					error={errors.passwordConfirm}
 				/>
 			</div>
-			<Button type="submit" fullWidth loading={loading}>
+			<Action type="submit" fullWidth loading={loading}>
 				Save Changes
-			</Button>
+			</Action>
 			{error && <Alert type="error">{error}</Alert>}
 			{success && <Alert type="success">{success}</Alert>}
 		</form>

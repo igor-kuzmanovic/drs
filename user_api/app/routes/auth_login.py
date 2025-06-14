@@ -39,7 +39,7 @@ def login():
 
     # Create a response object
     try:
-        response = LoginResponse(token=token).model_dump_json()
+        response = LoginResponse(token=token).model_dump()
     except ValidationError:
         return jsonify({"error": "Internal server error"}), 500
 
@@ -61,7 +61,7 @@ def login():
     except requests.exceptions.RequestException as e:
         return jsonify({"error": str(e)}), 500
 
-    return response, 200
+    return jsonify(response), 200
 
 
 __all__ = ["auth_login_blueprint"]

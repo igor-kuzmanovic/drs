@@ -5,7 +5,7 @@ from flask import Blueprint, jsonify, request
 from pydantic import UUID4, EmailStr, TypeAdapter
 
 from ..auth.jwt import validate_token, get_user_id_from_token
-from ..core.models import Survey
+from ..core.models import Survey, SurveyAnswer, SurveyResponse
 from ..core.pydantic import PydanticBaseModel
 
 surveys_get_blueprint = Blueprint("surveys_get_routes", __name__)
@@ -55,6 +55,17 @@ def get_surveys():
         except Exception:
             recipient_emails = []
 
+        # Aggregate results for this survey
+        results = {
+            SurveyAnswer.YES.value: 0,
+            SurveyAnswer.NO.value: 0,
+            SurveyAnswer.CANT_ANSWER.value: 0,
+        }
+        for response in SurveyResponse.query.filter_by(survey_id=survey.id).all():
+            answer = response.answer.value
+            if answer in results:
+                results[answer] += 1
+
         survey_response = GetSurveyResponse(
             id=survey.id,
             name=survey.name,
@@ -70,7 +81,9 @@ def get_surveys():
             createdAt=survey.created_at,
             updatedAt=survey.updated_at,
         )
-        result.append(survey_response.model_dump())
+        survey_dict = survey_response.model_dump()
+        survey_dict["results"] = results
+        result.append(survey_dict)
 
     return jsonify(
         {

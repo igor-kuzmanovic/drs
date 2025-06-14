@@ -86,11 +86,11 @@ def post():
             phone=user.phone,
             createdAt=user.created_at,
             updatedAt=user.updated_at,
-        ).model_dump_json()
+        ).model_dump()
     except ValidationError:
         return jsonify({"error": "Internal server error"}), 500
 
-    return response, 201
+    return jsonify(response), 201
 
 
 __all__ = ["user_post_blueprint"]

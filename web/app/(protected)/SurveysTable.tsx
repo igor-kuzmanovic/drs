@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { X } from "lucide-react";
-import Button from "../_components/Button";
+import Action from "../_components/Action";
 import Loading from "../_components/Loading";
 import Input from "../_components/Input";
-import { Survey } from "../_lib/api";
+import { Survey, SurveyStatus } from "../_lib/api";
+import { StatusBadge } from "../_components/StatusBadge";
 
 type SurveysTableProps = {
 	surveys: Survey[];
@@ -54,7 +55,7 @@ export default function SurveysTable({
 		<div>
 			<form
 				onSubmit={handleSubmit}
-				className="flex w-full max-w-2xl mx-auto items-center gap-2 mb-4"
+				className="flex w-full mx-auto items-center gap-2 mb-4"
 			>
 				<div className="relative flex-1">
 					<Input
@@ -78,14 +79,14 @@ export default function SurveysTable({
 						</button>
 					)}
 				</div>
-				<Button
+				<Action
 					type="submit"
-					variant="primary"
+					variant="secondary"
 					size="sm"
 					className="h-[42px] px-4"
 				>
 					Search
-				</Button>
+				</Action>
 			</form>
 			{loading ? (
 				<Loading />
@@ -93,14 +94,14 @@ export default function SurveysTable({
 				<div className="text-red-600">{error}</div>
 			) : (
 				<div className="overflow-x-auto max-w-[calc(100vw-2rem)]">
-					<table className="min-w-[600px] border bg-white">
+					<table className="w-full min-w-[600px] border bg-white">
 						<thead>
 							<tr className="bg-gray-100">
-								<th className="p-2 text-left">Name</th>
-								<th className="p-2 text-left">Question</th>
-								<th className="p-2 text-left">Status</th>
-								<th className="p-2 text-left">End Date</th>
-								<th className="p-2 text-left">Results</th>
+								<th className="p-2 text-left text-nowrap">Name</th>
+								<th className="p-2 text-left text-nowrap">Question</th>
+								<th className="p-2 text-left text-nowrap">Status</th>
+								<th className="p-2 text-left text-nowrap">End date</th>
+								<th className="p-2 text-left text-nowrap">Results</th>
 								<th></th>
 							</tr>
 						</thead>
@@ -109,9 +110,13 @@ export default function SurveysTable({
 								<tr key={survey.id} className="border-t">
 									<td className="p-2">{survey.name}</td>
 									<td className="p-2">{survey.question}</td>
-									<td className="p-2">{survey.status}</td>
 									<td className="p-2">
-										{new Date(survey.endDate).toLocaleString()}
+										<StatusBadge status={survey.status} />
+									</td>
+									<td className="p-2">
+										<span className="text-xs text-gray-500 font-normal">
+											{new Date(survey.endDate).toLocaleString()}
+										</span>
 									</td>
 									<td className="p-2 text-sm">
 										{survey.results ? (
@@ -145,41 +150,42 @@ export default function SurveysTable({
 									</td>
 									<td className="p-2">
 										<div className="flex gap-2">
-											<Button
+											<Action
 												href={`/surveys/${survey.id}`}
 												variant="primary"
 												size="sm"
 											>
 												View
-											</Button>
-											<Button
-												variant="danger"
-												size="sm"
-												loading={terminating === survey.id}
-												disabled={
-													survey.status === "closed" ||
-													terminating === survey.id ||
-													deleting === survey.id
-												}
-												onClick={() => onTerminate(survey.id)}
-											>
-												{terminating === survey.id
-													? "Terminating..."
-													: "Terminate"}
-											</Button>
-											<Button
-												variant="secondary"
-												size="sm"
-												loading={deleting === survey.id}
-												disabled={
-													survey.status !== "closed" ||
-													deleting === survey.id ||
-													terminating === survey.id
-												}
-												onClick={() => onDelete(survey.id)}
-											>
-												{deleting === survey.id ? "Deleting..." : "Delete"}
-											</Button>
+											</Action>
+											{survey.status !== SurveyStatus.Closed ? (
+												<Action
+													variant="secondary"
+													size="sm"
+													loading={terminating === survey.id}
+													disabled={
+														terminating === survey.id || deleting === survey.id
+													}
+													onClick={() => onTerminate(survey.id)}
+												>
+													{terminating === survey.id
+														? "Terminating..."
+														: "Terminate"}
+												</Action>
+											) : (
+												<Action
+													variant="danger"
+													size="sm"
+													loading={deleting === survey.id}
+													disabled={
+														survey.status !== SurveyStatus.Closed ||
+														deleting === survey.id ||
+														terminating === survey.id
+													}
+													onClick={() => onDelete(survey.id)}
+												>
+													{deleting === survey.id ? "Deleting..." : "Delete"}
+												</Action>
+											)}
 										</div>
 									</td>
 								</tr>
@@ -197,25 +203,25 @@ export default function SurveysTable({
 			)}
 			{totalPages > 1 && (
 				<div className="flex justify-center items-center gap-4 mt-4">
-					<Button
+					<Action
 						variant="secondary"
 						size="sm"
 						onClick={() => onPageChange(page - 1)}
 						disabled={page === 1}
 					>
 						Prev
-					</Button>
+					</Action>
 					<span className="text-sm">
 						Page {page} of {totalPages}
 					</span>
-					<Button
+					<Action
 						variant="secondary"
 						size="sm"
 						onClick={() => onPageChange(page + 1)}
 						disabled={page === totalPages}
 					>
 						Next
-					</Button>
+					</Action>
 				</div>
 			)}
 		</div>

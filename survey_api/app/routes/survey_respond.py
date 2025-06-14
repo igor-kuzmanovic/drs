@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from pydantic import EmailStr, ValidationError, UUID4, Field
-from datetime import datetime
+from pydantic import EmailStr, ValidationError, Field
+from datetime import datetime, timezone
 
 from ..core.db import db
 from ..core.models import Survey, SurveyResponse, SurveyStatus
@@ -24,7 +24,7 @@ def respond(survey_id):
     survey = Survey.query.filter_by(id=survey_id).first()
     if not survey:
         return jsonify({"error": "Survey not found"}), 404
-    if survey.status != SurveyStatus.ACTIVE:
+    if survey.status != SurveyStatus.ACTIVE.value:
         return jsonify({"error": "Survey is closed"}), 400
 
     # Check if already responded
@@ -38,7 +38,7 @@ def respond(survey_id):
         survey_id=survey_id,
         recipient_email=data.email,
         answer=data.answer,
-        responded_at=datetime.utcnow(),
+        answered_at=datetime.now(timezone.utc),
     )
     db.session.add(response)
     db.session.commit()

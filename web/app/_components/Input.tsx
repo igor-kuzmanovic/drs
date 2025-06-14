@@ -1,18 +1,12 @@
 import React from "react";
 import clsx from "clsx";
 
-type InputProps = {
-	id: string;
+type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
 	label?: React.ReactNode;
 	labelClassName?: string;
 	error?: string;
-	disabled?: boolean;
-	placeholder?: string;
-	type?: string;
-	autoComplete?: string;
-	value: string;
-	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-	name?: string;
+	inputSize?: "sm" | "md" | "lg";
+	wrapperClassName?: string;
 };
 
 export default function Input({
@@ -20,16 +14,20 @@ export default function Input({
 	label,
 	labelClassName = "",
 	error,
-	disabled = false,
-	placeholder,
-	type = "text",
-	autoComplete,
-	value,
-	onChange,
-	name,
+	inputSize = "md",
+	wrapperClassName = "",
+	className = "",
+	...rest
 }: InputProps) {
+	const sizeClasses =
+		inputSize === "sm"
+			? "px-3 py-1.5 text-sm"
+			: inputSize === "lg"
+				? "px-6 py-3 text-lg"
+				: "px-4 py-2 text-base";
+
 	return (
-		<div>
+		<div className={wrapperClassName}>
 			{label && (
 				<label
 					htmlFor={id}
@@ -40,18 +38,14 @@ export default function Input({
 			)}
 			<input
 				id={id}
-				name={name || id}
-				type={type}
-				autoComplete={autoComplete}
 				className={clsx(
-					"w-full border px-3 py-2 focus:outline-none transition",
+					"w-full border focus:outline-none transition",
 					"focus:bg-blue-50 focus:ring-2 focus:ring-blue-500",
 					"disabled:opacity-50 disabled:cursor-not-allowed",
+					sizeClasses,
+					className,
 				)}
-				placeholder={placeholder}
-				value={value}
-				onChange={onChange}
-				disabled={disabled}
+				{...rest}
 			/>
 			{error && <div className="text-red-600 text-xs mt-1">{error}</div>}
 		</div>

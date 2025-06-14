@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { printError } from "../_lib/error";
 import { useUser } from "../_context/UserContext";
 import Input from "../_components/Input";
-import Button from "../_components/Button";
+import Action from "../_components/Action";
 import { loginUser } from "../_lib/api";
 import Alert from "../_components/Alert";
 
@@ -74,9 +74,9 @@ export default function LoginForm() {
 					disabled={loading}
 				/>
 			</div>
-			<Button type="submit" fullWidth loading={loading}>
+			<Action type="submit" fullWidth loading={loading}>
 				Submit
-			</Button>
+			</Action>
 			{error && <Alert type="error">{error}</Alert>}
 		</form>
 	);

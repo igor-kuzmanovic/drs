@@ -9,15 +9,15 @@ from ..core.pydantic import PydanticBaseModel
 survey_results_blueprint = Blueprint("survey_results_routes", __name__)
 
 class SurveyResponseInfo(PydanticBaseModel):
-    respondentEmail: EmailStr
+    respondentEmail: EmailStr | None = None
     answer: str
     answeredAt: datetime
 
 class GetSurveyResultsResponse(PydanticBaseModel):
     surveyId: UUID4
-    results: dict  # e.g. {"YES": 10, "NO": 5, "CANT_ANSWER": 2}
+    results: dict
     totalResponses: int
-    responses: list[SurveyResponseInfo]  # List of all responses (if not anonymous)
+    responses: list[SurveyResponseInfo]
 
 @validate_token
 @survey_results_blueprint.route("/surveys/<uuid:survey_id>/results", methods=["GET"])
@@ -30,13 +30,14 @@ def get_survey_results(survey_id):
     if not survey:
         return jsonify({"error": "Survey not found"}), 404
 
-    results = {"YES": 0, "NO": 0, "CANT_ANSWER": 0}
+    results = {SurveyAnswer.YES.value: 0, SurveyAnswer.NO.value: 0, SurveyAnswer.CANT_ANSWER.value: 0}
     responses = []
     for response in SurveyResponse.query.filter_by(survey_id=survey.id).all():
-        answer = getattr(response, "answer", None)
+        print(response, response.answer, flush=True)
+        answer = response.answer.value
         if answer in results:
+            print(results, answer, flush=True)
             results[answer] += 1
-        # Include as much info as possible, but respect anonymity
         if survey.is_anonymous:
             responses.append({
                 "respondentEmail": None,

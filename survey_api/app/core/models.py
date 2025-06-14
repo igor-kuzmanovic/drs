@@ -9,15 +9,15 @@ from .db import db
 
 
 class SurveyStatus(enum.Enum):
-    ACTIVE = "active"
-    CLOSED = "closed"
-    DELETED = "deleted"
+    ACTIVE = "ACTIVE"
+    CLOSED = "CLOSED"
+    DELETED = "DELETED"
 
 
 class SurveyAnswer(enum.Enum):
-    YES = "yes"
-    NO = "no"
-    CANT_ANSWER = "cant_answer"
+    YES = "YES"
+    NO = "NO"
+    CANT_ANSWER = "CANT_ANSWER"
 
 
 class Survey(db.Model):
@@ -34,7 +34,7 @@ class Survey(db.Model):
     is_anonymous: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     owner_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     recipients: Mapped[str] = mapped_column(Text, nullable=False)
-    status: Mapped[SurveyStatus] = mapped_column(Enum(SurveyStatus), default=SurveyStatus.ACTIVE, nullable=False)
+    status: Mapped[SurveyStatus] = mapped_column(Enum(SurveyStatus), default=SurveyStatus.ACTIVE.value, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(UTC), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC),
                                                  nullable=False)
@@ -72,9 +72,9 @@ class Recipient(db.Model):
 
 
 class EmailTaskStatus(enum.Enum):
-    PENDING = "pending"
-    SENT = "sent"
-    FAILED = "failed"
+    PENDING = "PENDING"
+    SENT = "SENT"
+    FAILED = "FAILED"
 
 
 class EmailTask(db.Model):

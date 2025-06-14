@@ -54,7 +54,7 @@ def post():
         is_anonymous=data.isAnonymous,
         owner_id=user_id,
         recipients=",".join(data.recipients),  # Store emails as comma-separated string
-        status=SurveyStatus.ACTIVE,
+        status=SurveyStatus.ACTIVE.value,
     )
 
     # Add the survey to the session and commit
@@ -88,11 +88,11 @@ def post():
             status=survey.status.value,
             createdAt=survey.created_at,
             updatedAt=survey.updated_at,
-        ).model_dump_json()
+        ).model_dump()
     except ValidationError:
         return jsonify({"error": "Internal server error"}), 500
 
-    return response, 201
+    return jsonify(response), 201
 
 
 __all__ = ["survey_post_blueprint"]

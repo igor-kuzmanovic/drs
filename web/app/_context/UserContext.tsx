@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { getUser, User } from "../_lib/api";
+import { isHttpError, printError } from "../_lib/error";
 
 type UserContextType = {
 	user: User | null;
@@ -36,15 +37,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 		try {
 			const userData = await getUser();
 			setUser(userData);
-		} catch (err: any) {
-			if (err.message?.toLowerCase().includes("401")) {
+		} catch (err) {
+			if (isHttpError(err) && err.status === 401) {
 				localStorage.removeItem("token");
 				setUser(null);
 				setError("Session expired. Please log in again.");
 				window.location.href = "/login";
 			} else {
 				setUser(null);
-				setError("Failed to fetch user");
+				setError(printError(err));
 			}
 		} finally {
 			setLoading(false);

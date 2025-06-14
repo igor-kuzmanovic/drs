@@ -2,33 +2,45 @@
 
 import React from "react";
 import { Survey } from "../../../_lib/api";
+import { StatusBadge } from "../../../_components/StatusBadge";
 
 export default function SurveyDetails({ survey }: { survey: Survey }) {
 	return (
 		<section className="bg-white border p-6 mb-8">
-			<h2 className="text-2xl font-bold mb-4">{survey.name}</h2>
-			<div className="mb-2">
-				<span className="font-semibold">Question: </span>
-				{survey.question}
+			<div className="mb-4">
+				<div className="text-lg font-semibold mb-1">Question</div>
+				<div className="text-gray-800">{survey.question}</div>
 			</div>
-			<div className="mb-2">
-				<span className="font-semibold">Status: </span>
-				{survey.status}
-			</div>
-			<div className="mb-2">
-				<span className="font-semibold">End date: </span>
-				{new Date(survey.endDate).toLocaleString()}
-			</div>
-			<div className="mb-2">
-				<span className="font-semibold">Anonymous: </span>
-				{survey.isAnonymous ? "Yes" : "No"}
-			</div>
-			<div className="mb-2">
-				<span className="font-semibold">Recipients: </span>
-				{survey.recipients && survey.recipients.length > 0
-					? survey.recipients.join(", ")
-					: "None"}
-			</div>
+			<dl className="space-y-2">
+				<div className="flex flex-row justify-between items-center">
+					<dt className="font-semibold text-gray-600">Status</dt>
+					<dd>
+						<StatusBadge status={survey.status} />
+					</dd>
+				</div>
+				<div className="flex flex-row justify-between items-center">
+					<dt className="font-semibold text-gray-600">End date</dt>
+					<dd className="text-xs text-gray-500 font-normal">
+						{new Date(survey.endDate).toLocaleString()}
+					</dd>
+				</div>
+				<div className="flex flex-row justify-between items-center">
+					<dt className="font-semibold text-gray-600">Anonymous</dt>
+					<dd>{survey.isAnonymous ? "Yes" : "No"}</dd>
+				</div>
+				<div className="flex flex-row justify-between items-center">
+					<dt className="font-semibold text-gray-600">Recipients</dt>
+					<dd className="truncate max-w-[70%] text-right">
+						{Array.isArray(survey.recipients)
+							? survey.recipients.length > 0
+								? survey.recipients.join(", ")
+								: "None"
+							: survey.recipients
+								? survey.recipients
+								: "None"}
+					</dd>
+				</div>
+			</dl>
 		</section>
 	);
 }
