@@ -31,7 +31,7 @@ def send_survey_emails(survey_id):
     with current_app.app_context():
         survey = Survey.query.get(survey_id)
         if not survey:
-            print(f"Survey {survey_id} not found.")
+            current_app.logger.warning(f"Survey {survey_id} not found.")
             return
         pending_tasks = EmailTask.query.filter_by(survey_id=survey_id, status=EmailTaskStatus.PENDING).all()
         for task in pending_tasks:

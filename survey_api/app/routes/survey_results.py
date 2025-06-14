@@ -33,10 +33,8 @@ def get_survey_results(survey_id):
     results = {SurveyAnswer.YES.value: 0, SurveyAnswer.NO.value: 0, SurveyAnswer.CANT_ANSWER.value: 0}
     responses = []
     for response in SurveyResponse.query.filter_by(survey_id=survey.id).all():
-        print(response, response.answer, flush=True)
         answer = response.answer.value
         if answer in results:
-            print(results, answer, flush=True)
             results[answer] += 1
         if survey.is_anonymous:
             responses.append({
