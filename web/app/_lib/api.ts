@@ -191,7 +191,6 @@ export async function getPublicSurvey(id: string): Promise<PublicSurvey> {
 export const SurveyStatus = {
 	Active: "ACTIVE",
 	Closed: "CLOSED",
-	Deleted: "DELETED",
 } as const;
 
 export type SurveyStatusType = (typeof SurveyStatus)[keyof typeof SurveyStatus];

@@ -1,24 +1,28 @@
 # Survey Master - Email API
 
-## Libraries used
+Flask-based API for sending emails.
 
-- [Flask](https://flask.palletsprojects.com/en/stable/)
-
-## Development
-
-### Requirements
+## Requirements
 
 - [Docker](https://www.docker.com/)
 
-### Setup
+## Local Development
 
-- When adding new dependencies add them to `requirements.in` and run `docker compose exec email_api pip-compile`
+1. Copy `.env.example` to `.env` and adjust as needed.
+2. Build and run with Docker Compose from the project root:
 
-### Server
+   ```sh
+   docker compose up --build email_api
+   ```
 
-- Start the services using `docker compose -f ..\compose.yaml up`
+3. The API will be available at `http://localhost:5000`.
 
-### Adding dependencies
+## Adding Dependencies
 
-- Add dependencies to `requirements.in`
-- Compile `requirements.txt` with `pip-compile`
+- Add to `requirements.in`
+- Run:  
+  `docker compose exec email_api pip-compile`
+
+## Production
+
+- Deploy using Docker or to Heroku (see `DEPLOY.md`).

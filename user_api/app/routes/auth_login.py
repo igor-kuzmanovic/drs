@@ -1,7 +1,7 @@
-from app.auth.jwt import generate_jwt
-from app.core.db import db
-from app.core.models import User
-from app.core.pydantic import PydanticBaseModel
+from .jwt import generate_jwt
+from ..core.db import db
+from ..core.models import User
+from ..core.pydantic import PydanticBaseModel
 from flask import Blueprint, jsonify, request
 from pydantic import ValidationError, EmailStr, SecretStr, Field
 from werkzeug.security import check_password_hash

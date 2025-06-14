@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List
 
+from ..core.utils import close_expired_survey
 from flask import Blueprint, jsonify, request
 from pydantic import UUID4, EmailStr, TypeAdapter
 
@@ -39,7 +40,7 @@ def get_surveys():
         query = query.filter(Survey.name.ilike(f"%{name}%"))
 
     total = query.count()
-    surveys = (
+    surveys: List[Survey] = (
         query.order_by(Survey.created_at.desc())
         .offset((page - 1) * page_size)
         .limit(page_size)
@@ -48,6 +49,9 @@ def get_surveys():
 
     result = []
     for survey in surveys:
+        # Check and close if expired
+        close_expired_survey(survey)
+
         recipient_emails = [r.email for r in survey.recipients_list]
 
         # Aggregate results for this survey

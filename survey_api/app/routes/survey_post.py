@@ -1,7 +1,4 @@
 from datetime import datetime
-import multiprocessing
-import threading
-
 from flask import Blueprint, request, jsonify
 from pydantic import ValidationError, UUID4, EmailStr, Field, conlist
 
@@ -9,7 +6,8 @@ from ..auth.jwt import validate_token, get_user_id_from_token
 from ..core.db import db
 from ..core.models import Survey, SurveyStatus, Recipient, EmailTask
 from ..core.pydantic import PydanticBaseModel
-from ..email_worker import send_survey_emails
+from ..core.utils import run_concurrent_email_task
+from ..core.email import send_survey_emails
 
 survey_post_blueprint = Blueprint("survey_post_routes", __name__)
 
@@ -33,8 +31,6 @@ class PostSurveyResponse(PydanticBaseModel):
     createdAt: datetime
     updatedAt: datetime
 
-
-CONCURRENCY_MODE = "process"  # "process", "thread", or None
 
 @validate_token
 @survey_post_blueprint.route("/surveys", methods=["POST"])
@@ -78,14 +74,7 @@ def post():
     recipient_emails = [r.email for r in survey.recipients_list]
 
     # Start background job to send emails for this survey
-    if CONCURRENCY_MODE == "process":
-        p = multiprocessing.Process(target=send_survey_emails, args=(survey.id,))
-        p.start()
-    elif CONCURRENCY_MODE == "thread":
-        t = threading.Thread(target=send_survey_emails, args=(survey.id,))
-        t.start()
-    else:
-        send_survey_emails(survey.id)
+    run_concurrent_email_task(send_survey_emails, survey.id)
 
     response = PostSurveyResponse(
         id=survey.id,

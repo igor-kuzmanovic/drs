@@ -1,34 +1,37 @@
 # Survey Master - User API
 
-## Libraries used
+Flask-based API for user management.
 
-- [Flask](https://flask.palletsprojects.com/en/stable/)
-- [Flask CORS](https://flask-cors.readthedocs.io/)
-- [Flask Migrate](https://flask-migrate.readthedocs.io/)
-- [Flask SQLAlchemy](https://flask-sqlalchemy.readthedocs.io/)
-- [PyJWT](https://pyjwt.readthedocs.io/)
-
-## Development
-
-### Requirements
+## Requirements
 
 - [Docker](https://www.docker.com/)
 
-### Setup
+## Local Development
 
-- When adding new dependencies add them to `requirements.in` and run `docker compose exec user_api pip-compile`
+1. Copy `.env.example` to `.env` and adjust as needed.
+2. Build and run with Docker Compose from the project root:
 
-### Server
+   ```sh
+   docker compose up --build user_api
+   ```
 
-- Start the services using `docker compose -f ..\compose.yaml up`
+3. The API will be available at `http://localhost:5000`.
 
-### Database
+## Database Migrations
 
-- Initialize the database `docker compose exec user_api flask --app app.app db init`
-- Migrate the database `docker compose exec user_api flask --app app.app db upgrade`
-- When the database schema changes, generate a new migration `docker compose exec user_api flask --app app.app db migrate -m "Message."`
+- Initialize:  
+  `docker compose exec user_api flask --app app.app db init`
+- Migrate:  
+  `docker compose exec user_api flask --app app.app db migrate -m "Message"`
+- Upgrade:  
+  `docker compose exec user_api flask --app app.app db upgrade`
 
-### Adding dependencies
+## Adding Dependencies
 
-- Add dependencies to `requirements.in`
-- Compile `requirements.txt` with `pip-compile`
+- Add to `requirements.in`
+- Run:  
+  `docker compose exec user_api pip-compile`
+
+## Production
+
+- Deploy using Docker or to Heroku (see `DEPLOY.md`).

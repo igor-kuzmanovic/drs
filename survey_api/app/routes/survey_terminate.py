@@ -1,3 +1,5 @@
+from ..core.utils import run_concurrent_email_task
+from ..core.email import send_survey_ended_email
 from flask import Blueprint, jsonify
 from pydantic import UUID4
 
@@ -23,6 +25,9 @@ def terminate_survey(survey_id: UUID4):
 
     survey.status = SurveyStatus.CLOSED.value
     db.session.commit()
+
+    run_concurrent_email_task(send_survey_ended_email, survey)
+
     return jsonify({"message": "Survey terminated"}), 200
 
 

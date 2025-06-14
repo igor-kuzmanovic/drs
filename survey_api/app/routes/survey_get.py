@@ -7,6 +7,7 @@ from pydantic import UUID4, EmailStr, TypeAdapter
 from ..auth.jwt import validate_token, get_user_id_from_token
 from ..core.models import Survey, SurveyAnswer, SurveyResponse
 from ..core.pydantic import PydanticBaseModel
+from ..core.utils import close_expired_survey
 
 survey_get_blueprint = Blueprint("survey_get_routes", __name__)
 
@@ -44,6 +45,9 @@ def get_survey(survey_id):
     if not survey:
         return jsonify({"error": "Survey not found"}), 404
 
+    # Check and close if expired
+    close_expired_survey(survey)
+
     recipient_emails = [r.email for r in survey.recipients_list]
 
     # Aggregate results
@@ -74,9 +78,12 @@ def get_survey(survey_id):
 
 @survey_get_blueprint.route("/surveys/<uuid:survey_id>/public", methods=["GET"])
 def get_survey_public(survey_id):
-    survey = Survey.query.filter_by(id=survey_id).first()
+    survey: Optional[Survey] = Survey.query.filter_by(id=survey_id).first()
     if not survey:
         return jsonify({"error": "Survey not found"}), 404
+
+    # Check and close if expired
+    close_expired_survey(survey)
 
     response_data = GetSurveyPublicResponse(
         id=survey.id,

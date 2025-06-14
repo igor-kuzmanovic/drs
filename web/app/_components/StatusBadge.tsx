@@ -8,8 +8,6 @@ export function StatusBadge({ status }: { status: SurveyStatusType }) {
 				return "bg-green-100 text-green-800 border-green-300";
 			case SurveyStatus.Closed:
 				return "bg-gray-100 text-gray-700 border-gray-300";
-			case SurveyStatus.Deleted:
-				return "bg-red-100 text-red-800 border-red-300";
 			default:
 				return "bg-gray-100 text-gray-700 border-gray-300";
 		}

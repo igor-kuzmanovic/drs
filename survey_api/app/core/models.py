@@ -12,7 +12,6 @@ from .db import db
 class SurveyStatus(enum.Enum):
     ACTIVE = "ACTIVE"
     CLOSED = "CLOSED"
-    DELETED = "DELETED"
 
 
 class SurveyAnswer(enum.Enum):

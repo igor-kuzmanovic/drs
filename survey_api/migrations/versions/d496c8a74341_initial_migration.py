@@ -26,7 +26,7 @@ def upgrade():
     sa.Column('is_anonymous', sa.Boolean(), nullable=False),
     sa.Column('owner_id', sa.UUID(), nullable=False),
     sa.Column('recipients', sa.Text(), nullable=False),
-    sa.Column('status', sa.Enum('ACTIVE', 'CLOSED', 'DELETED', name='surveystatus'), nullable=False),
+    sa.Column('status', sa.Enum('ACTIVE', 'CLOSED', name='surveystatus'), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.PrimaryKeyConstraint('id'),

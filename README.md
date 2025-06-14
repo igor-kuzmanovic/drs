@@ -1,27 +1,38 @@
 # Survey Master
 
-## Development
+Monorepo for the Survey Master system, including:
 
-### Requirements
+- User API (`user_api`)
+- Survey API (`survey_api`)
+- Email API (`email_api`)
+- Web frontend (`web`)
 
-- [Docker](https://www.docker.com/)
-- [Python](https://www.python.org/)
-- [Node.js](https://nodejs.org/en)
-
-### Setup
-
-- Copy `.env.local.example` to `.env` and change if needed
-
-## Production
-
-### Requirements
+## Requirements
 
 - [Docker](https://www.docker.com/)
+- [Node.js](https://nodejs.org/en) (for local frontend development)
+- [Python](https://www.python.org/) (for local API development)
 
-### Setup
+## Local Development
 
-- Copy `.env.docker.example` to `.env` and change if needed
+Each service is containerized. You can run all services together:
 
-### Running everything
+```sh
+docker compose up --build
+```
 
-- Run `docker compose up`
+- Environment variables are managed via `.env` files. Copy `.env.example` or `.env.docker.example` as needed.
+
+## Production Deployment
+
+- Each service can be deployed individually to Heroku or another container platform.
+
+## Adding Dependencies
+
+- For Python APIs: Add to `requirements.in` and run `pip-compile` (inside the container).
+- For the frontend: Use `npm install <package>` in the `web` directory.
+
+## Useful Commands
+
+- Build and start all services: `docker compose up --build`
+- Stop all services: `docker compose down`

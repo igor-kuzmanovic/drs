@@ -1,23 +1,33 @@
-# Survey Master - Web
+# Survey Master - Web Frontend
 
-## Libraries used
+Next.js frontend for Survey Master.
 
-- [Next.js](https://nextjs.org/)
-
-## Development
-
-### Requirements
+## Requirements
 
 - [Node.js](https://nodejs.org/en)
 
-### Setup
+## Local Development
 
-- Install dependencies `npm install`
+1. Copy `.env.local.example` to `.env.local` and adjust as needed.
+2. Install dependencies:
 
-### Server
+   ```sh
+   npm install
+   ```
 
-- Use the WebStorm `Dev` script
+3. Start the development server:
 
-or
+   ```sh
+   npm run dev
+   ```
 
-- Run `npm run dev`
+   The app will be available at `http://localhost:3000`.
+
+## Production
+
+- Build and start:
+
+  ```sh
+  npm run build
+  npm start
+  ```
