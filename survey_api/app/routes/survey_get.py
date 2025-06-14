@@ -40,17 +40,11 @@ def get_survey(survey_id):
     if not user_id:
         return jsonify({"error": "Invalid token"}), 401
 
-    survey = Survey.query.filter_by(id=survey_id, owner_id=user_id).first()
+    survey: Optional[Survey] = Survey.query.filter_by(id=survey_id, owner_id=user_id).first()
     if not survey:
         return jsonify({"error": "Survey not found"}), 404
 
-    # Parse recipients
-    recipients = survey.recipients.split(",") if survey.recipients else []
-    email_adapter = TypeAdapter(List[EmailStr])
-    try:
-        recipient_emails = email_adapter.validate_python(recipients)
-    except Exception:
-        recipient_emails = []
+    recipient_emails = [r.email for r in survey.recipients_list]
 
     # Aggregate results
     results = {SurveyAnswer.YES.value: 0, SurveyAnswer.NO.value: 0, SurveyAnswer.CANT_ANSWER.value: 0}

@@ -47,13 +47,8 @@ def get_surveys():
     )
 
     result = []
-    email_adapter = TypeAdapter(List[EmailStr])
     for survey in surveys:
-        recipients = survey.recipients.split(",") if survey.recipients else []
-        try:
-            recipient_emails = email_adapter.validate_python(recipients)
-        except Exception:
-            recipient_emails = []
+        recipient_emails = [r.email for r in survey.recipients_list]
 
         # Aggregate results for this survey
         results = {
@@ -61,10 +56,13 @@ def get_surveys():
             SurveyAnswer.NO.value: 0,
             SurveyAnswer.CANT_ANSWER.value: 0,
         }
+        respondent_emails = []
         for response in SurveyResponse.query.filter_by(survey_id=survey.id).all():
             answer = response.answer.value
             if answer in results:
                 results[answer] += 1
+            if not survey.is_anonymous:
+                respondent_emails.append(response.recipient_email)
 
         survey_response = GetSurveyResponse(
             id=survey.id,
@@ -83,6 +81,8 @@ def get_surveys():
         )
         survey_dict = survey_response.model_dump()
         survey_dict["results"] = results
+        if not survey.is_anonymous:
+            survey_dict["respondentEmails"] = respondent_emails
         result.append(survey_dict)
 
     return jsonify(

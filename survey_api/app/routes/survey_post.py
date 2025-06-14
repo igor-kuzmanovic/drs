@@ -53,11 +53,9 @@ def post():
         end_date=data.endDate,
         is_anonymous=data.isAnonymous,
         owner_id=user_id,
-        recipients=",".join(data.recipients),  # Store emails as comma-separated string
         status=SurveyStatus.ACTIVE.value,
     )
 
-    # Add the survey to the session and commit
     db.session.add(survey)
     db.session.commit()
 
@@ -72,25 +70,20 @@ def post():
 
     db.session.commit()
 
-    # Create a response object
-    try:
-        # Convert strings to EmailStr explicitly
-        email_adapter = TypeAdapter(List[EmailStr])
-        recipient_emails = email_adapter.validate_python(survey.recipients.split(","))
+    # Prepare recipients for response
+    recipient_emails = [r.email for r in survey.recipients_list]
 
-        response = PostSurveyResponse(
-            id=survey.id,
-            name=survey.name,
-            question=survey.question,
-            endDate=survey.end_date,
-            isAnonymous=survey.is_anonymous,
-            recipients=recipient_emails,
-            status=survey.status.value,
-            createdAt=survey.created_at,
-            updatedAt=survey.updated_at,
-        ).model_dump()
-    except ValidationError:
-        return jsonify({"error": "Internal server error"}), 500
+    response = PostSurveyResponse(
+        id=survey.id,
+        name=survey.name,
+        question=survey.question,
+        endDate=survey.end_date,
+        isAnonymous=survey.is_anonymous,
+        recipients=recipient_emails,
+        status=survey.status.value,
+        createdAt=survey.created_at,
+        updatedAt=survey.updated_at,
+    ).model_dump()
 
     return jsonify(response), 201
 

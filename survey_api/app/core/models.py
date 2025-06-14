@@ -33,7 +33,6 @@ class Survey(db.Model):
     end_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     is_anonymous: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     owner_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
-    recipients: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[SurveyStatus] = mapped_column(Enum(SurveyStatus), default=SurveyStatus.ACTIVE.value, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(UTC), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC),
