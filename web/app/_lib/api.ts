@@ -1,5 +1,11 @@
-async function apiFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
-	const base = process.env.NEXT_PUBLIC_API_URL;
+const USER_API_BASE = process.env.NEXT_PUBLIC_USER_API_URL!;
+const SURVEY_API_BASE = process.env.NEXT_PUBLIC_SURVEY_API_URL!;
+
+async function apiFetch<T>(
+	base: string,
+	url: string,
+	options: RequestInit = {},
+): Promise<T> {
 	const token =
 		typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
@@ -22,7 +28,6 @@ async function apiFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
 		} else {
 			errorData = { error: res.statusText };
 		}
-		console.log(errorData);
 		throw {
 			status: res.status,
 			data: errorData,
@@ -54,11 +59,14 @@ export type UserProfileUpdate = Partial<
 > & { password?: string };
 
 export async function getUser(): Promise<User> {
-	return apiFetch<User>("/user", { method: "GET" });
+	return apiFetch<User>(USER_API_BASE, "/api/user", { method: "GET" });
 }
 
 export async function updateUser(data: UserProfileUpdate): Promise<User> {
-	return apiFetch<User>("/user", { method: "PUT", body: JSON.stringify(data) });
+	return apiFetch<User>(USER_API_BASE, "/api/user", {
+		method: "PUT",
+		body: JSON.stringify(data),
+	});
 }
 
 export type SignupRequest = {
@@ -75,7 +83,7 @@ export type SignupRequest = {
 export type SignupResponse = { token: string };
 
 export async function signupUser(data: SignupRequest): Promise<SignupResponse> {
-	return apiFetch<SignupResponse>("/users", {
+	return apiFetch<SignupResponse>(USER_API_BASE, "/api/users", {
 		method: "POST",
 		body: JSON.stringify(data),
 	});
@@ -85,7 +93,7 @@ export type LoginRequest = { email: string; password: string };
 export type LoginResponse = { token: string };
 
 export async function loginUser(data: LoginRequest): Promise<LoginResponse> {
-	return apiFetch<LoginResponse>("/auth/login", {
+	return apiFetch<LoginResponse>(USER_API_BASE, "/api/auth/login", {
 		method: "POST",
 		body: JSON.stringify(data),
 	});
@@ -130,28 +138,34 @@ export async function getSurveys({
 		total: number;
 		page: number;
 		pageSize: number;
-	}>(`/surveys?${params.toString()}`, { method: "GET" });
+	}>(SURVEY_API_BASE, `/api/surveys?${params.toString()}`, { method: "GET" });
 }
 
 export async function createSurvey(
 	data: CreateSurveyRequest,
 ): Promise<CreateSurveyResponse> {
-	return apiFetch<CreateSurveyResponse>("/surveys", {
+	return apiFetch<CreateSurveyResponse>(SURVEY_API_BASE, "/api/surveys", {
 		method: "POST",
 		body: JSON.stringify(data),
 	});
 }
 
 export async function terminateSurvey(id: string): Promise<void> {
-	await apiFetch<void>(`/surveys/${id}/terminate`, { method: "POST" });
+	await apiFetch<void>(SURVEY_API_BASE, `/api/surveys/${id}/terminate`, {
+		method: "POST",
+	});
 }
 
 export async function deleteSurvey(id: string): Promise<void> {
-	await apiFetch<void>(`/surveys/${id}`, { method: "DELETE" });
+	await apiFetch<void>(SURVEY_API_BASE, `/api/surveys/${id}`, {
+		method: "DELETE",
+	});
 }
 
 export async function getSurvey(id: string): Promise<Survey> {
-	return apiFetch<Survey>(`/surveys/${id}`, { method: "GET" });
+	return apiFetch<Survey>(SURVEY_API_BASE, `/api/surveys/${id}`, {
+		method: "GET",
+	});
 }
 
 export type SurveyResultResponse = {
@@ -168,9 +182,13 @@ export type SurveyResultResponse = {
 export async function getSurveyResults(
 	id: string,
 ): Promise<SurveyResultResponse> {
-	return apiFetch<SurveyResultResponse>(`/surveys/${id}/results`, {
-		method: "GET",
-	});
+	return apiFetch<SurveyResultResponse>(
+		SURVEY_API_BASE,
+		`/api/surveys/${id}/results`,
+		{
+			method: "GET",
+		},
+	);
 }
 
 export type PublicSurvey = {
@@ -185,7 +203,9 @@ export type PublicSurvey = {
 };
 
 export async function getPublicSurvey(id: string): Promise<PublicSurvey> {
-	return apiFetch<PublicSurvey>(`/surveys/${id}/public`, { method: "GET" });
+	return apiFetch<PublicSurvey>(SURVEY_API_BASE, `/api/surveys/${id}/public`, {
+		method: "GET",
+	});
 }
 
 export const SurveyStatus = {
@@ -212,8 +232,12 @@ export async function respondSurvey(
 	surveyId: string,
 	data: SurveyRespondRequest,
 ): Promise<SurveyRespondResponse> {
-	return apiFetch<SurveyRespondResponse>(`/surveys/${surveyId}/respond`, {
-		method: "POST",
-		body: JSON.stringify(data),
-	});
+	return apiFetch<SurveyRespondResponse>(
+		SURVEY_API_BASE,
+		`/api/surveys/${surveyId}/respond`,
+		{
+			method: "POST",
+			body: JSON.stringify(data),
+		},
+	);
 }
