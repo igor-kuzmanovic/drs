@@ -13,15 +13,14 @@ app.config.from_prefixed_env()
 # Configure logger to log to stdout
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.INFO)  # Or DEBUG, etc.
-formatter = logging.Formatter(
-    '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
-)
+formatter = logging.Formatter("[%(asctime)s] %(levelname)s in %(module)s: %(message)s")
 handler.setFormatter(formatter)
 
 # Clear default handlers and use the new one
 app.logger.handlers = []
 app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
+
 
 def authenticate(req: Request):
     auth_header = req.headers.get("Authorization")
@@ -33,9 +32,11 @@ def authenticate(req: Request):
 
     return token == app.config.get("API_KEY")
 
+
 @app.route("/")
 def index():
     return "OK", 200
+
 
 @app.route("/api/send", methods=["POST"])
 def send_email():
@@ -57,13 +58,16 @@ def send_email():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 @app.route("/health/live", methods=["GET"])
 def health_live():
     return jsonify({"status": "alive"}), 200
 
+
 @app.route("/health/ready", methods=["GET"])
 def health_ready():
     return jsonify({"status": "ready"}), 200
+
 
 if __name__ == "__main__":
     app.run()

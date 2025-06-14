@@ -23,7 +23,9 @@ class User(db.Model):
     city: Mapped[str] = mapped_column(String, nullable=False)
     country: Mapped[str] = mapped_column(String, nullable=False)
     phone: Mapped[str] = mapped_column(String, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(UTC), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now(UTC), nullable=False
+    )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC), nullable=False
     )

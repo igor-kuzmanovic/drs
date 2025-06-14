@@ -6,6 +6,7 @@ from urllib.parse import urlencode
 from .db import db
 from .models import EmailTask, EmailTaskStatus, Recipient, Survey
 
+
 def send_email(recipient_email, subject, body):
     response = requests.post(
         f"{current_app.config.get('EMAIL_API_URL')}/api/send",
@@ -15,19 +16,20 @@ def send_email(recipient_email, subject, body):
             "subject": subject,
             "body": body,
         },
-        headers={"Authorization": f"Bearer {current_app.config.get('EMAIL_API_KEY')}"}
+        headers={"Authorization": f"Bearer {current_app.config.get('EMAIL_API_KEY')}"},
     )
     response.raise_for_status()
 
+
 def generate_answer_link(survey_id, response_token, answer):
     base_url = current_app.config.get("WEB_ORIGIN")
-    params = urlencode({
-        "token": response_token,
-        "answer": answer
-    })
+    params = urlencode({"token": response_token, "answer": answer})
     return f"{base_url}/respond/{survey_id}?{params}"
 
-SURVEY_INVITE_EMAIL_SUBJECT = "You're invited to participate in the survey: {survey_name}"
+
+SURVEY_INVITE_EMAIL_SUBJECT = (
+    "You're invited to participate in the survey: {survey_name}"
+)
 SURVEY_INVITE_EMAIL_TEMPLATE = """
 <div style="font-family: 'Inter', sans-serif; background: #f8fafc; padding: 32px 0;">
   <div style="max-width: 480px; margin: auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #0001; padding: 32px;">
@@ -53,22 +55,30 @@ SURVEY_INVITE_EMAIL_TEMPLATE = """
 </div>
 """
 
+
 def send_survey_emails(survey_id):
     from datetime import datetime
+
     with current_app.app_context():
         survey = Survey.query.get(survey_id)
         if not survey:
             current_app.logger.warning(f"Survey {survey_id} not found.")
             return
-        pending_tasks = EmailTask.query.filter_by(survey_id=survey_id, status=EmailTaskStatus.PENDING).all()
+        pending_tasks = EmailTask.query.filter_by(
+            survey_id=survey_id, status=EmailTaskStatus.PENDING
+        ).all()
         for task in pending_tasks:
-            recipient = Recipient.query.filter_by(survey_id=survey_id, email=task.recipient_email).first()
+            recipient = Recipient.query.filter_by(
+                survey_id=survey_id, email=task.recipient_email
+            ).first()
             if not recipient:
                 continue
             subject = SURVEY_INVITE_EMAIL_SUBJECT.format(survey_name=survey.name)
             yes_link = generate_answer_link(survey_id, recipient.response_token, "YES")
             no_link = generate_answer_link(survey_id, recipient.response_token, "NO")
-            cant_link = generate_answer_link(survey_id, recipient.response_token, "CANT_ANSWER")
+            cant_link = generate_answer_link(
+                survey_id, recipient.response_token, "CANT_ANSWER"
+            )
             body = SURVEY_INVITE_EMAIL_TEMPLATE.format(
                 survey_name=survey.name,
                 survey_question=survey.question,
@@ -81,6 +91,7 @@ def send_survey_emails(survey_id):
             task.status = EmailTaskStatus.SENT
             task.sent_at = datetime.now(timezone.utc)
             db.session.commit()
+
 
 SURVEY_ENDED_EMAIL_SUBJECT = "Survey '{survey_name}' has ended"
 SURVEY_ENDED_EMAIL_TEMPLATE = """
@@ -104,8 +115,10 @@ SURVEY_ENDED_EMAIL_TEMPLATE = """
 </div>
 """
 
+
 def send_survey_ended_email(survey):
     from datetime import datetime
+
     recipients = Recipient.query.filter_by(survey_id=survey.id).all()
     subject = SURVEY_ENDED_EMAIL_SUBJECT.format(survey_name=survey.name)
     body = SURVEY_ENDED_EMAIL_TEMPLATE.format(

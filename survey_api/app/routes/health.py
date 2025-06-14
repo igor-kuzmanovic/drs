@@ -5,9 +5,11 @@ from ..core.db import db
 
 health_blueprint = Blueprint("health_routes", __name__)
 
+
 @health_blueprint.route("/health/live", methods=["GET"])
 def health_live():
     return jsonify({"status": "alive"}), 200
+
 
 @health_blueprint.route("/health/ready", methods=["GET"])
 def health_ready():

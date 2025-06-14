@@ -33,13 +33,24 @@ class Survey(db.Model):
     end_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     is_anonymous: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     owner_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
-    status: Mapped[SurveyStatus] = mapped_column(Enum(SurveyStatus), default=SurveyStatus.ACTIVE.value, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(UTC), nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC),
-                                                 nullable=False)
-    responses = relationship("SurveyResponse", back_populates="survey", cascade="all, delete-orphan")
-    recipients_list = relationship("Recipient", back_populates="survey", cascade="all, delete-orphan")
-    email_tasks = relationship("EmailTask", back_populates="survey", cascade="all, delete-orphan")
+    status: Mapped[SurveyStatus] = mapped_column(
+        Enum(SurveyStatus), default=SurveyStatus.ACTIVE.value, nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now(UTC), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC), nullable=False
+    )
+    responses = relationship(
+        "SurveyResponse", back_populates="survey", cascade="all, delete-orphan"
+    )
+    recipients_list = relationship(
+        "Recipient", back_populates="survey", cascade="all, delete-orphan"
+    )
+    email_tasks = relationship(
+        "EmailTask", back_populates="survey", cascade="all, delete-orphan"
+    )
 
 
 class SurveyResponse(db.Model):
@@ -50,10 +61,14 @@ class SurveyResponse(db.Model):
         unique=True,
         nullable=False,
     )
-    survey_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("survey.id"), nullable=False)
+    survey_id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("survey.id"), nullable=False
+    )
     recipient_email: Mapped[str] = mapped_column(String(255), nullable=False)
     answer: Mapped[SurveyAnswer] = mapped_column(Enum(SurveyAnswer), nullable=False)
-    answered_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(UTC), nullable=False)
+    answered_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now(UTC), nullable=False
+    )
     survey = relationship("Survey", back_populates="responses")
 
 
@@ -65,9 +80,16 @@ class Recipient(db.Model):
         unique=True,
         nullable=False,
     )
-    survey_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("survey.id"), nullable=False)
+    survey_id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("survey.id"), nullable=False
+    )
     email: Mapped[str] = mapped_column(String(255), nullable=False)
-    response_token: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, default=lambda: secrets.token_urlsafe(32))
+    response_token: Mapped[str] = mapped_column(
+        String(64),
+        unique=True,
+        nullable=False,
+        default=lambda: secrets.token_urlsafe(32),
+    )
     survey = relationship("Survey", back_populates="recipients_list")
 
 
@@ -85,10 +107,13 @@ class EmailTask(db.Model):
         unique=True,
         nullable=False,
     )
-    survey_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("survey.id"), nullable=False)
+    survey_id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("survey.id"), nullable=False
+    )
     recipient_email: Mapped[str] = mapped_column(String(255), nullable=False)
-    status: Mapped[EmailTaskStatus] = mapped_column(Enum(EmailTaskStatus), default=EmailTaskStatus.PENDING,
-                                                    nullable=False)
+    status: Mapped[EmailTaskStatus] = mapped_column(
+        Enum(EmailTaskStatus), default=EmailTaskStatus.PENDING, nullable=False
+    )
     sent_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     survey = relationship("Survey", back_populates="email_tasks")
 

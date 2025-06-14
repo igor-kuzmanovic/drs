@@ -29,7 +29,9 @@ def respond(survey_id):
         return jsonify({"error": "Survey is closed"}), 400
 
     if data.token:
-        recipient = Recipient.query.filter_by(survey_id=survey_id, response_token=data.token).first()
+        recipient = Recipient.query.filter_by(
+            survey_id=survey_id, response_token=data.token
+        ).first()
         if not recipient:
             return jsonify({"error": "Invalid or expired token"}), 400
         recipient_email = recipient.email

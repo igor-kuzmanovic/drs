@@ -7,6 +7,7 @@ from .email import send_survey_ended_email
 
 CONCURRENCY_MODE = "process"  # "process", "thread", or None
 
+
 def run_concurrent_email_task(email_func, *args):
     if CONCURRENCY_MODE == "process":
         p = multiprocessing.Process(target=email_func, args=args)
@@ -16,6 +17,7 @@ def run_concurrent_email_task(email_func, *args):
         t.start()
     else:
         email_func(*args)
+
 
 def close_expired_survey(survey: Survey) -> bool:
     now = datetime.now(timezone.utc)

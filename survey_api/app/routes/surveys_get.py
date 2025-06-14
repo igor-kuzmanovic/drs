@@ -89,14 +89,17 @@ def get_surveys():
             survey_dict["respondentEmails"] = respondent_emails
         result.append(survey_dict)
 
-    return jsonify(
-        {
-            "items": result,
-            "total": total,
-            "page": page,
-            "pageSize": page_size,
-        }
-    ), 200
+    return (
+        jsonify(
+            {
+                "items": result,
+                "total": total,
+                "page": page,
+                "pageSize": page_size,
+            }
+        ),
+        200,
+    )
 
 
 __all__ = ["surveys_get_blueprint"]

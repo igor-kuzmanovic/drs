@@ -33,7 +33,9 @@ def validate_token(func: Callable) -> Callable:
         if not decoded_token.is_valid:
             return jsonify({"error": decoded_token.error}), 401
 
-        current_app.logger.info(f"Validated the token for user {decoded_token.token['sub']}")
+        current_app.logger.info(
+            f"Validated the token for user {decoded_token.token['sub']}"
+        )
 
         return func(*args, **kwargs)
 
@@ -44,11 +46,15 @@ def get_user_id_from_token() -> Optional[str]:
     # Try to decode the token
     decoded = _decode_jwt(_get_token_from_request())
     if decoded.is_valid:
-        current_app.logger.info(f"Got the user id from the token: {decoded.token.get('sub')}")
+        current_app.logger.info(
+            f"Got the user id from the token: {decoded.token.get('sub')}"
+        )
 
         return decoded.token.get("sub")
 
-    current_app.logger.info(f"Failed to get the user id from the token: {decoded.error}")
+    current_app.logger.info(
+        f"Failed to get the user id from the token: {decoded.error}"
+    )
 
     return None
 
@@ -77,7 +83,12 @@ class DecodedJWT:
 def _decode_jwt(encoded_token: str) -> DecodedJWT:
     try:
         # Decode the token, allowing for a 10-second leeway
-        token = jwt.decode(encoded_token, current_app.config.get("SECRET_KEY"), algorithms=["HS256"], leeway=10)
+        token = jwt.decode(
+            encoded_token,
+            current_app.config.get("SECRET_KEY"),
+            algorithms=["HS256"],
+            leeway=10,
+        )
 
         return DecodedJWT(is_valid=True, token=token)
     except jwt.InvalidTokenError as e:

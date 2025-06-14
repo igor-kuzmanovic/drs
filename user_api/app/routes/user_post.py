@@ -24,10 +24,15 @@ class PostUserRequest(PydanticBaseModel):
     country: str = Field(min_length=3)
     phone: str = Field(min_length=3)
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def check_passwords_match(self) -> Self:
-        if self.password is not None and self.passwordConfirm is not None and self.password.get_secret_value() != self.passwordConfirm.get_secret_value():
-            raise ValueError('passwords do not match')
+        if (
+            self.password is not None
+            and self.passwordConfirm is not None
+            and self.password.get_secret_value()
+            != self.passwordConfirm.get_secret_value()
+        ):
+            raise ValueError("passwords do not match")
         return self
 
 

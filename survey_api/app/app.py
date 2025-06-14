@@ -22,9 +22,7 @@ app.config.from_prefixed_env()
 # Configure logger to log to stdout
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.INFO)  # Or DEBUG, etc.
-formatter = logging.Formatter(
-    '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
-)
+formatter = logging.Formatter("[%(asctime)s] %(levelname)s in %(module)s: %(message)s")
 handler.setFormatter(formatter)
 
 # Clear default handlers and use the new one

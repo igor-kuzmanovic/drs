@@ -11,6 +11,7 @@ from ..core.utils import close_expired_survey
 
 survey_get_blueprint = Blueprint("survey_get_routes", __name__)
 
+
 class GetSurveyDetailResponse(PydanticBaseModel):
     id: UUID4
     name: str
@@ -24,6 +25,7 @@ class GetSurveyDetailResponse(PydanticBaseModel):
     results: dict
     respondentEmails: Optional[List[EmailStr]]  # Only if not anonymous
 
+
 class GetSurveyPublicResponse(PydanticBaseModel):
     id: UUID4
     name: str
@@ -34,6 +36,7 @@ class GetSurveyPublicResponse(PydanticBaseModel):
     createdAt: datetime
     updatedAt: datetime
 
+
 @validate_token
 @survey_get_blueprint.route("/surveys/<uuid:survey_id>", methods=["GET"])
 def get_survey(survey_id):
@@ -41,7 +44,9 @@ def get_survey(survey_id):
     if not user_id:
         return jsonify({"error": "Invalid token"}), 401
 
-    survey: Optional[Survey] = Survey.query.filter_by(id=survey_id, owner_id=user_id).first()
+    survey: Optional[Survey] = Survey.query.filter_by(
+        id=survey_id, owner_id=user_id
+    ).first()
     if not survey:
         return jsonify({"error": "Survey not found"}), 404
 
@@ -51,7 +56,11 @@ def get_survey(survey_id):
     recipient_emails = [r.email for r in survey.recipients_list]
 
     # Aggregate results
-    results = {SurveyAnswer.YES.value: 0, SurveyAnswer.NO.value: 0, SurveyAnswer.CANT_ANSWER.value: 0}
+    results = {
+        SurveyAnswer.YES.value: 0,
+        SurveyAnswer.NO.value: 0,
+        SurveyAnswer.CANT_ANSWER.value: 0,
+    }
     respondent_emails = []
     for response in SurveyResponse.query.filter_by(survey_id=survey.id).all():
         answer = response.answer.value
@@ -76,6 +85,7 @@ def get_survey(survey_id):
 
     return jsonify(response_data.model_dump()), 200
 
+
 @survey_get_blueprint.route("/surveys/<uuid:survey_id>/public", methods=["GET"])
 def get_survey_public(survey_id):
     survey: Optional[Survey] = Survey.query.filter_by(id=survey_id).first()
@@ -91,11 +101,16 @@ def get_survey_public(survey_id):
         question=survey.question,
         endDate=survey.end_date,
         isAnonymous=survey.is_anonymous,
-        status=survey.status.value if hasattr(survey.status, "value") else str(survey.status),
+        status=(
+            survey.status.value
+            if hasattr(survey.status, "value")
+            else str(survey.status)
+        ),
         createdAt=survey.created_at,
         updatedAt=survey.updated_at,
     )
 
     return jsonify(response_data.model_dump()), 200
+
 
 __all__ = ["survey_get_blueprint"]
