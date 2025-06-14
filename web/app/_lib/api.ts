@@ -204,10 +204,9 @@ export const SurveyAnswer = {
 
 export type SurveyAnswerType = (typeof SurveyAnswer)[keyof typeof SurveyAnswer];
 
-export type SurveyRespondRequest = {
-	email: string;
-	answer: SurveyAnswerType;
-};
+export type SurveyRespondRequest =
+	| { email: string; answer: SurveyAnswerType }
+	| { token: string; answer: SurveyAnswerType };
 export type SurveyRespondResponse = { message: string };
 
 export async function respondSurvey(

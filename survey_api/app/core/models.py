@@ -1,5 +1,6 @@
 import enum
 import uuid
+import secrets
 from datetime import datetime, UTC
 
 from sqlalchemy import String, DateTime, UUID, Boolean, Text, Enum, ForeignKey
@@ -67,6 +68,7 @@ class Recipient(db.Model):
     )
     survey_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("survey.id"), nullable=False)
     email: Mapped[str] = mapped_column(String(255), nullable=False)
+    response_token: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, default=lambda: secrets.token_urlsafe(32))
     survey = relationship("Survey", back_populates="recipients_list")
 
 

@@ -15,6 +15,7 @@ export default function Checkbox({
 	wrapperClassName = "",
 	labelClassName = "",
 	className = "",
+	disabled,
 	...rest
 }: CheckboxProps) {
 	return (
@@ -23,6 +24,7 @@ export default function Checkbox({
 				<input
 					id={id}
 					type="checkbox"
+					disabled={disabled}
 					className={clsx(
 						"size-4 border transition focus:ring-2 focus:ring-blue-500",
 						"checked:bg-blue-500 checked:border-blue-500",
@@ -35,6 +37,7 @@ export default function Checkbox({
 					htmlFor={id}
 					className={clsx(
 						"text-sm font-medium cursor-pointer select-none",
+						disabled ? "text-gray-400" : "text-gray-900",
 						labelClassName,
 					)}
 				>

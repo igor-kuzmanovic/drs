@@ -27,7 +27,10 @@ export default function EmailChips({
 
 	const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (
-			(e.key === "Enter" || e.key === "," || e.key === "Tab") &&
+			(e.key === "Enter" ||
+				e.key === " " ||
+				e.key === "," ||
+				e.key === "Tab") &&
 			input.trim()
 		) {
 			e.preventDefault();

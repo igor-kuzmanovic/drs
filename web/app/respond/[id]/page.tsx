@@ -1,17 +1,26 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getPublicSurvey, PublicSurvey, SurveyStatus } from "../../_lib/api";
 import Loading from "../../_components/Loading";
 import { SurveyRespondForm } from "./SurveyRespondForm";
+import { useUser } from "../../_context/UserContext";
 
 export default function RespondSurveyPage() {
 	const params = useParams<{ id: string }>();
+	const searchParams = useSearchParams();
 	const id = params.id;
 
 	const [survey, setSurvey] = useState<PublicSurvey | null>(null);
 	const [loading, setLoading] = useState(true);
+
+	const { user } = useUser();
+
+	// Prefill from query params
+	const prefillEmail = user?.email || "";
+	const prefillAnswer = searchParams.get("answer") || "";
+	const token = searchParams.get("token") || "";
 
 	useEffect(() => {
 		getPublicSurvey(id)
@@ -40,7 +49,13 @@ export default function RespondSurveyPage() {
 				<p className="text-lg text-gray-700 mb-6 text-center">
 					{survey.question}
 				</p>
-				<SurveyRespondForm surveyId={id} isAnonymous={survey.isAnonymous} />
+				<SurveyRespondForm
+					surveyId={id}
+					isAnonymous={survey.isAnonymous}
+					prefillEmail={prefillEmail}
+					prefillAnswer={prefillAnswer}
+					token={token}
+				/>
 			</div>
 		</div>
 	);

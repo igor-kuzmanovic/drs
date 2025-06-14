@@ -1,9 +1,8 @@
-import requests
 from app.auth.jwt import generate_jwt
 from app.core.db import db
 from app.core.models import User
 from app.core.pydantic import PydanticBaseModel
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request
 from pydantic import ValidationError, EmailStr, SecretStr, Field
 from werkzeug.security import check_password_hash
 
@@ -42,24 +41,6 @@ def login():
         response = LoginResponse(token=token).model_dump()
     except ValidationError:
         return jsonify({"error": "Internal server error"}), 500
-
-    # TODO Remove this, just testing the email API
-    try:
-        email_api_response = requests.post(
-            f"{current_app.config.get("EMAIL_API_URL")}/api/send",
-            json={
-                "from": "api@surveymaster.com",
-                "to": "email.api@surveymaster.com",
-                "subject": "New login",
-                "body": f"The user <b>{user.first_name} {user.last_name}</b> logged in.",
-            },
-            headers={
-                "Authorization": f"Bearer {current_app.config.get("EMAIL_API_KEY")}"
-            },
-        )
-        email_api_response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        return jsonify({"error": str(e)}), 500
 
     return jsonify(response), 200
 

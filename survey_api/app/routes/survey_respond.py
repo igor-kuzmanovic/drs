@@ -3,14 +3,15 @@ from pydantic import EmailStr, ValidationError, Field
 from datetime import datetime, timezone
 
 from ..core.db import db
-from ..core.models import Survey, SurveyResponse, SurveyStatus
+from ..core.models import Survey, SurveyResponse, SurveyStatus, Recipient
 from ..core.pydantic import PydanticBaseModel
 
 survey_respond_blueprint = Blueprint("survey_respond_routes", __name__)
 
 
 class SurveyRespondRequest(PydanticBaseModel):
-    email: EmailStr
+    token: str | None = None
+    email: EmailStr | None = None
     answer: str = Field(pattern="^(YES|NO|CANT_ANSWER)$")
 
 
@@ -24,19 +25,30 @@ def respond(survey_id):
     survey = Survey.query.filter_by(id=survey_id).first()
     if not survey:
         return jsonify({"error": "Survey not found"}), 404
-    if survey.status != SurveyStatus.ACTIVE.value:
+    if survey.status != SurveyStatus.ACTIVE:
         return jsonify({"error": "Survey is closed"}), 400
+
+    if data.token:
+        recipient = Recipient.query.filter_by(survey_id=survey_id, response_token=data.token).first()
+        if not recipient:
+            return jsonify({"error": "Invalid or expired token"}), 400
+        recipient_email = recipient.email
+    elif data.email:
+        # Allow any email, not just listed recipients
+        recipient_email = data.email
+    else:
+        return jsonify({"error": "Token or email required"}), 400
 
     # Check if already responded
     existing = SurveyResponse.query.filter_by(
-        survey_id=survey_id, recipient_email=data.email
+        survey_id=survey_id, recipient_email=recipient_email
     ).first()
     if existing:
         return jsonify({"error": "Already responded"}), 400
 
     response = SurveyResponse(
         survey_id=survey_id,
-        recipient_email=data.email,
+        recipient_email=recipient_email,
         answer=data.answer,
         answered_at=datetime.now(timezone.utc),
     )
