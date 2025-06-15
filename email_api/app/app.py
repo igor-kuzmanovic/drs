@@ -1,10 +1,14 @@
 import smtplib
 import sys
 import logging
+import random
 
 from email.mime.text import MIMEText
 
-from flask import Flask, Request, jsonify, request
+from flask import Flask, Request, jsonify, request, current_app
+
+# Probability that an email will be sent successfully (1.0 = always succeed, 0.0 = always fail)
+EMAIL_SEND_SUCCESS_PROBABILITY: float = 1.0
 
 # Create a Flask app
 app = Flask(__name__)
@@ -46,6 +50,9 @@ def send_email():
     data = request.get_json()
 
     try:
+        if current_app.debug and random.random() > EMAIL_SEND_SUCCESS_PROBABILITY:
+            raise Exception("Simulated email sending failure")
+
         message = MIMEText(data["body"], "html")
         message["Subject"] = data["subject"]
         message["From"] = data["from"]

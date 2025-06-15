@@ -2,17 +2,30 @@ from datetime import datetime
 from typing import List, Optional
 
 from flask import Blueprint, jsonify
-from pydantic import UUID4, EmailStr, TypeAdapter
+from pydantic import UUID4, EmailStr
 
 from ..auth.jwt import validate_token, get_user_id_from_token
-from ..core.models import Survey, SurveyAnswer, SurveyResponse
+from ..core.models import Survey, EmailTask, SurveyAnswer, SurveyResponse
 from ..core.pydantic import PydanticBaseModel
 from ..core.utils import close_expired_survey
 
 survey_get_blueprint = Blueprint("survey_get_routes", __name__)
 
 
-class GetSurveyDetailResponse(PydanticBaseModel):
+class EmailTaskInfo(PydanticBaseModel):
+    recipient: EmailStr
+    status: str
+    sentAt: Optional[datetime]
+
+
+class EmailStatusSummary(PydanticBaseModel):
+    sent: int
+    pending: int
+    failed: int
+    total: int
+
+
+class GetSurveyResponse(PydanticBaseModel):
     id: UUID4
     name: str
     question: str
@@ -23,7 +36,8 @@ class GetSurveyDetailResponse(PydanticBaseModel):
     createdAt: datetime
     updatedAt: datetime
     results: dict
-    respondentEmails: Optional[List[EmailStr]]  # Only if not anonymous
+    respondentEmails: Optional[List[EmailStr]]
+    emailStatus: List[EmailTaskInfo]
 
 
 class GetSurveyPublicResponse(PydanticBaseModel):
@@ -37,21 +51,23 @@ class GetSurveyPublicResponse(PydanticBaseModel):
     updatedAt: datetime
 
 
-@validate_token
 @survey_get_blueprint.route("/surveys/<uuid:survey_id>", methods=["GET"])
-def get_survey(survey_id):
+@validate_token
+def get_survey(survey_id: UUID4):
     user_id = get_user_id_from_token()
-    if not user_id:
-        return jsonify({"error": "Invalid token"}), 401
-
-    survey: Optional[Survey] = Survey.query.filter_by(
-        id=survey_id, owner_id=user_id
-    ).first()
+    survey = Survey.query.filter_by(id=survey_id, owner_id=user_id).first()
     if not survey:
         return jsonify({"error": "Survey not found"}), 404
 
-    # Check and close if expired
-    close_expired_survey(survey)
+    email_tasks = EmailTask.query.filter_by(survey_id=survey_id).all()
+    email_status = [
+        EmailTaskInfo(
+            recipient=email_task.recipient_email,
+            status=email_task.status,
+            sentAt=email_task.sent_at,
+        )
+        for email_task in email_tasks
+    ]
 
     recipient_emails = [r.email for r in survey.recipients_list]
 
@@ -69,7 +85,7 @@ def get_survey(survey_id):
         if not survey.is_anonymous:
             respondent_emails.append(response.recipient_email)
 
-    response_data = GetSurveyDetailResponse(
+    response_data = GetSurveyResponse(
         id=survey.id,
         name=survey.name,
         question=survey.question,
@@ -81,6 +97,7 @@ def get_survey(survey_id):
         updatedAt=survey.updated_at,
         results=results,
         respondentEmails=respondent_emails if not survey.is_anonymous else None,
+        emailStatus=email_status,
     )
 
     return jsonify(response_data.model_dump()), 200
@@ -101,11 +118,7 @@ def get_survey_public(survey_id):
         question=survey.question,
         endDate=survey.end_date,
         isAnonymous=survey.is_anonymous,
-        status=(
-            survey.status.value
-            if hasattr(survey.status, "value")
-            else str(survey.status)
-        ),
+        status=survey.status,
         createdAt=survey.created_at,
         updatedAt=survey.updated_at,
     )

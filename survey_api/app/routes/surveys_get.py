@@ -1,18 +1,31 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from ..core.utils import close_expired_survey
 from flask import Blueprint, jsonify, request
-from pydantic import UUID4, EmailStr, TypeAdapter
+from pydantic import EmailStr, UUID4
 
 from ..auth.jwt import validate_token, get_user_id_from_token
-from ..core.models import Survey, SurveyAnswer, SurveyResponse
+from ..core.models import Survey, SurveyAnswer, SurveyResponse, EmailTask, EmailTaskStatus
 from ..core.pydantic import PydanticBaseModel
 
 surveys_get_blueprint = Blueprint("surveys_get_routes", __name__)
 
 
-class GetSurveyResponse(PydanticBaseModel):
+class EmailTaskInfo(PydanticBaseModel):
+    recipient: EmailStr
+    status: str
+    sentAt: Optional[datetime]
+
+
+class EmailStatusSummary(PydanticBaseModel):
+    sent: int
+    pending: int
+    failed: int
+    total: int
+
+
+class GetSurveysResponse(PydanticBaseModel):
     id: UUID4
     name: str
     question: str
@@ -22,6 +35,9 @@ class GetSurveyResponse(PydanticBaseModel):
     status: str
     createdAt: datetime
     updatedAt: datetime
+    results: dict
+    respondentEmails: Optional[List[EmailStr]]
+    emailStatusSummary: EmailStatusSummary
 
 
 @validate_token
@@ -68,26 +84,31 @@ def get_surveys():
             if not survey.is_anonymous:
                 respondent_emails.append(response.recipient_email)
 
-        survey_response = GetSurveyResponse(
+        email_tasks = EmailTask.query.filter_by(survey_id=survey.id).all()
+        sent = sum(1 for email_task in email_tasks if email_task.status == EmailTaskStatus.SENT)
+        pending = sum(1 for email_task in email_tasks if email_task.status == EmailTaskStatus.PENDING)
+        failed = sum(1 for email_task in email_tasks if email_task.status == EmailTaskStatus.FAILED)
+
+        survey_response = GetSurveysResponse(
             id=survey.id,
             name=survey.name,
             question=survey.question,
             endDate=survey.end_date,
             isAnonymous=survey.is_anonymous,
             recipients=recipient_emails,
-            status=(
-                survey.status.value
-                if hasattr(survey.status, "value")
-                else str(survey.status)
-            ),
+            status=survey.status,
             createdAt=survey.created_at,
             updatedAt=survey.updated_at,
+            results=results,
+            respondentEmails=respondent_emails if not survey.is_anonymous else None,
+            emailStatusSummary=EmailStatusSummary(
+                sent=sent,
+                pending=pending,
+                failed=failed,
+                total=len(email_tasks),
+            ),
         )
-        survey_dict = survey_response.model_dump()
-        survey_dict["results"] = results
-        if not survey.is_anonymous:
-            survey_dict["respondentEmails"] = respondent_emails
-        result.append(survey_dict)
+        result.append(survey_response.model_dump())
 
     return (
         jsonify(

@@ -11,8 +11,9 @@ from .routes.survey_delete import survey_delete_blueprint
 from .routes.survey_get import survey_get_blueprint
 from .routes.survey_post import survey_post_blueprint
 from .routes.survey_respond import survey_respond_blueprint
-from .routes.survey_terminate import survey_terminate_blueprint
 from .routes.survey_results import survey_results_blueprint
+from .routes.survey_retry_failed_emails import survey_retry_failed_emails_blueprint
+from .routes.survey_terminate import survey_terminate_blueprint
 from .routes.surveys_get import surveys_get_blueprint
 
 # Create a Flask app
@@ -39,8 +40,9 @@ app.register_blueprint(survey_delete_blueprint, url_prefix="/api")
 app.register_blueprint(survey_get_blueprint, url_prefix="/api")
 app.register_blueprint(survey_post_blueprint, url_prefix="/api")
 app.register_blueprint(survey_respond_blueprint, url_prefix="/api")
-app.register_blueprint(survey_terminate_blueprint, url_prefix="/api")
 app.register_blueprint(survey_results_blueprint, url_prefix="/api")
+app.register_blueprint(survey_retry_failed_emails_blueprint, url_prefix="/api")
+app.register_blueprint(survey_terminate_blueprint, url_prefix="/api")
 app.register_blueprint(surveys_get_blueprint, url_prefix="/api")
 
 # Set up error handling

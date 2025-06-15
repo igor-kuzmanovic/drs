@@ -20,14 +20,12 @@ def run_concurrent_email_task(email_func, *args):
 
 
 def close_expired_survey(survey: Survey) -> bool:
-    now = datetime.now(timezone.utc)
-
-    if survey.status == SurveyStatus.ACTIVE and survey.end_date <= now:
+    if survey.status == SurveyStatus.ACTIVE and survey.end_date <= datetime.now(timezone.utc):
         survey.status = SurveyStatus.CLOSED
 
         db.session.commit()
 
-        run_concurrent_email_task(send_survey_ended_email, survey)
+        run_concurrent_email_task(send_survey_ended_email, survey.id)
 
         return True
 

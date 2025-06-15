@@ -1,7 +1,7 @@
 import enum
 import uuid
 import secrets
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 
 from sqlalchemy import String, DateTime, UUID, Boolean, Text, Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -30,17 +30,17 @@ class Survey(db.Model):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     question: Mapped[str] = mapped_column(Text, nullable=False)
-    end_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    end_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     is_anonymous: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     owner_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     status: Mapped[SurveyStatus] = mapped_column(
         Enum(SurveyStatus), default=SurveyStatus.ACTIVE.value, nullable=False
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now(UTC), nullable=False
+        DateTime(timezone=True), default=datetime.now(timezone.utc), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC), nullable=False
+        DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc), nullable=False
     )
     responses = relationship(
         "SurveyResponse", back_populates="survey", cascade="all, delete-orphan"
@@ -67,7 +67,7 @@ class SurveyResponse(db.Model):
     recipient_email: Mapped[str] = mapped_column(String(255), nullable=False)
     answer: Mapped[SurveyAnswer] = mapped_column(Enum(SurveyAnswer), nullable=False)
     answered_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now(UTC), nullable=False
+        DateTime(timezone=True), default=datetime.now(timezone.utc), nullable=False
     )
     survey = relationship("Survey", back_populates="responses")
 
@@ -114,7 +114,7 @@ class EmailTask(db.Model):
     status: Mapped[EmailTaskStatus] = mapped_column(
         Enum(EmailTaskStatus), default=EmailTaskStatus.PENDING, nullable=False
     )
-    sent_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     survey = relationship("Survey", back_populates="email_tasks")
 
 

@@ -9,11 +9,12 @@ import { StatusBadge } from "../_components/StatusBadge";
 type SurveysTableProps = {
 	surveys: Survey[];
 	loading?: boolean;
-	error?: string | null;
-	terminating: string | null;
-	deleting: string | null;
+	terminatingId?: string | null;
+	deletingId?: string | null;
+	retryingId?: string | null;
 	onTerminate: (id: string) => void;
 	onDelete: (id: string) => void;
+	onRetryFailedEmails: (surveyId: string) => void;
 	searchValue: string;
 	onSearch: (value: string) => void;
 	page: number;
@@ -25,11 +26,12 @@ type SurveysTableProps = {
 export default function SurveysTable({
 	surveys,
 	loading,
-	error,
-	terminating,
-	deleting,
+	terminatingId,
+	deletingId,
+	retryingId,
 	onTerminate,
 	onDelete,
+	onRetryFailedEmails,
 	searchValue,
 	onSearch,
 	page,
@@ -90,18 +92,16 @@ export default function SurveysTable({
 			</form>
 			{loading ? (
 				<Loading />
-			) : error ? (
-				<div className="text-red-600">{error}</div>
 			) : (
 				<div className="overflow-x-auto max-w-[calc(100vw-2rem)]">
 					<table className="w-full min-w-[600px] border bg-white">
 						<thead>
 							<tr className="bg-gray-100">
 								<th className="p-2 text-left text-nowrap">Name</th>
-								<th className="p-2 text-left text-nowrap">Question</th>
 								<th className="p-2 text-left text-nowrap">Status</th>
 								<th className="p-2 text-left text-nowrap">End date</th>
 								<th className="p-2 text-left text-nowrap">Results</th>
+								<th className="p-2 text-left text-nowrap">Email Status</th>
 								<th></th>
 							</tr>
 						</thead>
@@ -109,7 +109,6 @@ export default function SurveysTable({
 							{surveys.map((survey) => (
 								<tr key={survey.id} className="border-t">
 									<td className="p-2">{survey.name}</td>
-									<td className="p-2">{survey.question}</td>
 									<td className="p-2">
 										<StatusBadge status={survey.status} />
 									</td>
@@ -148,8 +147,27 @@ export default function SurveysTable({
 											<span className="text-gray-400">No data</span>
 										)}
 									</td>
+									<td className="p-2 text-sm">
+										{survey.emailStatusSummary ? (
+											<div>
+												<span className="text-green-700">
+													{survey.emailStatusSummary.sent} sent
+												</span>
+												{" | "}
+												<span className="text-yellow-700">
+													{survey.emailStatusSummary.pending} pending
+												</span>
+												{" | "}
+												<span className="text-red-700">
+													{survey.emailStatusSummary.failed} failed
+												</span>
+											</div>
+										) : (
+											<span className="text-gray-400">N/A</span>
+										)}
+									</td>
 									<td className="p-2">
-										<div className="flex gap-2">
+										<div className="flex flex-wrap items-center gap-2">
 											<Action
 												href={`/surveys/${survey.id}`}
 												variant="primary"
@@ -158,32 +176,53 @@ export default function SurveysTable({
 												View
 											</Action>
 											{survey.status !== SurveyStatus.Closed ? (
-												<Action
-													variant="secondary"
-													size="sm"
-													loading={terminating === survey.id}
-													disabled={
-														terminating === survey.id || deleting === survey.id
-													}
-													onClick={() => onTerminate(survey.id)}
-												>
-													{terminating === survey.id
-														? "Terminating..."
-														: "Terminate"}
-												</Action>
+												<>
+													<Action
+														variant="secondary"
+														size="sm"
+														loading={terminatingId === survey.id}
+														disabled={
+															terminatingId === survey.id ||
+															deletingId === survey.id
+														}
+														onClick={() => onTerminate(survey.id)}
+													>
+														{terminatingId === survey.id
+															? "Terminating..."
+															: "Terminate"}
+													</Action>
+													{survey.emailStatusSummary &&
+														survey.emailStatusSummary.failed > 0 && (
+															<Action
+																variant="danger"
+																size="sm"
+																loading={retryingId === survey.id}
+																disabled={
+																	retryingId !== null &&
+																	retryingId !== survey.id
+																}
+																onClick={() => onRetryFailedEmails(survey.id)}
+															>
+																{retryingId === survey.id
+																	? "Retrying Failed Emails..."
+																	: "Retry Failed Emails"}
+															</Action>
+														)}
+												</>
 											) : (
 												<Action
 													variant="danger"
 													size="sm"
-													loading={deleting === survey.id}
+													loading={deletingId === survey.id}
 													disabled={
+														deletingId !== null ||
 														survey.status !== SurveyStatus.Closed ||
-														deleting === survey.id ||
-														terminating === survey.id
+														deletingId === survey.id ||
+														terminatingId === survey.id
 													}
 													onClick={() => onDelete(survey.id)}
 												>
-													{deleting === survey.id ? "Deleting..." : "Delete"}
+													{deletingId === survey.id ? "Deleting..." : "Delete"}
 												</Action>
 											)}
 										</div>

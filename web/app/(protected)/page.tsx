@@ -4,7 +4,13 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useUser } from "../_context/UserContext";
 import { printError } from "../_lib/error";
-import { getSurveys, Survey, terminateSurvey, deleteSurvey } from "../_lib/api";
+import {
+	getSurveys,
+	Survey,
+	terminateSurvey,
+	deleteSurvey,
+	retrySurveyFailedEmails,
+} from "../_lib/api";
 import Alert from "../_components/Alert";
 import SurveysTable from "./SurveysTable";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -20,9 +26,9 @@ export default function Page() {
 	const [surveysLoading, setSurveysLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
-	const [terminating, setTerminating] = useState<string | null>(null);
-	const [deleting, setDeleting] = useState<string | null>(null);
-	const [total, setTotal] = useState(0);
+	const [terminatingId, setTerminatingId] = useState<string | null>(null);
+	const [deletingId, setDeletingId] = useState<string | null>(null);
+	const [retryingId, setRetryingId] = useState<string | null>(null);
 
 	const name = searchParams.get("name") || "";
 	const page = parseInt(searchParams.get("page") || "1", 10);
@@ -40,6 +46,8 @@ export default function Page() {
 			setSurveysLoading(false);
 		}
 	}, [name, page]);
+
+	const [total, setTotal] = useState(0);
 
 	useEffect(() => {
 		if (user) fetchSurveys();
@@ -64,16 +72,17 @@ export default function Page() {
 
 	const handleTerminate = async (id: string) => {
 		if (!confirm("Are you sure you want to terminate this survey?")) return;
-		setTerminating(id);
+		setTerminatingId(id);
 		setSuccess(null);
+		setError(null);
 		try {
 			await terminateSurvey(id);
 			await fetchSurveys();
 			setSuccess("Survey terminated successfully.");
 		} catch (err) {
-			alert(printError(err));
+			setError(printError(err));
 		} finally {
-			setTerminating(null);
+			setTerminatingId(null);
 		}
 	};
 
@@ -84,16 +93,38 @@ export default function Page() {
 			)
 		)
 			return;
-		setDeleting(id);
+		setDeletingId(id);
 		setSuccess(null);
+		setError(null);
 		try {
 			await deleteSurvey(id);
 			await fetchSurveys();
 			setSuccess("Survey deleted successfully.");
 		} catch (err) {
-			alert(printError(err));
+			setError(printError(err));
 		} finally {
-			setDeleting(null);
+			setDeletingId(null);
+		}
+	};
+
+	const handleRetryFailedEmails = async (id: string) => {
+		if (
+			!confirm(
+				"Are you sure you want to retry sending failed emails for this survey? This may take some time.",
+			)
+		)
+			return;
+		setRetryingId(id);
+		setSuccess(null);
+		setError(null);
+		try {
+			await retrySurveyFailedEmails(id);
+			await fetchSurveys();
+			setSuccess("Retry started for failed emails.");
+		} catch (err) {
+			setError(printError(err));
+		} finally {
+			setRetryingId(null);
 		}
 	};
 
@@ -104,14 +135,16 @@ export default function Page() {
 					Your <span className="text-blue-600">Surveys</span>
 				</h1>
 				{success && <Alert type="success">{success}</Alert>}
+				{error && <Alert type="error">{error}</Alert>}
 				<SurveysTable
 					surveys={surveys}
 					loading={surveysLoading}
-					error={error}
-					terminating={terminating}
-					deleting={deleting}
+					terminatingId={terminatingId}
+					deletingId={deletingId}
+					retryingId={retryingId}
 					onTerminate={handleTerminate}
 					onDelete={handleDelete}
+					onRetryFailedEmails={handleRetryFailedEmails}
 					searchValue={name}
 					onSearch={handleSearch}
 					page={page}

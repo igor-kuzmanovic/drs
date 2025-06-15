@@ -1,4 +1,4 @@
-from .jwt import generate_jwt
+from ..auth.jwt import generate_jwt
 from ..core.db import db
 from ..core.models import User
 from ..core.pydantic import PydanticBaseModel

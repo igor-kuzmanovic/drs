@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 
 from sqlalchemy import String, DateTime, UUID
 from sqlalchemy.orm import Mapped, mapped_column
@@ -24,10 +24,10 @@ class User(db.Model):
     country: Mapped[str] = mapped_column(String, nullable=False)
     phone: Mapped[str] = mapped_column(String, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now(UTC), nullable=False
+        DateTime(timezone=True), default=datetime.now(timezone.utc), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC), nullable=False
+        DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc), nullable=False
     )
 
 

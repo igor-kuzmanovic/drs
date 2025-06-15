@@ -1,13 +1,25 @@
 from datetime import datetime, timezone
+from typing import List, Optional
 import requests
 from flask import current_app
 from urllib.parse import urlencode
+import time
 
 from .db import db
-from .models import EmailTask, EmailTaskStatus, Recipient, Survey
+from .models import EmailTask, EmailTaskStatus, Recipient, Survey, SurveyAnswer, SurveyStatus
+
+
+# Artificial delay (in seconds) for sending each email, for local development/testing
+EMAIL_SEND_ARTIFICIAL_DELAY: float = 0.0
 
 
 def send_email(recipient_email, subject, body):
+    if current_app.debug and EMAIL_SEND_ARTIFICIAL_DELAY > 0:
+        current_app.logger.info(
+            f"Artificial delay of {EMAIL_SEND_ARTIFICIAL_DELAY}s before sending email to {recipient_email}"
+        )
+        time.sleep(EMAIL_SEND_ARTIFICIAL_DELAY)
+    current_app.logger.info(f"Sending email to {recipient_email} with subject '{subject}'")
     response = requests.post(
         f"{current_app.config.get('EMAIL_API_URL')}/api/send",
         json={
@@ -18,6 +30,7 @@ def send_email(recipient_email, subject, body):
         },
         headers={"Authorization": f"Bearer {current_app.config.get('EMAIL_API_KEY')}"},
     )
+    current_app.logger.info(f"Email send response status: {response.status_code} for {recipient_email}")
     response.raise_for_status()
 
 
@@ -52,7 +65,6 @@ SURVEY_INVITE_EMAIL_TEMPLATE = """
   <div style="text-align: center; color: #64748b; font-size: 0.9rem; margin-top: 24px;">
     &copy; {year} Survey Master
   </div>
-</div>
 """
 
 
@@ -60,24 +72,38 @@ def send_survey_emails(survey_id):
     from datetime import datetime
 
     with current_app.app_context():
-        survey = Survey.query.get(survey_id)
+        survey: Optional[Survey] = Survey.query.get(survey_id)
         if not survey:
             current_app.logger.warning(f"Survey {survey_id} not found.")
             return
-        pending_tasks = EmailTask.query.filter_by(
-            survey_id=survey_id, status=EmailTaskStatus.PENDING
+        if survey.status == SurveyStatus.CLOSED.value:
+            current_app.logger.info(f"Survey {survey_id} is CLOSED. No emails will be sent.")
+            return
+        failed_tasks = EmailTask.query.filter(
+            EmailTask.survey_id == survey_id,
+            EmailTask.status == EmailTaskStatus.FAILED
         ).all()
-        for task in pending_tasks:
-            recipient = Recipient.query.filter_by(
+        for task in failed_tasks:
+            task.status = EmailTaskStatus.PENDING
+        if failed_tasks:
+            db.session.commit()
+        tasks_to_send: List[EmailTask] = EmailTask.query.filter(
+            EmailTask.survey_id == survey_id,
+            EmailTask.status.in_([EmailTaskStatus.PENDING])
+        ).all()
+        current_app.logger.info(f"Found {len(tasks_to_send)} email tasks (pending) for survey {survey_id}")
+        for task in tasks_to_send:
+            recipient: Optional[Recipient] = Recipient.query.filter_by(
                 survey_id=survey_id, email=task.recipient_email
             ).first()
             if not recipient:
+                current_app.logger.info(f"Recipient {task.recipient_email} not found for survey {survey_id}")
                 continue
             subject = SURVEY_INVITE_EMAIL_SUBJECT.format(survey_name=survey.name)
-            yes_link = generate_answer_link(survey_id, recipient.response_token, "YES")
-            no_link = generate_answer_link(survey_id, recipient.response_token, "NO")
+            yes_link = generate_answer_link(survey_id, recipient.response_token, SurveyAnswer.YES.value)
+            no_link = generate_answer_link(survey_id, recipient.response_token, SurveyAnswer.NO.value)
             cant_link = generate_answer_link(
-                survey_id, recipient.response_token, "CANT_ANSWER"
+                survey_id, recipient.response_token, SurveyAnswer.CANT_ANSWER.value
             )
             body = SURVEY_INVITE_EMAIL_TEMPLATE.format(
                 survey_name=survey.name,
@@ -87,10 +113,17 @@ def send_survey_emails(survey_id):
                 cant_link=cant_link,
                 year=datetime.now().year,
             )
-            send_email(task.recipient_email, subject, body)
-            task.status = EmailTaskStatus.SENT
-            task.sent_at = datetime.now(timezone.utc)
-            db.session.commit()
+            current_app.logger.info(f"Preparing to send invitation email to {task.recipient_email} for survey {survey_id}")
+            try:
+                send_email(task.recipient_email, subject, body)
+                task.status = EmailTaskStatus.SENT
+                task.sent_at = datetime.now(timezone.utc)
+                current_app.logger.info(f"Marked email as SENT for {task.recipient_email} in survey {survey_id}")
+            except Exception as e:
+                task.status = EmailTaskStatus.FAILED
+                current_app.logger.warning(f"Failed to send email to {task.recipient_email} for survey {survey_id}: {e}")
+            finally:
+                db.session.commit()
 
 
 SURVEY_ENDED_EMAIL_SUBJECT = "Survey '{survey_name}' has ended"
@@ -116,14 +149,28 @@ SURVEY_ENDED_EMAIL_TEMPLATE = """
 """
 
 
-def send_survey_ended_email(survey):
+def send_survey_ended_email(survey_id: str):
     from datetime import datetime
 
-    recipients = Recipient.query.filter_by(survey_id=survey.id).all()
-    subject = SURVEY_ENDED_EMAIL_SUBJECT.format(survey_name=survey.name)
-    body = SURVEY_ENDED_EMAIL_TEMPLATE.format(
-        survey_name=survey.name,
-        year=datetime.now().year,
-    )
-    for recipient in recipients:
-        send_email(recipient.email, subject, body)
+    with current_app.app_context():
+        survey = Survey.query.get(survey_id)
+        if not survey:
+            current_app.logger.warning(f"Survey {survey_id} not found.")
+            return
+        if not survey.status == SurveyStatus.CLOSED.value:
+            current_app.logger.info(f"Survey {survey_id} is not CLOSED. No ended emails will be sent.")
+            return
+        recipients: List[Recipient] = Recipient.query.filter_by(survey_id=survey.id).all()
+        current_app.logger.info(f"Sending survey ended emails to {len(recipients)} recipients for survey {survey.id}")
+        subject = SURVEY_ENDED_EMAIL_SUBJECT.format(survey_name=survey.name)
+        body = SURVEY_ENDED_EMAIL_TEMPLATE.format(
+            survey_name=survey.name,
+            year=datetime.now().year,
+        )
+        for recipient in recipients:
+            current_app.logger.info(f"Sending survey ended email to {recipient.email} for survey {survey.id}")
+            try:
+                send_email(recipient.email, subject, body)
+                current_app.logger.info(f"Survey ended email sent to {recipient.email} for survey {survey.id}")
+            except Exception as e:
+                current_app.logger.warning(f"Failed to send survey ended email to {recipient.email} for survey {survey.id}: {e}")

@@ -23,10 +23,13 @@ def terminate_survey(survey_id: UUID4):
     if not survey:
         return jsonify({"error": "Survey not found"}), 404
 
+    if survey.status == SurveyStatus.CLOSED.value:
+        return jsonify({"error": "Survey is already closed"}), 400
+
     survey.status = SurveyStatus.CLOSED.value
     db.session.commit()
 
-    run_concurrent_email_task(send_survey_ended_email, survey)
+    run_concurrent_email_task(send_survey_ended_email, survey.id)
 
     return jsonify({"message": "Survey terminated"}), 200
 

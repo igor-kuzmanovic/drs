@@ -113,6 +113,8 @@ export type Survey = {
 	updatedAt: string;
 	results: Record<SurveyAnswerType, number>;
 	respondentEmails?: string[] | null;
+	emailStatus?: EmailTaskInfo[]; // for detail
+	emailStatusSummary?: EmailStatusSummary; // for list
 };
 
 export type CreateSurveyRequest = {
@@ -239,5 +241,28 @@ export async function respondSurvey(
 			method: "POST",
 			body: JSON.stringify(data),
 		},
+	);
+}
+
+export type EmailTaskStatus = "PENDING" | "SENT" | "FAILED";
+
+export type EmailTaskInfo = {
+	recipient: string;
+	status: EmailTaskStatus;
+	sentAt: string | null;
+};
+
+export type EmailStatusSummary = {
+	sent: number;
+	pending: number;
+	failed: number;
+	total: number;
+};
+
+export async function retrySurveyFailedEmails(surveyId: string): Promise<void> {
+	await apiFetch<void>(
+		SURVEY_API_BASE,
+		`/api/surveys/${surveyId}/retry-failed-emails`,
+		{ method: "POST" },
 	);
 }
