@@ -11,7 +11,7 @@ export default function SurveyDetails({ survey }: { survey: Survey }) {
 				<div className="text-lg font-semibold mb-1">Question</div>
 				<div className="text-gray-800">{survey.question}</div>
 			</div>
-			<dl className="space-y-2">
+			<dl className="grid grid-cols-2 gap-x-4 gap-y-2">
 				<div className="flex flex-row justify-between items-center">
 					<dt className="font-semibold text-gray-600">Status</dt>
 					<dd>

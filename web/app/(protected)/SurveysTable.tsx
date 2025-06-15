@@ -97,76 +97,68 @@ export default function SurveysTable({
 					<table className="w-full min-w-[600px] border bg-white">
 						<thead>
 							<tr className="bg-gray-100">
-								<th className="p-2 text-left text-nowrap">Name</th>
-								<th className="p-2 text-left text-nowrap">Status</th>
-								<th className="p-2 text-left text-nowrap">End date</th>
-								<th className="p-2 text-left text-nowrap">Results</th>
-								<th className="p-2 text-left text-nowrap">Email Status</th>
-								<th></th>
+								<th className="p-2 text-left">Name</th>
+								<th className="p-2 text-left">Status</th>
+								<th className="p-2 text-left">End</th>
+								<th className="p-2 text-center">Stats</th>
+								<th className="p-2 text-center">Actions</th>
 							</tr>
 						</thead>
 						<tbody>
 							{surveys.map((survey) => (
-								<tr key={survey.id} className="border-t">
-									<td className="p-2">{survey.name}</td>
+								<tr key={survey.id} className="border-t align-middle">
+									<td className="p-2 font-medium">{survey.name}</td>
 									<td className="p-2">
 										<StatusBadge status={survey.status} />
 									</td>
-									<td className="p-2">
-										<span className="text-xs text-gray-500 font-normal">
-											{new Date(survey.endDate).toLocaleString()}
-										</span>
+									<td className="p-2 text-xs text-gray-500">
+										{new Date(survey.endDate).toLocaleDateString()}
 									</td>
-									<td className="p-2 text-sm">
-										{survey.results ? (
-											<div>
-												<div>
-													<b>
-														{survey.isAnonymous ? "Responses" : "Respondents"}:
-													</b>{" "}
-													{Object.values(survey.results).reduce(
-														(a, b) => a + b,
-														0,
-													)}
-												</div>
-												<div>
-													<span className="text-green-700">
-														Yes: {survey.results.YES}
-													</span>
-													{" | "}
-													<span className="text-red-700">
-														No: {survey.results.NO}
-													</span>
-													{" | "}
-													<span className="text-gray-700">
-														Can&apos;t answer: {survey.results.CANT_ANSWER}
-													</span>
-												</div>
-											</div>
-										) : (
-											<span className="text-gray-400">No data</span>
-										)}
-									</td>
-									<td className="p-2 text-sm">
-										{survey.emailStatusSummary ? (
-											<div>
-												<span className="text-green-700">
-													{survey.emailStatusSummary.sent} sent
+									<td className="p-2 text-center">
+										<div className="flex flex-col gap-1 items-center">
+											<div className="flex gap-1">
+												<span
+													title="Yes"
+													className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-semibold"
+												>
+													Y: {survey.results?.YES ?? 0}
 												</span>
-												{" | "}
-												<span className="text-yellow-700">
-													{survey.emailStatusSummary.pending} pending
+												<span
+													title="No"
+													className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-semibold"
+												>
+													N: {survey.results?.NO ?? 0}
 												</span>
-												{" | "}
-												<span className="text-red-700">
-													{survey.emailStatusSummary.failed} failed
+												<span
+													title="Can't answer"
+													className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs font-semibold"
+												>
+													C: {survey.results?.CANT_ANSWER ?? 0}
 												</span>
 											</div>
-										) : (
-											<span className="text-gray-400">N/A</span>
-										)}
+											<div className="flex gap-1 text-xs">
+												<span
+													title="Sent"
+													className="bg-green-50 text-green-700 px-1 rounded"
+												>
+													S: {survey.emailStatusSummary?.sent ?? 0}
+												</span>
+												<span
+													title="Pending"
+													className="bg-yellow-50 text-yellow-700 px-1 rounded"
+												>
+													P: {survey.emailStatusSummary?.pending ?? 0}
+												</span>
+												<span
+													title="Failed"
+													className="bg-red-50 text-red-700 px-1 rounded"
+												>
+													F: {survey.emailStatusSummary?.failed ?? 0}
+												</span>
+											</div>
+										</div>
 									</td>
-									<td className="p-2">
+									<td className="p-2 text-center">
 										<div className="flex flex-wrap items-center gap-2">
 											<Action
 												href={`/surveys/${survey.id}`}
