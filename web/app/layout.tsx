@@ -20,7 +20,11 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 	const [sidebarOpen, setSidebarOpen] = useState(false);
 
 	if (loading) {
-		return <Loading />;
+		return (
+			<div className="flex items-center justify-center min-h-screen">
+				<Loading />
+			</div>
+		);
 	}
 
 	const showSidebar = !!user;

@@ -29,7 +29,12 @@ export default function RespondSurveyPage() {
 			.finally(() => setLoading(false));
 	}, [id]);
 
-	if (loading) return <Loading />;
+	if (loading)
+		return (
+			<div className="flex items-center justify-center min-h-screen">
+				<Loading />
+			</div>
+		);
 	if (!survey)
 		return <div className="text-center text-lg mt-12">Survey not found.</div>;
 	if (survey.status === SurveyStatus.Closed) {

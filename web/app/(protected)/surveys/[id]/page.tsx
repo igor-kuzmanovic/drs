@@ -60,7 +60,11 @@ export default function SurveyDetailPage() {
 	}
 
 	if (dataLoading || !survey || !results) {
-		return <Loading />;
+		return (
+			<div className="flex items-center justify-center min-h-screen">
+				<Loading />
+			</div>
+		);
 	}
 
 	const noResponses = !hasResponses;

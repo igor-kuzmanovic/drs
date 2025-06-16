@@ -19,7 +19,13 @@ export default function ProtectedLayout({
 		}
 	}, [user, loading, router]);
 
-	if (loading || !user) return <Loading />;
+	if (loading || !user) {
+		return (
+			<div className="flex items-center justify-center min-h-screen">
+				<Loading />
+			</div>
+		);
+	}
 
 	return <>{children}</>;
 }

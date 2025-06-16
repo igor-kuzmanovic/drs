@@ -17,7 +17,12 @@ export default function Page() {
 		}
 	}, [user, loading, router]);
 
-	if (loading) return <Loading />;
+	if (loading)
+		return (
+			<div className="flex items-center justify-center min-h-screen">
+				<Loading />
+			</div>
+		);
 	if (user) return null;
 
 	const handleLoginSuccess = () => {
