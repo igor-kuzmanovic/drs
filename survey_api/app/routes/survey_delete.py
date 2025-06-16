@@ -3,7 +3,7 @@ from pydantic import UUID4
 
 from ..auth.jwt import validate_token, get_user_id_from_token
 from ..core.db import db
-from ..core.models import Survey
+from ..core.survey_service import get_survey_by_id
 
 survey_delete_blueprint = Blueprint("survey_delete_routes", __name__)
 
@@ -15,9 +15,9 @@ def delete_survey(survey_id: UUID4):
     if not user_id:
         return jsonify({"error": "Invalid token"}), 401
 
-    survey = Survey.query.filter_by(id=survey_id, owner_id=user_id).first()
-    if not survey:
-        return jsonify({"error": "Survey not found"}), 404
+    survey, error_response = get_survey_by_id(survey_id, user_id)
+    if error_response:
+        return jsonify(error_response[0]), error_response[1]
 
     db.session.delete(survey)
     db.session.commit()

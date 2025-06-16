@@ -1,28 +1,15 @@
 from datetime import datetime
 from typing import List, Optional
 
-from ..core.utils import close_expired_survey
 from flask import Blueprint, jsonify, request
 from pydantic import EmailStr, UUID4
 
 from ..auth.jwt import validate_token, get_user_id_from_token
-from ..core.models import Survey, SurveyAnswer, SurveyResponse, EmailTask, EmailTaskStatus
+from ..core.models import Survey
 from ..core.pydantic import PydanticBaseModel
+from ..core.survey_service import EmailStatusSummary, get_survey_results, get_email_status_summary, check_and_update_survey_status
 
 surveys_get_blueprint = Blueprint("surveys_get_routes", __name__)
-
-
-class EmailTaskInfo(PydanticBaseModel):
-    recipient: EmailStr
-    status: str
-    sentAt: Optional[datetime]
-
-
-class EmailStatusSummary(PydanticBaseModel):
-    sent: int
-    pending: int
-    failed: int
-    total: int
 
 
 class GetSurveysResponse(PydanticBaseModel):
@@ -65,29 +52,13 @@ def get_surveys():
 
     result = []
     for survey in surveys:
-        # Check and close if expired
-        close_expired_survey(survey)
+        check_and_update_survey_status(survey)
 
         recipient_emails = [r.email for r in survey.recipients_list]
 
-        # Aggregate results for this survey
-        results = {
-            SurveyAnswer.YES.value: 0,
-            SurveyAnswer.NO.value: 0,
-            SurveyAnswer.CANT_ANSWER.value: 0,
-        }
-        respondent_emails = []
-        for response in SurveyResponse.query.filter_by(survey_id=survey.id).all():
-            answer = response.answer.value
-            if answer in results:
-                results[answer] += 1
-            if not survey.is_anonymous:
-                respondent_emails.append(response.recipient_email)
+        results, respondent_emails = get_survey_results(survey)
 
-        email_tasks = EmailTask.query.filter_by(survey_id=survey.id).all()
-        sent = sum(1 for email_task in email_tasks if email_task.status == EmailTaskStatus.SENT)
-        pending = sum(1 for email_task in email_tasks if email_task.status == EmailTaskStatus.PENDING)
-        failed = sum(1 for email_task in email_tasks if email_task.status == EmailTaskStatus.FAILED)
+        email_status_summary = get_email_status_summary(survey.id)
 
         survey_response = GetSurveysResponse(
             id=survey.id,
@@ -101,12 +72,7 @@ def get_surveys():
             updatedAt=survey.updated_at,
             results=results,
             respondentEmails=respondent_emails if not survey.is_anonymous else None,
-            emailStatusSummary=EmailStatusSummary(
-                sent=sent,
-                pending=pending,
-                failed=failed,
-                total=len(email_tasks),
-            ),
+            emailStatusSummary=email_status_summary,
         )
         result.append(survey_response.model_dump())
 

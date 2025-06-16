@@ -1,11 +1,9 @@
-from flask import Blueprint, jsonify, current_app
+from flask import Blueprint, jsonify
 from pydantic import UUID4
 
 from ..auth.jwt import validate_token, get_user_id_from_token
-from ..core.db import db
-from ..core.models import Survey, SurveyStatus
-from ..core.utils import run_concurrent_email_task
-from ..core.email import send_survey_emails
+from ..core.models import SurveyStatus
+from ..core.survey_service import get_survey_by_id, retry_failed_survey_emails
 
 survey_retry_failed_emails_blueprint = Blueprint("survey_retry_failed_emails_routes", __name__)
 
@@ -19,15 +17,16 @@ def retry_failed_emails(survey_id: UUID4):
     if not user_id:
         return jsonify({"error": "Invalid token"}), 401
 
-    survey = Survey.query.filter_by(id=survey_id, owner_id=user_id).first()
-    if not survey:
-        return jsonify({"error": "Survey not found"}), 404
+    survey, error_response = get_survey_by_id(survey_id, user_id)
+    if error_response:
+        return jsonify(error_response[0]), error_response[1]
 
     if survey.status == SurveyStatus.CLOSED.value:
         return jsonify({"error": "Survey is closed"}), 400
 
-    run_concurrent_email_task(send_survey_emails, survey_id)
+    retry_failed_survey_emails(survey_id)
 
     return jsonify({"message": "Retry started"}), 200
+
 
 __all__ = ["survey_retry_failed_emails_blueprint"]

@@ -1,10 +1,9 @@
-from ..auth.jwt import generate_jwt
-from ..core.db import db
-from ..core.models import User
-from ..core.pydantic import PydanticBaseModel
 from flask import Blueprint, jsonify, request
 from pydantic import ValidationError, EmailStr, SecretStr, Field
-from werkzeug.security import check_password_hash
+
+from ..auth.jwt import generate_jwt
+from ..core.pydantic import PydanticBaseModel
+from ..core.user_service import check_user_credentials, handle_validation_error
 
 auth_login_blueprint = Blueprint("auth_login_routes", __name__)
 
@@ -20,23 +19,20 @@ class LoginResponse(PydanticBaseModel):
 
 @auth_login_blueprint.route("/auth/login", methods=["POST"])
 def login():
-    # Validate the incoming data
     try:
         data = LoginRequest.model_validate(request.json)
     except ValidationError as e:
-        return jsonify({"error": "Validation error", "messages": e.errors()}), 400
+        error_response = handle_validation_error(e)
+        return jsonify(error_response[0]), error_response[1]
 
-    # Check if the user exists and the password is correct
-    user = db.session.query(User).filter_by(email=data.email).first()
-    if user is None or not check_password_hash(
-        user.password, data.password.get_secret_value()
-    ):
-        return jsonify({"error": "Invalid email or password"}), 401
+    user, error_response = check_user_credentials(
+        data.email, data.password.get_secret_value()
+    )
+    if error_response:
+        return jsonify(error_response[0]), error_response[1]
 
-    # Generate a JWT token
     token = generate_jwt(str(user.id))
 
-    # Create a response object
     try:
         response = LoginResponse(token=token).model_dump()
     except ValidationError:

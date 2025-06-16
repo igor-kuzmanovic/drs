@@ -1,22 +1,14 @@
 from flask import Blueprint, request, jsonify
-from pydantic import ValidationError, EmailStr, UUID4, Field
-from werkzeug.security import generate_password_hash
+from pydantic import ValidationError
 
 from ..auth.jwt import validate_token, get_user_id_from_token
 from ..core.db import db
-from ..core.models import User
-from ..core.pydantic import PydanticBaseModel
+from ..core.user_service import get_user_by_id, update_user_from_dict, UserBaseModel, handle_validation_error
 
 user_put_blueprint = Blueprint("user_put_routes", __name__)
 
 
-class PutUserRequest(PydanticBaseModel):
-    firstName: str = Field(min_length=3)
-    lastName: str = Field(min_length=3)
-    address: str = Field(min_length=3)
-    city: str = Field(min_length=3)
-    country: str = Field(min_length=3)
-    phone: str = Field(min_length=3)
+class PutUserRequest(UserBaseModel):
     password: str | None = None
 
 
@@ -27,23 +19,17 @@ def put():
     if not user_id:
         return jsonify({"error": "Invalid token"}), 401
 
-    user = db.session.get(User, user_id)
-    if user is None:
-        return jsonify({"error": "User not found"}), 404
+    user, error_response = get_user_by_id(user_id)
+    if error_response:
+        return jsonify(error_response[0]), error_response[1]
 
     try:
         data = PutUserRequest.model_validate(request.json)
     except ValidationError as e:
-        return jsonify({"error": "Validation error", "messages": e.errors()}), 400
+        error_response = handle_validation_error(e)
+        return jsonify(error_response[0]), error_response[1]
 
-    user.first_name = data.firstName
-    user.last_name = data.lastName
-    user.address = data.address
-    user.city = data.city
-    user.country = data.country
-    user.phone = data.phone
-    if data.password:
-        user.password = generate_password_hash(data.password)
+    update_user_from_dict(user, data.model_dump())
     db.session.commit()
 
     return jsonify({"message": "Profile updated"}), 200

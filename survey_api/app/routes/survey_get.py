@@ -5,24 +5,11 @@ from flask import Blueprint, jsonify
 from pydantic import UUID4, EmailStr
 
 from ..auth.jwt import validate_token, get_user_id_from_token
-from ..core.models import Survey, EmailTask, SurveyAnswer, SurveyResponse
+from ..core.models import Survey
 from ..core.pydantic import PydanticBaseModel
-from ..core.utils import close_expired_survey
+from ..core.survey_service import EmailTaskInfo, get_survey_results, get_email_tasks_info, check_and_update_survey_status
 
 survey_get_blueprint = Blueprint("survey_get_routes", __name__)
-
-
-class EmailTaskInfo(PydanticBaseModel):
-    recipient: EmailStr
-    status: str
-    sentAt: Optional[datetime]
-
-
-class EmailStatusSummary(PydanticBaseModel):
-    sent: int
-    pending: int
-    failed: int
-    total: int
 
 
 class GetSurveyResponse(PydanticBaseModel):
@@ -59,31 +46,10 @@ def get_survey(survey_id: UUID4):
     if not survey:
         return jsonify({"error": "Survey not found"}), 404
 
-    email_tasks = EmailTask.query.filter_by(survey_id=survey_id).all()
-    email_status = [
-        EmailTaskInfo(
-            recipient=email_task.recipient_email,
-            status=email_task.status,
-            sentAt=email_task.sent_at,
-        )
-        for email_task in email_tasks
-    ]
-
+    email_status = get_email_tasks_info(survey_id)
     recipient_emails = [r.email for r in survey.recipients_list]
 
-    # Aggregate results
-    results = {
-        SurveyAnswer.YES.value: 0,
-        SurveyAnswer.NO.value: 0,
-        SurveyAnswer.CANT_ANSWER.value: 0,
-    }
-    respondent_emails = []
-    for response in SurveyResponse.query.filter_by(survey_id=survey.id).all():
-        answer = response.answer.value
-        if answer in results:
-            results[answer] += 1
-        if not survey.is_anonymous:
-            respondent_emails.append(response.recipient_email)
+    results, respondent_emails = get_survey_results(survey)
 
     response_data = GetSurveyResponse(
         id=survey.id,
@@ -109,8 +75,7 @@ def get_survey_public(survey_id):
     if not survey:
         return jsonify({"error": "Survey not found"}), 404
 
-    # Check and close if expired
-    close_expired_survey(survey)
+    check_and_update_survey_status(survey)
 
     response_data = GetSurveyPublicResponse(
         id=survey.id,

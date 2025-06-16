@@ -3,8 +3,9 @@ from pydantic import EmailStr, ValidationError, Field
 from datetime import datetime, timezone
 
 from ..core.db import db
-from ..core.models import Survey, SurveyResponse, SurveyStatus, Recipient
+from ..core.models import SurveyResponse, SurveyStatus, Recipient
 from ..core.pydantic import PydanticBaseModel
+from ..core.survey_service import get_survey_by_id_public, handle_validation_error
 
 survey_respond_blueprint = Blueprint("survey_respond_routes", __name__)
 
@@ -20,11 +21,13 @@ def respond(survey_id):
     try:
         data = SurveyRespondRequest.model_validate(request.json)
     except ValidationError as e:
-        return jsonify({"error": "Validation error", "messages": e.errors()}), 400
+        error_response = handle_validation_error(e)
+        return jsonify(error_response[0]), error_response[1]
 
-    survey = Survey.query.filter_by(id=survey_id).first()
-    if not survey:
-        return jsonify({"error": "Survey not found"}), 404
+    survey, error_response = get_survey_by_id_public(survey_id)
+    if error_response:
+        return jsonify(error_response[0]), error_response[1]
+
     if survey.status != SurveyStatus.ACTIVE:
         return jsonify({"error": "Survey is closed"}), 400
 
@@ -36,12 +39,10 @@ def respond(survey_id):
             return jsonify({"error": "Invalid or expired token"}), 400
         recipient_email = recipient.email
     elif data.email:
-        # Allow any email, not just listed recipients
         recipient_email = data.email
     else:
         return jsonify({"error": "Token or email required"}), 400
 
-    # Check if already responded
     existing = SurveyResponse.query.filter_by(
         survey_id=survey_id, recipient_email=recipient_email
     ).first()

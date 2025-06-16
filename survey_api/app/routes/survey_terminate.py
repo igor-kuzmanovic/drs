@@ -1,11 +1,8 @@
-from ..core.utils import run_concurrent_email_task
-from ..core.email import send_survey_ended_email
 from flask import Blueprint, jsonify
 from pydantic import UUID4
 
 from ..auth.jwt import validate_token, get_user_id_from_token
-from ..core.db import db
-from ..core.models import Survey, SurveyStatus
+from ..core.survey_service import get_survey_by_id, terminate_survey
 
 survey_terminate_blueprint = Blueprint("survey_terminate_routes", __name__)
 
@@ -14,22 +11,19 @@ survey_terminate_blueprint = Blueprint("survey_terminate_routes", __name__)
 @survey_terminate_blueprint.route(
     "/surveys/<uuid:survey_id>/terminate", methods=["POST"]
 )
-def terminate_survey(survey_id: UUID4):
+def terminate_survey_route(survey_id: UUID4):
     user_id = get_user_id_from_token()
     if not user_id:
         return jsonify({"error": "Invalid token"}), 401
 
-    survey = Survey.query.filter_by(id=survey_id, owner_id=user_id).first()
-    if not survey:
-        return jsonify({"error": "Survey not found"}), 404
+    survey, error_response = get_survey_by_id(survey_id, user_id)
+    if error_response:
+        return jsonify(error_response[0]), error_response[1]
 
-    if survey.status == SurveyStatus.CLOSED.value:
+    if survey.status == "CLOSED":
         return jsonify({"error": "Survey is already closed"}), 400
 
-    survey.status = SurveyStatus.CLOSED.value
-    db.session.commit()
-
-    run_concurrent_email_task(send_survey_ended_email, survey.id)
+    terminate_survey(survey)
 
     return jsonify({"message": "Survey terminated"}), 200
 

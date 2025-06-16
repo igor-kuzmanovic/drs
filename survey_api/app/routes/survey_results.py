@@ -1,10 +1,11 @@
 from flask import Blueprint, jsonify
-from pydantic import UUID4, EmailStr, TypeAdapter
+from pydantic import UUID4, EmailStr
 from datetime import datetime
 
 from ..auth.jwt import validate_token, get_user_id_from_token
-from ..core.models import Survey, SurveyResponse, SurveyAnswer
+from ..core.models import Survey, SurveyAnswer
 from ..core.pydantic import PydanticBaseModel
+from ..core.survey_service import get_detailed_responses
 
 survey_results_blueprint = Blueprint("survey_results_routes", __name__)
 
@@ -38,27 +39,13 @@ def get_survey_results(survey_id):
         SurveyAnswer.NO.value: 0,
         SurveyAnswer.CANT_ANSWER.value: 0,
     }
-    responses = []
-    for response in SurveyResponse.query.filter_by(survey_id=survey.id).all():
-        answer = response.answer.value
+
+    responses = get_detailed_responses(survey)
+
+    for response_info in responses:
+        answer = response_info["answer"]
         if answer in results:
             results[answer] += 1
-        if survey.is_anonymous:
-            responses.append(
-                {
-                    "respondentEmail": None,
-                    "answer": answer,
-                    "answeredAt": response.answered_at,
-                }
-            )
-        else:
-            responses.append(
-                {
-                    "respondentEmail": response.recipient_email,
-                    "answer": answer,
-                    "answeredAt": response.answered_at,
-                }
-            )
 
     total_responses = sum(results.values())
 
