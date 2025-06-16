@@ -5,7 +5,9 @@ from ..auth.jwt import validate_token, get_user_id_from_token
 from ..core.models import SurveyStatus
 from ..core.survey_service import get_survey_by_id, retry_failed_survey_emails
 
-survey_retry_failed_emails_blueprint = Blueprint("survey_retry_failed_emails_routes", __name__)
+survey_retry_failed_emails_blueprint = Blueprint(
+    "survey_retry_failed_emails_routes", __name__
+)
 
 
 @validate_token

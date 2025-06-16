@@ -40,7 +40,10 @@ class Survey(db.Model):
         DateTime(timezone=True), default=datetime.now(timezone.utc), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc), nullable=False
+        DateTime(timezone=True),
+        default=datetime.now(timezone.utc),
+        onupdate=datetime.now(timezone.utc),
+        nullable=False,
     )
     responses = relationship(
         "SurveyResponse", back_populates="survey", cascade="all, delete-orphan"

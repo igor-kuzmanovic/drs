@@ -4,7 +4,14 @@ from typing import List, Optional, Dict, Tuple, Any, Union
 from pydantic import UUID4, EmailStr, ValidationError
 
 from .db import db
-from .models import Survey, SurveyResponse, SurveyAnswer, EmailTask, EmailTaskStatus, SurveyStatus
+from .models import (
+    Survey,
+    SurveyResponse,
+    SurveyAnswer,
+    EmailTask,
+    EmailTaskStatus,
+    SurveyStatus,
+)
 from .pydantic import PydanticBaseModel
 from .utils import close_expired_survey, run_concurrent_email_task
 from .email import send_survey_emails, send_survey_ended_email
@@ -25,9 +32,15 @@ class EmailStatusSummary(PydanticBaseModel):
 
 def get_email_status_summary(survey_id: UUID4) -> EmailStatusSummary:
     email_tasks = EmailTask.query.filter_by(survey_id=survey_id).all()
-    sent = sum(1 for email_task in email_tasks if email_task.status == EmailTaskStatus.SENT)
-    pending = sum(1 for email_task in email_tasks if email_task.status == EmailTaskStatus.PENDING)
-    failed = sum(1 for email_task in email_tasks if email_task.status == EmailTaskStatus.FAILED)
+    sent = sum(
+        1 for email_task in email_tasks if email_task.status == EmailTaskStatus.SENT
+    )
+    pending = sum(
+        1 for email_task in email_tasks if email_task.status == EmailTaskStatus.PENDING
+    )
+    failed = sum(
+        1 for email_task in email_tasks if email_task.status == EmailTaskStatus.FAILED
+    )
 
     return EmailStatusSummary(
         sent=sent,
@@ -72,17 +85,21 @@ def get_detailed_responses(survey: Survey) -> List[Dict]:
     for response in SurveyResponse.query.filter_by(survey_id=survey.id).all():
         answer = response.answer.value
         if survey.is_anonymous:
-            responses.append({
-                "respondentEmail": None,
-                "answer": answer,
-                "answeredAt": response.answered_at,
-            })
+            responses.append(
+                {
+                    "respondentEmail": None,
+                    "answer": answer,
+                    "answeredAt": response.answered_at,
+                }
+            )
         else:
-            responses.append({
-                "respondentEmail": response.recipient_email,
-                "answer": answer,
-                "answeredAt": response.answered_at,
-            })
+            responses.append(
+                {
+                    "respondentEmail": response.recipient_email,
+                    "answer": answer,
+                    "answeredAt": response.answered_at,
+                }
+            )
     return responses
 
 
@@ -90,14 +107,18 @@ def check_and_update_survey_status(survey: Survey) -> None:
     close_expired_survey(survey)
 
 
-def get_survey_by_id(survey_id: UUID4, user_id: UUID4) -> Tuple[Optional[Survey], Optional[Tuple[Dict, int]]]:
+def get_survey_by_id(
+    survey_id: UUID4, user_id: UUID4
+) -> Tuple[Optional[Survey], Optional[Tuple[Dict, int]]]:
     survey = Survey.query.filter_by(id=survey_id, owner_id=user_id).first()
     if survey is None:
         return None, ({"error": "Survey not found"}, 404)
     return survey, None
 
 
-def get_survey_by_id_public(survey_id: UUID4) -> Tuple[Optional[Survey], Optional[Tuple[Dict, int]]]:
+def get_survey_by_id_public(
+    survey_id: UUID4,
+) -> Tuple[Optional[Survey], Optional[Tuple[Dict, int]]]:
     survey = Survey.query.filter_by(id=survey_id).first()
     if survey is None:
         return None, ({"error": "Survey not found"}, 404)
@@ -118,6 +139,7 @@ def terminate_survey(survey: Survey) -> None:
 def retry_failed_survey_emails(survey_id: UUID4) -> None:
     run_concurrent_email_task(send_survey_emails, survey_id)
 
+
 __all__ = [
     "EmailTaskInfo",
     "EmailStatusSummary",
@@ -130,5 +152,5 @@ __all__ = [
     "get_survey_by_id_public",
     "handle_validation_error",
     "terminate_survey",
-    "retry_failed_survey_emails"
+    "retry_failed_survey_emails",
 ]

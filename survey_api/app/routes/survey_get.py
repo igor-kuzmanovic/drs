@@ -7,7 +7,12 @@ from pydantic import UUID4, EmailStr
 from ..auth.jwt import validate_token, get_user_id_from_token
 from ..core.models import Survey
 from ..core.pydantic import PydanticBaseModel
-from ..core.survey_service import EmailTaskInfo, get_survey_results, get_email_tasks_info, check_and_update_survey_status
+from ..core.survey_service import (
+    EmailTaskInfo,
+    get_survey_results,
+    get_email_tasks_info,
+    check_and_update_survey_status,
+)
 
 survey_get_blueprint = Blueprint("survey_get_routes", __name__)
 
