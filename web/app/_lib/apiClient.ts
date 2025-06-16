@@ -29,9 +29,7 @@ export class ApiClient {
 		// Handle 401 Unauthorized globally
 		if (response.status === 401) {
 			AuthService.removeToken();
-			if (typeof window !== "undefined") {
-				window.location.href = "/login";
-			}
+			window.location.href = "/login";
 			throw {
 				status: 401,
 				data: { error: "Authentication failed. Please log in again." },

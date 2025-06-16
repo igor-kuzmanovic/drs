@@ -69,14 +69,12 @@ export default function SurveyDetailPage() {
 
 	const noResponses = !hasResponses;
 
-	const shareUrl =
-		typeof window !== "undefined"
-			? `${window.location.origin}/respond/${id}`
-			: "";
+	const shareUrl = `/respond/${id}`;
 
 	const handleCopy = async () => {
 		if (shareUrl) {
-			await navigator.clipboard.writeText(shareUrl);
+			const fullUrl = `${window.location.origin}${shareUrl}`;
+			await navigator.clipboard.writeText(fullUrl);
 			setCopied(true);
 			setTimeout(() => setCopied(false), 1500);
 		}

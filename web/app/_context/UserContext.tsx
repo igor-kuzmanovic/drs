@@ -11,6 +11,7 @@ import { User } from "../_lib/models";
 import AuthService from "../_lib/auth";
 import UserService from "../_lib/user";
 import { useToast } from "./ToastContext";
+import { useRouter } from "next/navigation";
 
 type UserContextType = {
 	user: User | null;
@@ -33,6 +34,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const { showToast } = useToast();
+	const router = useRouter();
 
 	const refreshUser = useCallback(async () => {
 		if (!AuthService.isAuthenticated()) {
@@ -57,9 +59,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 				AuthService.removeToken();
 				setUser(null);
 				showToast("Session expired. Please log in again.", "error");
-				if (typeof window !== "undefined") {
-					window.location.href = "/login";
-				}
+				router.replace("/login");
 			} else {
 				setUser(null);
 				const errorMessage =
@@ -77,7 +77,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 		} finally {
 			setLoading(false);
 		}
-	}, [setUser, setLoading, setError, showToast]);
+	}, [setUser, setLoading, setError, showToast, router]);
 
 	useEffect(() => {
 		refreshUser();
