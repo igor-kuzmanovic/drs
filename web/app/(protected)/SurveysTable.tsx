@@ -3,8 +3,9 @@ import { X } from "lucide-react";
 import Action from "../_components/Action";
 import Loading from "../_components/Loading";
 import Input from "../_components/Input";
-import { Survey, SurveyStatus } from "../_lib/api";
+import { Survey, SurveyStatus } from "../_lib/models";
 import { StatusBadge } from "../_components/StatusBadge";
+import Pagination from "../_components/Pagination";
 
 type SurveysTableProps = {
 	surveys: Survey[];
@@ -233,26 +234,12 @@ export default function SurveysTable({
 				</div>
 			)}
 			{totalPages > 1 && (
-				<div className="flex justify-center items-center gap-4 mt-4">
-					<Action
-						variant="secondary"
-						size="sm"
-						onClick={() => onPageChange(page - 1)}
-						disabled={page === 1}
-					>
-						Prev
-					</Action>
-					<span className="text-sm">
-						Page {page} of {totalPages}
-					</span>
-					<Action
-						variant="secondary"
-						size="sm"
-						onClick={() => onPageChange(page + 1)}
-						disabled={page === totalPages}
-					>
-						Next
-					</Action>
+				<div className="mt-4">
+					<Pagination
+						currentPage={page}
+						totalPages={totalPages}
+						onPageChange={onPageChange}
+					/>
 				</div>
 			)}
 		</div>

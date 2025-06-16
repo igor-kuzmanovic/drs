@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
-import { useUser } from "../../_context/UserContext";
+import React from "react";
 import Input from "../../_components/Input";
 import Action from "../../_components/Action";
-import Loading from "../../_components/Loading";
-import { printError } from "../../_lib/error";
-import { updateUser, User } from "../../_lib/api";
 import Alert from "../../_components/Alert";
+import { useForm } from "../../_hooks/useForm";
+import { useToast } from "../../_context/ToastContext";
+import { User } from "../../_lib/models";
+import UserService from "../../_lib/user";
 
 type FormValues = {
 	firstName: string;
@@ -20,28 +20,25 @@ type FormValues = {
 	passwordConfirm: string;
 };
 
-const getInitialValues = (
-	user: Partial<User> | null | undefined,
-): FormValues => ({
-	firstName: user?.firstName || "",
-	lastName: user?.lastName || "",
-	address: user?.address || "",
-	city: user?.city || "",
-	country: user?.country || "",
-	phone: user?.phone || "",
+const getInitialValues = (user: User): FormValues => ({
+	firstName: user.firstName || "",
+	lastName: user.lastName || "",
+	address: user.address || "",
+	city: user.city || "",
+	country: user.country || "",
+	phone: user.phone || "",
 	password: "",
 	passwordConfirm: "",
 });
 
-export default function ProfileForm() {
-	const { user, refreshUser } = useUser();
-	const [values, setValues] = useState<FormValues>(getInitialValues(user));
-	const [errors, setErrors] = useState<Partial<FormValues>>({});
-	const [error, setError] = useState<string | null>(null);
-	const [success, setSuccess] = useState<string | null>(null);
-	const [loading, setLoading] = useState(false);
-
-	if (!user) return <Loading />;
+export default function ProfileForm({
+	user,
+	onUserUpdated,
+}: {
+	user: User;
+	onUserUpdated: () => void;
+}) {
+	const { showToast } = useToast();
 
 	const validate = (vals: FormValues) => {
 		const errs: Partial<FormValues> = {};
@@ -58,41 +55,34 @@ export default function ProfileForm() {
 		return errs;
 	};
 
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setValues({ ...values, [e.target.name]: e.target.value });
-		setErrors({ ...errors, [e.target.name]: undefined });
-		setError(null);
-		setSuccess(null);
-	};
+	const {
+		values,
+		errors,
+		error,
+		loading,
+		handleChange,
+		handleSubmit,
+		setValues,
+	} = useForm<FormValues>({
+		initialValues: getInitialValues(user),
+		validate,
+		onSubmit: async (formValues) => {
+			const updateData = {
+				firstName: formValues.firstName,
+				lastName: formValues.lastName,
+				address: formValues.address,
+				city: formValues.city,
+				country: formValues.country,
+				phone: formValues.phone,
+				password: formValues.password ? formValues.password : undefined,
+			};
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setError(null);
-		setSuccess(null);
-		const validationErrors = validate(values);
-		setErrors(validationErrors);
-		if (Object.keys(validationErrors).length > 0) return;
-
-		setLoading(true);
-		try {
-			await updateUser({
-				firstName: values.firstName,
-				lastName: values.lastName,
-				address: values.address,
-				city: values.city,
-				country: values.country,
-				phone: values.phone,
-				password: values.password ? values.password : undefined,
-			});
-			setSuccess("Profile updated!");
-			await refreshUser();
-			setValues({ ...values, password: "", passwordConfirm: "" });
-		} catch (err) {
-			setError(printError(err));
-		} finally {
-			setLoading(false);
-		}
-	};
+			await UserService.updateUser(updateData);
+			showToast("Profile updated successfully!", "success");
+			onUserUpdated();
+			setValues({ ...formValues, password: "", passwordConfirm: "" });
+		},
+	});
 
 	return (
 		<form
@@ -196,7 +186,6 @@ export default function ProfileForm() {
 				Save Changes
 			</Action>
 			{error && <Alert type="error">{error}</Alert>}
-			{success && <Alert type="success">{success}</Alert>}
 		</form>
 	);
 }

@@ -2,12 +2,8 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-	getSurvey,
-	getSurveyResults,
-	Survey,
-	SurveyResultResponse,
-} from "../../../_lib/api";
+import { Survey, SurveyResultResponse } from "../../../_lib/models";
+import SurveyService from "../../../_lib/survey";
 import SurveyDetails from "./SurveyDetails";
 import SurveyResultsTable from "./SurveyResultsTable";
 import Loading from "../../../_components/Loading";
@@ -28,8 +24,8 @@ export default function SurveyDetailPage() {
 	const [copied, setCopied] = useState(false);
 
 	useEffect(() => {
-		getSurvey(id).then((data) => setSurvey(data));
-		getSurveyResults(id).then((data) => setResults(data));
+		SurveyService.getSurvey(id).then((data) => setSurvey(data));
+		SurveyService.getSurveyResults(id).then((data) => setResults(data));
 		setDataLoading(false);
 	}, [id]);
 

@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { SurveyStatusType, SurveyStatus } from "../_lib/api";
+import { SurveyStatusType, SurveyStatus } from "../_lib/models";
 
 export function StatusBadge({ status }: { status: SurveyStatusType }) {
 	const color = (() => {

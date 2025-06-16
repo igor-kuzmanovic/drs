@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { SurveyAnswer, SurveyResultResponse } from "../../../_lib/api";
+import { SurveyAnswer, SurveyResultResponse } from "../../../_lib/models";
 
 export default function SurveyResultsTable({
 	responses,

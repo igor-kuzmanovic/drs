@@ -5,8 +5,10 @@ import Input from "../../_components/Input";
 import Radio from "../../_components/Radio";
 import Action from "../../_components/Action";
 import Alert from "../../_components/Alert";
-import { respondSurvey, SurveyAnswer, SurveyAnswerType } from "../../_lib/api";
-import { printError } from "../../_lib/error";
+import { useForm } from "../../_hooks/useForm";
+import { useToast } from "../../_context/ToastContext";
+import SurveyService from "../../_lib/survey";
+import { SurveyAnswer, SurveyAnswerType } from "../../_lib/models";
 
 export function SurveyRespondForm({
 	surveyId,
@@ -22,66 +24,68 @@ export function SurveyRespondForm({
 	token?: string;
 }) {
 	const effectiveEmail = prefillEmail;
-	const [email, setEmail] = useState(effectiveEmail);
-	const [answer, setAnswer] = useState<SurveyAnswerType | "">(
-		(prefillAnswer as SurveyAnswerType) || "",
-	);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [success, setSuccess] = useState<string | null>(null);
 	const [submitted, setSubmitted] = useState(false);
 	const autoSubmitted = useRef(false);
+	const { showToast } = useToast();
+
+	const initialValues = {
+		email: effectiveEmail,
+		answer: (prefillAnswer as SurveyAnswerType) || "",
+	};
+
+	const { values, error, loading, handleSubmit, setValue } = useForm({
+		initialValues,
+		validate: (values) => {
+			const errors: Record<string, string> = {};
+			if (!isAnonymous && !token && !values.email) {
+				errors.email = "Email is required.";
+			}
+			if (!values.answer) {
+				errors.answer = "Please select an answer.";
+			}
+			return errors;
+		},
+		onSubmit: async (values) => {
+			try {
+				if (token) {
+					await SurveyService.respondSurvey(surveyId, {
+						token,
+						answer: values.answer as SurveyAnswerType,
+					});
+				} else {
+					await SurveyService.respondSurvey(surveyId, {
+						email: values.email,
+						answer: values.answer as SurveyAnswerType,
+					});
+				}
+
+				showToast("Thank you for your response!", "success");
+				setSubmitted(true);
+			} catch (err) {
+				if (err instanceof Error && err.message === "Already responded") {
+					setSubmitted(true);
+				} else {
+					throw err;
+				}
+			}
+		},
+	});
 
 	// Auto-submit only if token and answer are present
 	useEffect(() => {
 		if (
 			token &&
-			(answer === SurveyAnswer.Yes ||
-				answer === SurveyAnswer.No ||
-				answer === SurveyAnswer.CantAnswer) &&
+			(values.answer === SurveyAnswer.Yes ||
+				values.answer === SurveyAnswer.No ||
+				values.answer === SurveyAnswer.CantAnswer) &&
 			!submitted &&
 			!autoSubmitted.current
 		) {
 			autoSubmitted.current = true;
-			handleSubmit();
+			handleSubmit(new Event("submit") as unknown as React.FormEvent);
 		}
 		// eslint-disable-next-line
-	}, [token, answer]);
-
-	const handleSubmit = async (e?: React.FormEvent) => {
-		if (e) e.preventDefault();
-		setError(null);
-		setSuccess(null);
-
-		if (!isAnonymous && !token && !email) {
-			setError("Email is required.");
-			return;
-		}
-		if (!answer) {
-			setError("Please select an answer.");
-			return;
-		}
-
-		setLoading(true);
-		try {
-			await respondSurvey(
-				surveyId,
-				token
-					? { token, answer: answer as SurveyAnswerType }
-					: { email, answer: answer as SurveyAnswerType },
-			);
-			setSuccess("Thank you for your response!");
-			setSubmitted(true);
-		} catch (err) {
-			const msg = printError(err);
-			setError(msg);
-			if (msg === "Already responded") {
-				setSubmitted(true);
-			}
-		} finally {
-			setLoading(false);
-		}
-	};
+	}, [token, values.answer]);
 
 	const isDisabled = loading || submitted;
 
@@ -98,8 +102,8 @@ export function SurveyRespondForm({
 					type="email"
 					autoComplete="email"
 					placeholder="you@email.com"
-					value={email}
-					onChange={(e) => setEmail(e.target.value)}
+					value={values.email}
+					onChange={(e) => setValue("email", e.target.value)}
 					disabled={isDisabled}
 					readOnly={!!effectiveEmail}
 				/>
@@ -110,8 +114,8 @@ export function SurveyRespondForm({
 					name="answer"
 					label="Yes"
 					value={SurveyAnswer.Yes}
-					checked={answer === SurveyAnswer.Yes}
-					onChange={() => setAnswer(SurveyAnswer.Yes)}
+					checked={values.answer === SurveyAnswer.Yes}
+					onChange={() => setValue("answer", SurveyAnswer.Yes)}
 					disabled={isDisabled || !!prefillAnswer}
 				/>
 				<Radio
@@ -119,8 +123,8 @@ export function SurveyRespondForm({
 					name="answer"
 					label="No"
 					value={SurveyAnswer.No}
-					checked={answer === SurveyAnswer.No}
-					onChange={() => setAnswer(SurveyAnswer.No)}
+					checked={values.answer === SurveyAnswer.No}
+					onChange={() => setValue("answer", SurveyAnswer.No)}
 					disabled={isDisabled || !!prefillAnswer}
 				/>
 				<Radio
@@ -128,8 +132,8 @@ export function SurveyRespondForm({
 					name="answer"
 					label="Can't answer"
 					value={SurveyAnswer.CantAnswer}
-					checked={answer === SurveyAnswer.CantAnswer}
-					onChange={() => setAnswer(SurveyAnswer.CantAnswer)}
+					checked={values.answer === SurveyAnswer.CantAnswer}
+					onChange={() => setValue("answer", SurveyAnswer.CantAnswer)}
 					disabled={isDisabled || !!prefillAnswer}
 				/>
 			</div>
@@ -142,7 +146,6 @@ export function SurveyRespondForm({
 				Submit
 			</Action>
 			{error && <Alert type="error">{error}</Alert>}
-			{success && <Alert type="success">{success}</Alert>}
 		</form>
 	);
 }

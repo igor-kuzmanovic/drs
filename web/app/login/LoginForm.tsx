@@ -1,51 +1,50 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { printError } from "../_lib/error";
-import { useUser } from "../_context/UserContext";
+import React from "react";
 import Input from "../_components/Input";
 import Action from "../_components/Action";
-import { loginUser } from "../_lib/api";
 import Alert from "../_components/Alert";
+import { useForm } from "../_hooks/useForm";
+import { useToast } from "../_context/ToastContext";
+import AuthService from "../_lib/auth";
 
-export default function LoginForm() {
-	const router = useRouter();
-	const { refreshUser } = useUser();
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
-	const [error, setError] = useState<string | null>(null);
-	const [loading, setLoading] = useState(false);
+export default function LoginForm({
+	onUserUpdated,
+	onSuccess,
+}: {
+	onUserUpdated: () => Promise<void>;
+	onSuccess: () => void;
+}) {
+	const { showToast } = useToast();
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setError(null);
-
-		if (!email) {
-			setError("Invalid email");
-			return;
-		}
-		if (!password) {
-			setError("Invalid password");
-			return;
-		}
-
-		setLoading(true);
-		try {
-			const data = await loginUser({ email, password });
-			if (data.token) {
-				localStorage.setItem("token", data.token);
-				await refreshUser();
-				router.push("/");
-			} else {
-				setError("Login failed");
-			}
-		} catch (err) {
-			setError(printError(err));
-		} finally {
-			setLoading(false);
-		}
-	};
+	const {
+		values,
+		errors: formErrors,
+		loading,
+		error,
+		handleChange,
+		handleSubmit,
+	} = useForm({
+		initialValues: {
+			email: "",
+			password: "",
+		},
+		validate: (values) => {
+			const errors: Record<string, string> = {};
+			if (!values.email) errors.email = "Email is required";
+			if (!values.password) errors.password = "Password is required";
+			return errors;
+		},
+		onSubmit: async (values) => {
+			await AuthService.login({
+				email: values.email,
+				password: values.password,
+			});
+			await onUserUpdated();
+			showToast("Login successful", "success");
+			onSuccess();
+		},
+	});
 
 	return (
 		<form
@@ -55,27 +54,31 @@ export default function LoginForm() {
 			<div className="flex flex-col gap-4">
 				<Input
 					id="email"
+					name="email"
 					label="Email"
 					type="email"
 					autoComplete="email"
 					placeholder="john.doe@email.com"
-					value={email}
-					onChange={(e) => setEmail(e.target.value)}
+					value={values.email}
+					onChange={handleChange}
 					disabled={loading}
+					error={formErrors.email}
 				/>
 				<Input
 					id="password"
+					name="password"
 					label="Password"
 					type="password"
 					autoComplete="current-password"
 					placeholder="p@ssw0rd"
-					value={password}
-					onChange={(e) => setPassword(e.target.value)}
+					value={values.password}
+					onChange={handleChange}
 					disabled={loading}
+					error={formErrors.password}
 				/>
 			</div>
 			<Action type="submit" fullWidth loading={loading}>
-				Submit
+				Log In
 			</Action>
 			{error && <Alert type="error">{error}</Alert>}
 		</form>

@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { printError } from "../../../_lib/error";
+import React from "react";
 import Input from "../../../_components/Input";
 import Textarea from "../../../_components/Textarea";
 import Action from "../../../_components/Action";
 import Checkbox from "../../../_components/Checkbox";
-import { createSurvey } from "../../../_lib/api";
 import Alert from "../../../_components/Alert";
 import EmailChips from "../../../_components/EmailChips";
+import { useForm } from "../../../_hooks/useForm";
+import SurveyService from "../../../_lib/survey";
+import { useToast } from "../../../_context/ToastContext";
 
 type FormValues = {
 	name: string;
@@ -17,13 +17,6 @@ type FormValues = {
 	endDate: string;
 	recipients: string[];
 	isAnonymous: boolean;
-};
-
-type FormErrors = {
-	name?: string;
-	question?: string;
-	endDate?: string;
-	recipients?: string;
 };
 
 const initialValues: FormValues = {
@@ -34,69 +27,58 @@ const initialValues: FormValues = {
 	isAnonymous: false,
 };
 
-export default function CreateSurveyForm() {
-	const router = useRouter();
-	const [values, setValues] = useState<FormValues>(initialValues);
-	const [errors, setErrors] = useState<FormErrors>({});
-	const [error, setError] = useState<string | null>(null);
-	const [loading, setLoading] = useState(false);
+export default function CreateSurveyForm({
+	onSuccess,
+	onCancel,
+}: {
+	onSuccess: () => void;
+	onCancel: () => void;
+}) {
+	const { showToast } = useToast();
 
-	const validate = (vals: FormValues) => {
-		const errs: FormErrors = {};
-		if (vals.name.length === 0) errs.name = "Name is required";
-		if (vals.question.length === 0) errs.question = "Question is required";
-		if (!vals.endDate) {
-			errs.endDate = "End date is required";
-		} else {
-			const selected = new Date(vals.endDate).getTime();
-			const now = Date.now();
-			if (selected < now) {
-				errs.endDate = "End date cannot be in the past";
+	const {
+		values,
+		errors: formErrors,
+		loading,
+		error,
+		handleChange,
+		handleSubmit,
+		setValue,
+	} = useForm({
+		initialValues,
+		validate: (values) => {
+			const errors: Record<string, string> = {};
+			if (!values.name) errors.name = "Name is required";
+			if (!values.question) errors.question = "Question is required";
+			if (!values.endDate) {
+				errors.endDate = "End date is required";
+			} else {
+				const selected = new Date(values.endDate).getTime();
+				const now = Date.now();
+				if (selected < now) {
+					errors.endDate = "End date cannot be in the past";
+				}
 			}
-		}
-		if (vals.recipients.length === 0) {
-			errs.recipients = "At least one recipient is required";
-		} else if (vals.recipients.length > 50) {
-			errs.recipients = "Maximum 50 recipients are allowed";
-		}
-		return errs;
-	};
-
-	const handleChange = (
-		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-	) => {
-		const value =
-			e.target.type === "checkbox"
-				? (e.target as HTMLInputElement).checked
-				: e.target.value;
-
-		setValues({ ...values, [e.target.name]: value });
-		setErrors({ ...errors, [e.target.name]: undefined });
-	};
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setError(null);
-		const validationErrors = validate(values);
-		setErrors(validationErrors);
-		if (Object.keys(validationErrors).length > 0) return;
-
-		setLoading(true);
-		try {
-			await createSurvey({
+			if (values.recipients.length === 0) {
+				errors.recipients = "At least one recipient is required";
+			} else if (values.recipients.length > 50) {
+				errors.recipients = "Maximum 50 recipients are allowed";
+			}
+			return errors;
+		},
+		onSubmit: async (values) => {
+			await SurveyService.createSurvey({
 				name: values.name,
 				question: values.question,
 				endDate: new Date(values.endDate).toISOString(),
 				isAnonymous: values.isAnonymous,
 				recipients: values.recipients,
 			});
-			router.push("/");
-		} catch (err) {
-			setError(printError(err));
-		} finally {
-			setLoading(false);
-		}
-	};
+
+			showToast("Survey created successfully", "success");
+			onSuccess();
+		},
+	});
 
 	return (
 		<form
@@ -113,7 +95,7 @@ export default function CreateSurveyForm() {
 					value={values.name}
 					onChange={handleChange}
 					disabled={loading}
-					error={errors.name}
+					error={formErrors.name}
 				/>
 				<Textarea
 					id="question"
@@ -123,7 +105,7 @@ export default function CreateSurveyForm() {
 					value={values.question}
 					onChange={handleChange}
 					disabled={loading}
-					error={errors.question}
+					error={formErrors.question}
 				/>
 				<Input
 					id="endDate"
@@ -133,13 +115,13 @@ export default function CreateSurveyForm() {
 					value={values.endDate}
 					onChange={handleChange}
 					disabled={loading}
-					error={errors.endDate}
+					error={formErrors.endDate}
 				/>
 				<EmailChips
 					value={values.recipients}
-					onChange={(recipients) => setValues({ ...values, recipients })}
+					onChange={(recipients) => setValue("recipients", recipients)}
 					disabled={loading}
-					error={errors.recipients}
+					error={formErrors.recipients}
 					label="Recipients"
 				/>
 				<Checkbox
@@ -156,7 +138,7 @@ export default function CreateSurveyForm() {
 					type="button"
 					variant="secondary"
 					disabled={loading}
-					onClick={() => router.push("/surveys")}
+					onClick={onCancel}
 				>
 					Cancel
 				</Action>

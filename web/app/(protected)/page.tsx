@@ -1,19 +1,15 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useUser } from "../_context/UserContext";
-import { printError } from "../_lib/error";
-import {
-	getSurveys,
-	Survey,
-	terminateSurvey,
-	deleteSurvey,
-	retrySurveyFailedEmails,
-} from "../_lib/api";
 import Alert from "../_components/Alert";
 import SurveysTable from "./SurveysTable";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useApiCall } from "../_hooks/useApiCall";
+import { useToast } from "../_context/ToastContext";
+import { Survey } from "../_lib/models";
+import SurveyService from "../_lib/survey";
 
 const PAGE_SIZE = 20;
 
@@ -21,37 +17,84 @@ export default function Page() {
 	const { user } = useUser();
 	const searchParams = useSearchParams();
 	const router = useRouter();
+	const { showToast } = useToast();
 
 	const [surveys, setSurveys] = useState<Survey[]>([]);
-	const [surveysLoading, setSurveysLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	const [total, setTotal] = useState(0);
 	const [success, setSuccess] = useState<string | null>(null);
-	const [terminatingId, setTerminatingId] = useState<string | null>(null);
-	const [deletingId, setDeletingId] = useState<string | null>(null);
-	const [retryingId, setRetryingId] = useState<string | null>(null);
 
 	const name = searchParams.get("name") || "";
 	const page = parseInt(searchParams.get("page") || "1", 10);
 
-	const fetchSurveys = useCallback(async () => {
-		setSurveysLoading(true);
-		setError(null);
-		try {
-			const data = await getSurveys({ name, page, pageSize: PAGE_SIZE });
-			setSurveys(data.items);
-			setTotal(data.total);
-		} catch (err) {
-			setError(printError(err));
-		} finally {
-			setSurveysLoading(false);
-		}
-	}, [name, page]);
+	const getSurveysApi = useApiCall<
+		[{ name: string; page: number; pageSize: number }],
+		{ items: Survey[]; total: number; page: number; pageSize: number }
+	>(async (params) => {
+		return SurveyService.getSurveys(params);
+	});
 
-	const [total, setTotal] = useState(0);
+	const terminateSurveyApi = useApiCall<[string], void>(
+		async (id) => {
+			return SurveyService.terminateSurvey(id);
+		},
+		{
+			onSuccess: () => {
+				showToast("Survey terminated successfully", "success");
+				setSuccess("Survey terminated successfully");
+				// Refresh surveys by updating page which will trigger the effect
+				const currentParams = new URLSearchParams(searchParams.toString());
+				router.replace(`?${currentParams.toString()}`);
+			},
+		},
+	);
+
+	const deleteSurveyApi = useApiCall<[string], void>(
+		async (id) => {
+			return SurveyService.deleteSurvey(id);
+		},
+		{
+			onSuccess: () => {
+				showToast("Survey deleted successfully", "success");
+				setSuccess("Survey deleted successfully");
+				// Refresh surveys by updating page which will trigger the effect
+				const currentParams = new URLSearchParams(searchParams.toString());
+				router.replace(`?${currentParams.toString()}`);
+			},
+		},
+	);
+
+	const retrySurveyFailedEmailsApi = useApiCall<[string], void>(
+		async (id) => {
+			return SurveyService.retrySurveyFailedEmails(id);
+		},
+		{
+			onSuccess: () => {
+				showToast("Retry started for failed emails", "success");
+				setSuccess("Retry started for failed emails");
+				// Refresh surveys by updating page which will trigger the effect
+				const currentParams = new URLSearchParams(searchParams.toString());
+				router.replace(`?${currentParams.toString()}`);
+			},
+		},
+	);
 
 	useEffect(() => {
-		if (user) fetchSurveys();
-	}, [user, fetchSurveys]);
+		if (user) {
+			const loadSurveysInEffect = async () => {
+				const data = await getSurveysApi.execute({
+					name,
+					page,
+					pageSize: PAGE_SIZE,
+				});
+				if (data) {
+					setSurveys(data.items);
+					setTotal(data.total);
+				}
+			};
+
+			loadSurveysInEffect();
+		}
+	}, [user, name, page, getSurveysApi]);
 
 	const handleSearch = (searchValue: string) => {
 		const params = new URLSearchParams(searchParams);
@@ -72,18 +115,7 @@ export default function Page() {
 
 	const handleTerminate = async (id: string) => {
 		if (!confirm("Are you sure you want to terminate this survey?")) return;
-		setTerminatingId(id);
-		setSuccess(null);
-		setError(null);
-		try {
-			await terminateSurvey(id);
-			await fetchSurveys();
-			setSuccess("Survey terminated successfully.");
-		} catch (err) {
-			setError(printError(err));
-		} finally {
-			setTerminatingId(null);
-		}
+		await terminateSurveyApi.execute(id);
 	};
 
 	const handleDelete = async (id: string) => {
@@ -93,18 +125,7 @@ export default function Page() {
 			)
 		)
 			return;
-		setDeletingId(id);
-		setSuccess(null);
-		setError(null);
-		try {
-			await deleteSurvey(id);
-			await fetchSurveys();
-			setSuccess("Survey deleted successfully.");
-		} catch (err) {
-			setError(printError(err));
-		} finally {
-			setDeletingId(null);
-		}
+		await deleteSurveyApi.execute(id);
 	};
 
 	const handleRetryFailedEmails = async (id: string) => {
@@ -114,18 +135,7 @@ export default function Page() {
 			)
 		)
 			return;
-		setRetryingId(id);
-		setSuccess(null);
-		setError(null);
-		try {
-			await retrySurveyFailedEmails(id);
-			await fetchSurveys();
-			setSuccess("Retry started for failed emails.");
-		} catch (err) {
-			setError(printError(err));
-		} finally {
-			setRetryingId(null);
-		}
+		await retrySurveyFailedEmailsApi.execute(id);
 	};
 
 	return (
@@ -135,13 +145,33 @@ export default function Page() {
 					Your <span className="text-blue-600">Surveys</span>
 				</h1>
 				{success && <Alert type="success">{success}</Alert>}
-				{error && <Alert type="error">{error}</Alert>}
+				{(getSurveysApi.error ||
+					terminateSurveyApi.error ||
+					deleteSurveyApi.error ||
+					retrySurveyFailedEmailsApi.error) && (
+					<Alert type="error">
+						{getSurveysApi.error ||
+							terminateSurveyApi.error ||
+							deleteSurveyApi.error ||
+							retrySurveyFailedEmailsApi.error}
+					</Alert>
+				)}
 				<SurveysTable
 					surveys={surveys}
-					loading={surveysLoading}
-					terminatingId={terminatingId}
-					deletingId={deletingId}
-					retryingId={retryingId}
+					loading={getSurveysApi.loading}
+					terminatingId={
+						terminateSurveyApi.loading
+							? Object.keys(terminateSurveyApi)[0]
+							: null
+					}
+					deletingId={
+						deleteSurveyApi.loading ? Object.keys(deleteSurveyApi)[0] : null
+					}
+					retryingId={
+						retrySurveyFailedEmailsApi.loading
+							? Object.keys(retrySurveyFailedEmailsApi)[0]
+							: null
+					}
 					onTerminate={handleTerminate}
 					onDelete={handleDelete}
 					onRetryFailedEmails={handleRetryFailedEmails}
@@ -152,14 +182,16 @@ export default function Page() {
 					total={total}
 					onPageChange={handlePageChange}
 				/>
-				{!surveysLoading && !error && surveys.length === 0 && (
-					<div>
-						No surveys found.{" "}
-						<Link href="/surveys/new" className="text-blue-600 underline">
-							Create one?
-						</Link>
-					</div>
-				)}
+				{!getSurveysApi.loading &&
+					!getSurveysApi.error &&
+					surveys.length === 0 && (
+						<div>
+							No surveys found.{" "}
+							<Link href="/surveys/new" className="text-blue-600 underline">
+								Create one?
+							</Link>
+						</div>
+					)}
 			</div>
 		</div>
 	);

@@ -8,7 +8,7 @@ import LoginForm from "./LoginForm";
 import Loading from "../_components/Loading";
 
 export default function Page() {
-	const { user, loading } = useUser();
+	const { user, loading, refreshUser } = useUser();
 	const router = useRouter();
 
 	useEffect(() => {
@@ -20,12 +20,16 @@ export default function Page() {
 	if (loading) return <Loading />;
 	if (user) return null;
 
+	const handleLoginSuccess = () => {
+		router.push("/");
+	};
+
 	return (
 		<div className="flex flex-col gap-6">
 			<h1 className="text-center text-3xl font-bold">
 				Log in to <span className="text-blue-600">Survey Master</span>
 			</h1>
-			<LoginForm />
+			<LoginForm onUserUpdated={refreshUser} onSuccess={handleLoginSuccess} />
 			<div className="flex flex-col gap-2">
 				<p className="text-center text-sm">
 					Don&apos;t have an account?{" "}

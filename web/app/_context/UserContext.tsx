@@ -1,8 +1,16 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { getUser, User } from "../_lib/api";
-import { isHttpError, printError } from "../_lib/error";
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useState,
+} from "react";
+import { User } from "../_lib/models";
+import AuthService from "../_lib/auth";
+import UserService from "../_lib/user";
+import { useToast } from "./ToastContext";
 
 type UserContextType = {
 	user: User | null;
@@ -24,40 +32,61 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	const [user, setUser] = useState<User | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const { showToast } = useToast();
 
-	const refreshUser = async () => {
-		const token = localStorage.getItem("token");
-		if (!token) {
+	const refreshUser = useCallback(async () => {
+		if (!AuthService.isAuthenticated()) {
 			setUser(null);
 			setLoading(false);
 			return;
 		}
+
 		setLoading(true);
 		setError(null);
+
 		try {
-			const userData = await getUser();
+			const userData = await UserService.getUser();
 			setUser(userData);
 		} catch (err) {
-			if (isHttpError(err) && err.status === 401) {
-				localStorage.removeItem("token");
+			if (
+				err &&
+				typeof err === "object" &&
+				"status" in err &&
+				err.status === 401
+			) {
+				AuthService.removeToken();
 				setUser(null);
-				setError("Session expired. Please log in again.");
-				window.location.href = "/login";
+				showToast("Session expired. Please log in again.", "error");
+				if (typeof window !== "undefined") {
+					window.location.href = "/login";
+				}
 			} else {
 				setUser(null);
-				setError(printError(err));
+				const errorMessage =
+					err &&
+					typeof err === "object" &&
+					"data" in err &&
+					typeof err.data === "object" &&
+					err.data &&
+					"error" in err.data
+						? String(err.data.error)
+						: "Failed to load user data";
+				setError(errorMessage);
+				showToast(errorMessage, "error");
 			}
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [setUser, setLoading, setError, showToast]);
 
 	useEffect(() => {
 		refreshUser();
+
+		// Listen for storage events (token changes)
 		const onStorage = () => refreshUser();
 		window.addEventListener("storage", onStorage);
 		return () => window.removeEventListener("storage", onStorage);
-	}, []);
+	}, [refreshUser]);
 
 	return (
 		<UserContext.Provider

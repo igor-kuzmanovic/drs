@@ -1,7 +1,7 @@
-import { getSurvey } from "../../../_lib/api";
+import SurveyService from "../../../_lib/survey";
 
 export default async function Head({ params }: { params: { id: string } }) {
-	const survey = await getSurvey(params.id);
+	const survey = await SurveyService.getSurvey(params.id);
 
 	return (
 		<>

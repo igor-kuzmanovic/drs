@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { printError } from "../_lib/error";
-import { useUser } from "../_context/UserContext";
+import React from "react";
 import Input from "../_components/Input";
 import Action from "../_components/Action";
-import { signupUser } from "../_lib/api";
 import Alert from "../_components/Alert";
+import { useForm } from "../_hooks/useForm";
+import AuthService from "../_lib/auth";
+import { useToast } from "../_context/ToastContext";
 
 type FormValues = {
 	firstName: string;
@@ -33,13 +32,14 @@ const initialValues: FormValues = {
 	passwordConfirm: "",
 };
 
-export default function SignupForm() {
-	const router = useRouter();
-	const [values, setValues] = useState<FormValues>(initialValues);
-	const [errors, setErrors] = useState<Partial<FormValues>>({});
-	const [error, setError] = useState<string | null>(null);
-	const [loading, setLoading] = useState(false);
-	const { refreshUser } = useUser();
+export default function SignupForm({
+	onUserUpdated,
+	onSuccess,
+}: {
+	onUserUpdated: () => Promise<void>;
+	onSuccess: () => void;
+}) {
+	const { showToast } = useToast();
 
 	const validate = (vals: FormValues) => {
 		const errs: Partial<FormValues> = {};
@@ -59,34 +59,17 @@ export default function SignupForm() {
 		return errs;
 	};
 
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setValues({ ...values, [e.target.name]: e.target.value });
-		setErrors({ ...errors, [e.target.name]: undefined });
-	};
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setError(null);
-		const validationErrors = validate(values);
-		setErrors(validationErrors);
-		if (Object.keys(validationErrors).length > 0) return;
-
-		setLoading(true);
-		try {
-			const data = await signupUser(values);
-			if (data.token) {
-				localStorage.setItem("token", data.token);
-				await refreshUser();
-				router.push("/");
-			} else {
-				setError("Signup failed");
-			}
-		} catch (err) {
-			setError(printError(err));
-		} finally {
-			setLoading(false);
-		}
-	};
+	const { values, errors, loading, error, handleChange, handleSubmit } =
+		useForm<FormValues>({
+			initialValues,
+			validate,
+			onSubmit: async (formValues) => {
+				await AuthService.signup(formValues);
+				await onUserUpdated();
+				showToast("Signup successful!", "success");
+				onSuccess();
+			},
+		});
 
 	return (
 		<form

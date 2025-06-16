@@ -2,7 +2,8 @@
 
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getPublicSurvey, PublicSurvey, SurveyStatus } from "../../_lib/api";
+import { PublicSurvey, SurveyStatus } from "../../_lib/models";
+import SurveyService from "../../_lib/survey";
 import Loading from "../../_components/Loading";
 import { SurveyRespondForm } from "./SurveyRespondForm";
 import { useUser } from "../../_context/UserContext";
@@ -23,7 +24,7 @@ export default function RespondSurveyPage() {
 	const token = searchParams.get("token") || "";
 
 	useEffect(() => {
-		getPublicSurvey(id)
+		SurveyService.getPublicSurvey(id)
 			.then(setSurvey)
 			.finally(() => setLoading(false));
 	}, [id]);
