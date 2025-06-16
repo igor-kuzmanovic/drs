@@ -10,9 +10,6 @@ import Pagination from "../_components/Pagination";
 type SurveysTableProps = {
 	surveys: Survey[];
 	loading?: boolean;
-	terminatingId?: string | null;
-	deletingId?: string | null;
-	retryingId?: string | null;
 	onTerminate: (id: string) => void;
 	onDelete: (id: string) => void;
 	onRetryFailedEmails: (surveyId: string) => void;
@@ -27,9 +24,6 @@ type SurveysTableProps = {
 export default function SurveysTable({
 	surveys,
 	loading,
-	terminatingId,
-	deletingId,
-	retryingId,
 	onTerminate,
 	onDelete,
 	onRetryFailedEmails,
@@ -41,6 +35,9 @@ export default function SurveysTable({
 	onPageChange,
 }: SurveysTableProps) {
 	const [searchInput, setSearchInput] = useState(searchValue);
+	const [terminatingId, setTerminatingId] = useState<string | null>(null);
+	const [deletingId, setDeletingId] = useState<string | null>(null);
+	const [retryingId, setRetryingId] = useState<string | null>(null);
 
 	const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -52,6 +49,33 @@ export default function SurveysTable({
 	const handleClear = () => {
 		setSearchInput("");
 		onSearch("");
+	};
+
+	const handleTerminate = async (id: string) => {
+		setTerminatingId(id);
+		try {
+			await onTerminate(id);
+		} finally {
+			setTerminatingId(null);
+		}
+	};
+
+	const handleDelete = async (id: string) => {
+		setDeletingId(id);
+		try {
+			await onDelete(id);
+		} finally {
+			setDeletingId(null);
+		}
+	};
+
+	const handleRetryFailedEmails = async (id: string) => {
+		setRetryingId(id);
+		try {
+			await onRetryFailedEmails(id);
+		} finally {
+			setRetryingId(null);
+		}
 	};
 
 	return (
@@ -178,7 +202,7 @@ export default function SurveysTable({
 															terminatingId === survey.id ||
 															deletingId === survey.id
 														}
-														onClick={() => onTerminate(survey.id)}
+														onClick={() => handleTerminate(survey.id)}
 													>
 														{terminatingId === survey.id
 															? "Terminating..."
@@ -194,7 +218,9 @@ export default function SurveysTable({
 																	retryingId !== null &&
 																	retryingId !== survey.id
 																}
-																onClick={() => onRetryFailedEmails(survey.id)}
+																onClick={() =>
+																	handleRetryFailedEmails(survey.id)
+																}
 															>
 																{retryingId === survey.id
 																	? "Retrying Failed Emails..."
@@ -213,7 +239,7 @@ export default function SurveysTable({
 														deletingId === survey.id ||
 														terminatingId === survey.id
 													}
-													onClick={() => onDelete(survey.id)}
+													onClick={() => handleDelete(survey.id)}
 												>
 													{deletingId === survey.id ? "Deleting..." : "Delete"}
 												</Action>

@@ -152,9 +152,6 @@ export default function Page() {
 					<SurveysTable
 						surveys={surveys}
 						loading={false}
-						terminatingId={null}
-						deletingId={null}
-						retryingId={null}
 						onTerminate={handleTerminate}
 						onDelete={handleDelete}
 						onRetryFailedEmails={handleRetryFailedEmails}
