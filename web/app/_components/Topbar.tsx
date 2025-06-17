@@ -9,19 +9,43 @@ import {
 	ClipboardList,
 } from "lucide-react";
 import { useUser } from "../_context/UserContext";
+import { useHealth } from "../_context/HealthContext";
 import { usePathname } from "next/navigation";
+import { SERVICE_TYPES, ServiceType } from "../_lib/health";
 
 function NavLink({
 	href,
 	children,
+	requiredService,
+	disabledMessage,
 }: {
 	href: string;
 	children: React.ReactNode;
+	requiredService?: ServiceType;
+	disabledMessage?: string;
 }) {
+	const { isUserServiceHealthy, isSurveyServiceHealthy } = useHealth();
+
+	const isDisabled =
+		requiredService &&
+		((requiredService === SERVICE_TYPES.USER && !isUserServiceHealthy) ||
+			(requiredService === SERVICE_TYPES.SURVEY && !isSurveyServiceHealthy));
+
+	const baseClasses =
+		"flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600";
+	const disabledClasses = "opacity-50 cursor-not-allowed pointer-events-none";
+
 	return (
 		<Link
-			href={href}
-			className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600"
+			href={isDisabled ? "#" : href}
+			className={`${baseClasses} ${isDisabled ? disabledClasses : ""}`}
+			onClick={(e) => {
+				if (isDisabled) {
+					e.preventDefault();
+				}
+			}}
+			title={isDisabled ? disabledMessage : undefined}
+			aria-disabled={isDisabled}
 		>
 			{children}
 		</Link>
@@ -62,13 +86,21 @@ export default function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
 							: !user && (
 									<>
 										{pathname !== "/login" && (
-											<NavLink href="/login">
+											<NavLink
+												href="/login"
+												requiredService={SERVICE_TYPES.USER}
+												disabledMessage="Login is currently unavailable"
+											>
 												<LogIn size={18} />
 												<span className="leading-none">Log in</span>
 											</NavLink>
 										)}
 										{pathname === "/login" && (
-											<NavLink href="/signup">
+											<NavLink
+												href="/signup"
+												requiredService={SERVICE_TYPES.USER}
+												disabledMessage="Signup is currently unavailable"
+											>
 												<UserPlus size={18} />
 												<span className="leading-none">Sign up</span>
 											</NavLink>
@@ -76,7 +108,11 @@ export default function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
 									</>
 								)}
 						{user && (
-							<NavLink href="/logout">
+							<NavLink
+								href="/logout"
+								requiredService={SERVICE_TYPES.USER}
+								disabledMessage="Logout is currently unavailable"
+							>
 								<LogOut size={18} />
 								<span className="leading-none">Logout</span>
 							</NavLink>

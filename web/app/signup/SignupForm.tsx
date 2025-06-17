@@ -7,6 +7,7 @@ import Alert from "../_components/Alert";
 import { useForm } from "../_hooks/useForm";
 import AuthService from "../_lib/auth";
 import { useToast } from "../_context/ToastContext";
+import { SERVICE_TYPES } from "../_lib/health";
 
 type FormValues = {
 	firstName: string;
@@ -35,9 +36,11 @@ const initialValues: FormValues = {
 export default function SignupForm({
 	onUserUpdated,
 	onSuccess,
+	disabled = false,
 }: {
 	onUserUpdated: () => Promise<void>;
 	onSuccess: () => void;
+	disabled?: boolean;
 }) {
 	const { showToast } = useToast();
 
@@ -87,7 +90,7 @@ export default function SignupForm({
 					placeholder="john.doe@email.com"
 					value={values.email}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={errors.email}
 				/>
 				<Input
@@ -99,7 +102,7 @@ export default function SignupForm({
 					placeholder="p@ssw0rd"
 					value={values.password}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={errors.password}
 				/>
 				<Input
@@ -111,7 +114,7 @@ export default function SignupForm({
 					placeholder="p@ssw0rd"
 					value={values.passwordConfirm}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={errors.passwordConfirm}
 				/>
 				<Input
@@ -122,7 +125,7 @@ export default function SignupForm({
 					placeholder="John"
 					value={values.firstName}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={errors.firstName}
 				/>
 				<Input
@@ -133,7 +136,7 @@ export default function SignupForm({
 					placeholder="Doe"
 					value={values.lastName}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={errors.lastName}
 				/>
 				<Input
@@ -144,7 +147,7 @@ export default function SignupForm({
 					placeholder="221B Baker Street"
 					value={values.address}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={errors.address}
 				/>
 				<Input
@@ -155,7 +158,7 @@ export default function SignupForm({
 					placeholder="London"
 					value={values.city}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={errors.city}
 				/>
 				<Input
@@ -166,7 +169,7 @@ export default function SignupForm({
 					placeholder="United Kingdom"
 					value={values.country}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={errors.country}
 				/>
 				<Input
@@ -177,11 +180,18 @@ export default function SignupForm({
 					placeholder="+1 (123) 456-7890"
 					value={values.phone}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={errors.phone}
 				/>
 			</div>
-			<Action type="submit" fullWidth loading={loading}>
+			<Action
+				type="submit"
+				fullWidth
+				loading={loading}
+				disabled={disabled}
+				requiredService={disabled ? SERVICE_TYPES.USER : undefined}
+				disabledMessage="Signup is currently unavailable"
+			>
 				Submit
 			</Action>
 			{error && <Alert type="error">{error}</Alert>}

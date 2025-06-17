@@ -7,6 +7,9 @@ import SurveyService from "../../_lib/survey";
 import Loading from "../../_components/Loading";
 import { SurveyRespondForm } from "./SurveyRespondForm";
 import { useUser } from "../../_context/UserContext";
+import { useHealth } from "../../_context/HealthContext";
+import ServiceUnavailable from "../../_components/ServiceUnavailable";
+import { SERVICE_TYPES } from "../../_lib/health";
 
 export default function RespondSurveyPage() {
 	const params = useParams<{ id: string }>();
@@ -16,6 +19,7 @@ export default function RespondSurveyPage() {
 	const [survey, setSurvey] = useState<PublicSurvey | null>(null);
 	const [loading, setLoading] = useState(true);
 
+	const { isSurveyServiceHealthy } = useHealth();
 	const { user } = useUser();
 
 	// Prefill from query params
@@ -55,12 +59,19 @@ export default function RespondSurveyPage() {
 				<p className="text-lg text-gray-700 mb-6 text-center">
 					{survey.question}
 				</p>
+
+				<ServiceUnavailable
+					serviceName={SERVICE_TYPES.SURVEY}
+					message="Survey response submission is currently unavailable. Please try again later."
+				/>
+
 				<SurveyRespondForm
 					surveyId={id}
 					isAnonymous={survey.isAnonymous}
 					prefillEmail={prefillEmail}
 					prefillAnswer={prefillAnswer}
 					token={token}
+					disabled={!isSurveyServiceHealthy}
 				/>
 			</div>
 		</div>

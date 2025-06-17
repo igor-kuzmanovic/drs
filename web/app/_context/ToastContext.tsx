@@ -4,7 +4,13 @@ import React, { createContext, useContext, useState, useCallback } from "react";
 import { X as CloseIcon, CheckCircle, AlertCircle, Info } from "lucide-react";
 import { createPortal } from "react-dom";
 
-type ToastType = "success" | "error" | "info";
+export const TOAST_TYPES = {
+	success: "success",
+	error: "error",
+	info: "info",
+} as const;
+
+type ToastType = (typeof TOAST_TYPES)[keyof typeof TOAST_TYPES];
 
 interface Toast {
 	id: string;
@@ -82,29 +88,29 @@ const ToastItem: React.FC<{ toast: Toast; onClose: () => void }> = ({
 
 	const getIcon = () => {
 		switch (type) {
-			case "success":
+			case TOAST_TYPES.success:
 				return <CheckCircle className="text-green-500" size={20} />;
-			case "error":
+			case TOAST_TYPES.error:
 				return <AlertCircle className="text-red-500" size={20} />;
-			case "info":
+			case TOAST_TYPES.info:
 				return <Info className="text-blue-500" size={20} />;
 		}
 	};
 
 	const getBgColor = () => {
 		switch (type) {
-			case "success":
-				return "bg-green-50 border-green-200";
-			case "error":
-				return "bg-red-50 border-red-200";
-			case "info":
-				return "bg-blue-50 border-blue-200";
+			case TOAST_TYPES.success:
+				return "bg-green-50 border-green-400";
+			case TOAST_TYPES.error:
+				return "bg-red-50 border-red-400";
+			case TOAST_TYPES.info:
+				return "bg-blue-50 border-blue-400";
 		}
 	};
 
 	return (
 		<div
-			className={`p-4 rounded-lg shadow-md border ${getBgColor()} flex items-start gap-3 animate-slideIn`}
+			className={`p-4 border ${getBgColor()} flex items-center gap-3 animate-slideIn`}
 			role="alert"
 		>
 			{getIcon()}

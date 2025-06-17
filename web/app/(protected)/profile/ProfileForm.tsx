@@ -8,6 +8,7 @@ import { useForm } from "../../_hooks/useForm";
 import { useToast } from "../../_context/ToastContext";
 import { User } from "../../_lib/models";
 import UserService from "../../_lib/user";
+import { SERVICE_TYPES } from "../../_lib/health";
 
 type FormValues = {
 	firstName: string;
@@ -34,9 +35,11 @@ const getInitialValues = (user: User): FormValues => ({
 export default function ProfileForm({
 	user,
 	onUserUpdated,
+	disabled = false,
 }: {
 	user: User;
 	onUserUpdated: () => void;
+	disabled?: boolean;
 }) {
 	const { showToast } = useToast();
 
@@ -99,7 +102,7 @@ export default function ProfileForm({
 					placeholder="John"
 					value={values.firstName}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={errors.firstName}
 				/>
 				<Input
@@ -110,7 +113,7 @@ export default function ProfileForm({
 					placeholder="Doe"
 					value={values.lastName}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={errors.lastName}
 				/>
 				<Input
@@ -121,7 +124,7 @@ export default function ProfileForm({
 					placeholder="221B Baker Street"
 					value={values.address}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={errors.address}
 				/>
 				<Input
@@ -132,7 +135,7 @@ export default function ProfileForm({
 					placeholder="London"
 					value={values.city}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={errors.city}
 				/>
 				<Input
@@ -143,7 +146,7 @@ export default function ProfileForm({
 					placeholder="United Kingdom"
 					value={values.country}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={errors.country}
 				/>
 				<Input
@@ -154,7 +157,7 @@ export default function ProfileForm({
 					placeholder="+1 (123) 456-7890"
 					value={values.phone}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={errors.phone}
 				/>
 				<Input
@@ -166,7 +169,7 @@ export default function ProfileForm({
 					placeholder="Leave blank to keep current"
 					value={values.password}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={errors.password}
 				/>
 				<Input
@@ -178,11 +181,18 @@ export default function ProfileForm({
 					placeholder="Repeat new password"
 					value={values.passwordConfirm}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={errors.passwordConfirm}
 				/>
 			</div>
-			<Action type="submit" fullWidth loading={loading}>
+			<Action
+				type="submit"
+				fullWidth
+				loading={loading}
+				disabled={disabled}
+				requiredService={disabled ? SERVICE_TYPES.USER : undefined}
+				disabledMessage="The user service is currently unavailable. Profile editing is disabled."
+			>
 				Save Changes
 			</Action>
 			{error && <Alert type="error">{error}</Alert>}

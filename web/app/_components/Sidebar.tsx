@@ -8,8 +8,10 @@ import {
 	User as UserIcon,
 } from "lucide-react";
 import { useUser } from "../_context/UserContext";
+import { useHealth } from "../_context/HealthContext";
 import React from "react";
 import { usePathname } from "next/navigation";
+import { SERVICE_TYPES, ServiceType } from "../_lib/health";
 
 function NavLink({
 	href,
@@ -17,24 +19,47 @@ function NavLink({
 	icon,
 	onClick,
 	active,
+	requiredService,
+	disabledMessage,
 }: {
 	href: string;
 	children: React.ReactNode;
 	icon?: React.ReactNode;
 	onClick?: () => void;
 	active?: boolean;
+	requiredService?: ServiceType;
+	disabledMessage?: string;
 }) {
+	const { isUserServiceHealthy, isSurveyServiceHealthy } = useHealth();
+
+	const isDisabled =
+		requiredService &&
+		((requiredService === SERVICE_TYPES.USER && !isUserServiceHealthy) ||
+			(requiredService === SERVICE_TYPES.SURVEY && !isSurveyServiceHealthy));
+
+	const baseClasses = `flex items-center gap-2 px-4 py-2 ${
+		active
+			? "bg-blue-600 text-white font-semibold"
+			: "hover:bg-blue-50 text-gray-700 hover:text-blue-600"
+	}`;
+
+	const disabledClasses = "opacity-50 cursor-not-allowed pointer-events-none";
+
+	const className = `${baseClasses} ${isDisabled ? disabledClasses : ""}`;
+
 	return (
 		<Link
-			href={href}
-			className={`flex items-center gap-2 px-4 py-2
-                ${
-									active
-										? "bg-blue-600 text-white font-semibold"
-										: "hover:bg-blue-50 text-gray-700 hover:text-blue-600"
-								}
-            `}
-			onClick={onClick}
+			href={isDisabled ? "#" : href}
+			className={className}
+			onClick={(e) => {
+				if (isDisabled) {
+					e.preventDefault();
+					return;
+				}
+				onClick?.();
+			}}
+			title={isDisabled ? disabledMessage : undefined}
+			aria-disabled={isDisabled}
 		>
 			{icon}
 			<span className="truncate">{children}</span>
@@ -67,6 +92,8 @@ function AuthSidebarLinks({
 				icon={<UserIcon size={18} />}
 				onClick={onNavigate}
 				active={pathname === "/profile"}
+				requiredService={SERVICE_TYPES.USER}
+				disabledMessage="Profile editing is currently unavailable"
 			>
 				Profile
 			</NavLink>
@@ -75,6 +102,8 @@ function AuthSidebarLinks({
 				icon={<PlusCircle size={18} />}
 				onClick={onNavigate}
 				active={pathname === "/surveys/new"}
+				requiredService={SERVICE_TYPES.SURVEY}
+				disabledMessage="Survey creation is currently unavailable"
 			>
 				Create Survey
 			</NavLink>

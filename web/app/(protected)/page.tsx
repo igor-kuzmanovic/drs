@@ -3,17 +3,21 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useUser } from "../_context/UserContext";
+import { useHealth } from "../_context/HealthContext";
 import SurveysTable from "./SurveysTable";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "../_context/ToastContext";
 import { Survey } from "../_lib/models";
 import SurveyService from "../_lib/survey";
 import Loading from "../_components/Loading";
+import ServiceUnavailable from "../_components/ServiceUnavailable";
+import { SERVICE_TYPES } from "../_lib/health";
 
 const PAGE_SIZE = 20;
 
 export default function Page() {
 	const { user } = useUser();
+	const { isSurveyServiceHealthy } = useHealth();
 	const searchParams = useSearchParams();
 	const router = useRouter();
 	const { showToast } = useToast();
@@ -149,9 +153,15 @@ export default function Page() {
 						Your <span className="text-blue-600">Surveys</span>
 					</h1>
 
+					<ServiceUnavailable
+						serviceName={SERVICE_TYPES.SURVEY}
+						message="The survey service is currently unavailable. You can view your surveys, but you won't be able to create, edit, or manage them until the service is back online."
+					/>
+
 					<SurveysTable
 						surveys={surveys}
 						loading={false}
+						disabled={!isSurveyServiceHealthy}
 						onTerminate={handleTerminate}
 						onDelete={handleDelete}
 						onRetryFailedEmails={handleRetryFailedEmails}
@@ -166,7 +176,18 @@ export default function Page() {
 					{surveys.length === 0 && (
 						<div>
 							No surveys found.{" "}
-							<Link href="/surveys/new" className="text-blue-600 underline">
+							<Link
+								href="/surveys/new"
+								className={`text-blue-600 underline ${
+									!isSurveyServiceHealthy ? "opacity-50 cursor-not-allowed" : ""
+								}`}
+								onClick={(e) => !isSurveyServiceHealthy && e.preventDefault()}
+								title={
+									!isSurveyServiceHealthy
+										? "The survey service is currently unavailable"
+										: undefined
+								}
+							>
 								Create one?
 							</Link>
 						</div>

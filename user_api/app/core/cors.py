@@ -5,11 +5,7 @@ from flask_cors import CORS
 def setup_cors(app: Flask) -> None:
     CORS(
         app,
-        resources={
-            r"/api/*": {
-                "origins": app.config.get("WEB_ORIGIN"),
-            }
-        },
+        resources={r"/*": {"origins": app.config.get("WEB_ORIGIN")}},
         supports_credentials=True,
         max_age=60 * 60 * 24,
     )

@@ -1,4 +1,4 @@
-import { surveyApiClient } from "./apiClient";
+import { surveyApiClient, withHealthCheck } from "./apiClient";
 import {
 	Survey,
 	CreateSurveyRequest,
@@ -8,6 +8,7 @@ import {
 	SurveyRespondRequest,
 	SurveyRespondResponse,
 } from "./models";
+import { SERVICE_TYPES } from "./health";
 
 export const SurveyService = {
 	getSurveys: async ({
@@ -21,58 +22,84 @@ export const SurveyService = {
 		};
 		if (name) params.name = name;
 
-		return await surveyApiClient.get<{
-			items: Survey[];
-			total: number;
-			page: number;
-			pageSize: number;
-		}>("/api/surveys", params);
+		return withHealthCheck(
+			() =>
+				surveyApiClient.get<{
+					items: Survey[];
+					total: number;
+					page: number;
+					pageSize: number;
+				}>("/api/surveys", params),
+			SERVICE_TYPES.SURVEY,
+		);
 	},
 
 	createSurvey: async (
 		data: CreateSurveyRequest,
 	): Promise<CreateSurveyResponse> => {
-		return await surveyApiClient.post<CreateSurveyResponse>(
-			"/api/surveys",
-			data,
+		return withHealthCheck(
+			() => surveyApiClient.post<CreateSurveyResponse>("/api/surveys", data),
+			SERVICE_TYPES.SURVEY,
 		);
 	},
 
 	terminateSurvey: async (id: string): Promise<void> => {
-		await surveyApiClient.post<void>(`/api/surveys/${id}/terminate`);
+		return withHealthCheck(
+			() => surveyApiClient.post<void>(`/api/surveys/${id}/terminate`),
+			SERVICE_TYPES.SURVEY,
+		);
 	},
 
 	deleteSurvey: async (id: string): Promise<void> => {
-		await surveyApiClient.delete<void>(`/api/surveys/${id}`);
+		return withHealthCheck(
+			() => surveyApiClient.delete<void>(`/api/surveys/${id}`),
+			SERVICE_TYPES.SURVEY,
+		);
 	},
 
 	getSurvey: async (id: string): Promise<Survey> => {
-		return await surveyApiClient.get<Survey>(`/api/surveys/${id}`);
+		return withHealthCheck(
+			() => surveyApiClient.get<Survey>(`/api/surveys/${id}`),
+			SERVICE_TYPES.SURVEY,
+		);
 	},
 
 	getSurveyResults: async (id: string): Promise<SurveyResultResponse> => {
-		return await surveyApiClient.get<SurveyResultResponse>(
-			`/api/surveys/${id}/results`,
+		return withHealthCheck(
+			() =>
+				surveyApiClient.get<SurveyResultResponse>(`/api/surveys/${id}/results`),
+			SERVICE_TYPES.SURVEY,
 		);
 	},
 
 	getPublicSurvey: async (id: string): Promise<PublicSurvey> => {
-		return await surveyApiClient.get<PublicSurvey>(`/api/surveys/${id}/public`);
+		return withHealthCheck(
+			() => surveyApiClient.get<PublicSurvey>(`/api/surveys/${id}/public`),
+			SERVICE_TYPES.SURVEY,
+		);
 	},
 
 	respondSurvey: async (
 		surveyId: string,
 		data: SurveyRespondRequest,
 	): Promise<SurveyRespondResponse> => {
-		return await surveyApiClient.post<SurveyRespondResponse>(
-			`/api/surveys/${surveyId}/respond`,
-			data,
+		return withHealthCheck(
+			() =>
+				surveyApiClient.post<SurveyRespondResponse>(
+					`/api/surveys/${surveyId}/respond`,
+					data,
+				),
+			SERVICE_TYPES.SURVEY,
 		);
 	},
 
 	retrySurveyFailedEmails: async (surveyId: string): Promise<void> => {
-		await surveyApiClient.post<void>(
-			`/api/surveys/${surveyId}/retry-failed-emails`,
+		return withHealthCheck(
+			() =>
+				surveyApiClient.post<void>(
+					`/api/surveys/${surveyId}/retry-failed-emails`,
+				),
+			SERVICE_TYPES.SURVEY,
 		);
 	},
 };

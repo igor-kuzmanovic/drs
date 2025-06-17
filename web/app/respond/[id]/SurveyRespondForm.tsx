@@ -7,8 +7,10 @@ import Action from "../../_components/Action";
 import Alert from "../../_components/Alert";
 import { useForm } from "../../_hooks/useForm";
 import { useToast } from "../../_context/ToastContext";
+import { useHealth } from "../../_context/HealthContext";
 import SurveyService from "../../_lib/survey";
 import { SurveyAnswer, SurveyAnswerType } from "../../_lib/models";
+import { SERVICE_TYPES } from "../../_lib/health";
 
 export function SurveyRespondForm({
 	surveyId,
@@ -16,17 +18,20 @@ export function SurveyRespondForm({
 	prefillEmail = "",
 	prefillAnswer = "",
 	token = "",
+	disabled = false,
 }: {
 	surveyId: string;
 	isAnonymous: boolean;
 	prefillEmail?: string;
 	prefillAnswer?: string;
 	token?: string;
+	disabled?: boolean;
 }) {
 	const effectiveEmail = prefillEmail;
 	const [submitted, setSubmitted] = useState(false);
 	const autoSubmitted = useRef(false);
 	const { showToast } = useToast();
+	const { isSurveyServiceHealthy } = useHealth();
 
 	const initialValues = {
 		email: effectiveEmail,
@@ -87,7 +92,8 @@ export function SurveyRespondForm({
 		// eslint-disable-next-line
 	}, [token, values.answer]);
 
-	const isDisabled = loading || submitted;
+	const isDisabled =
+		loading || submitted || disabled || !isSurveyServiceHealthy;
 
 	return (
 		<form
@@ -142,6 +148,10 @@ export function SurveyRespondForm({
 				fullWidth
 				loading={loading}
 				disabled={isDisabled || !!prefillAnswer}
+				requiredService={
+					!isSurveyServiceHealthy ? SERVICE_TYPES.SURVEY : undefined
+				}
+				disabledMessage="Survey response submission is currently unavailable"
 			>
 				Submit
 			</Action>

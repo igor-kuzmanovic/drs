@@ -6,10 +6,12 @@ import Input from "../_components/Input";
 import { Survey, SurveyStatus } from "../_lib/models";
 import { StatusBadge } from "../_components/StatusBadge";
 import Pagination from "../_components/Pagination";
+import { SERVICE_TYPES } from "../_lib/health";
 
 type SurveysTableProps = {
 	surveys: Survey[];
 	loading?: boolean;
+	disabled?: boolean;
 	onTerminate: (id: string) => void;
 	onDelete: (id: string) => void;
 	onRetryFailedEmails: (surveyId: string) => void;
@@ -24,6 +26,7 @@ type SurveysTableProps = {
 export default function SurveysTable({
 	surveys,
 	loading,
+	disabled = false,
 	onTerminate,
 	onDelete,
 	onRetryFailedEmails,
@@ -93,6 +96,7 @@ export default function SurveysTable({
 						value={searchInput}
 						onChange={(e) => setSearchInput(e.target.value)}
 						className="pr-10"
+						disabled={disabled}
 					/>
 					{searchInput && (
 						<button
@@ -101,6 +105,7 @@ export default function SurveysTable({
 							className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
 							aria-label="Clear search"
 							tabIndex={0}
+							disabled={disabled}
 						>
 							<X className="w-4 h-4" />
 						</button>
@@ -111,6 +116,7 @@ export default function SurveysTable({
 					variant="secondary"
 					size="sm"
 					className="h-[42px] px-4"
+					disabled={disabled}
 				>
 					Search
 				</Action>
@@ -189,6 +195,7 @@ export default function SurveysTable({
 												href={`/surveys/${survey.id}`}
 												variant="primary"
 												size="sm"
+												requiredService={SERVICE_TYPES.SURVEY}
 											>
 												View
 											</Action>
@@ -200,9 +207,11 @@ export default function SurveysTable({
 														loading={terminatingId === survey.id}
 														disabled={
 															terminatingId === survey.id ||
-															deletingId === survey.id
+															deletingId === survey.id ||
+															disabled
 														}
 														onClick={() => handleTerminate(survey.id)}
+														requiredService={SERVICE_TYPES.SURVEY}
 													>
 														{terminatingId === survey.id
 															? "Terminating..."
@@ -215,12 +224,14 @@ export default function SurveysTable({
 																size="sm"
 																loading={retryingId === survey.id}
 																disabled={
-																	retryingId !== null &&
-																	retryingId !== survey.id
+																	(retryingId !== null &&
+																		retryingId !== survey.id) ||
+																	disabled
 																}
 																onClick={() =>
 																	handleRetryFailedEmails(survey.id)
 																}
+																requiredService={SERVICE_TYPES.SURVEY}
 															>
 																{retryingId === survey.id
 																	? "Retrying Failed Emails..."
@@ -237,9 +248,11 @@ export default function SurveysTable({
 														deletingId !== null ||
 														survey.status !== SurveyStatus.Closed ||
 														deletingId === survey.id ||
-														terminatingId === survey.id
+														terminatingId === survey.id ||
+														disabled
 													}
 													onClick={() => handleDelete(survey.id)}
+													requiredService={SERVICE_TYPES.SURVEY}
 												>
 													{deletingId === survey.id ? "Deleting..." : "Delete"}
 												</Action>

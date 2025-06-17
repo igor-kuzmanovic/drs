@@ -8,12 +8,12 @@ https://api.localhost {
     level INFO
   }
 
-	handle_path /health/user {
+	handle /health/user {
 		rewrite * /health/ready
 		reverse_proxy user_api:5000
 	}
 
-	handle_path /health/survey {
+	handle /health/survey {
 		rewrite * /health/ready
 		reverse_proxy survey_api:5000
 	}

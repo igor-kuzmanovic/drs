@@ -1,24 +1,35 @@
-import { userApiClient } from "./apiClient";
+import { userApiClient, withHealthCheck } from "./apiClient";
 import { User, UserProfileUpdate, LoginRequest, SignupRequest } from "./models";
+import { SERVICE_TYPES } from "./health";
 
 export const UserService = {
 	getUser: async (): Promise<User> => {
-		return await userApiClient.get<User>("/api/user");
+		return withHealthCheck(
+			() => userApiClient.get<User>("/api/user"),
+			SERVICE_TYPES.USER,
+		);
 	},
 
 	updateUser: async (data: UserProfileUpdate): Promise<User> => {
-		return await userApiClient.put<User>("/api/user", data);
+		return withHealthCheck(
+			() => userApiClient.put<User>("/api/user", data),
+			SERVICE_TYPES.USER,
+		);
 	},
 
 	login: async (credentials: LoginRequest): Promise<{ token: string }> => {
-		return await userApiClient.post<{ token: string }>(
-			"/api/auth/login",
-			credentials,
+		return withHealthCheck(
+			() =>
+				userApiClient.post<{ token: string }>("/api/auth/login", credentials),
+			SERVICE_TYPES.USER,
 		);
 	},
 
 	signup: async (data: SignupRequest): Promise<{ token: string }> => {
-		return await userApiClient.post<{ token: string }>("/api/users", data);
+		return withHealthCheck(
+			() => userApiClient.post<{ token: string }>("/api/users", data),
+			SERVICE_TYPES.USER,
+		);
 	},
 };
 

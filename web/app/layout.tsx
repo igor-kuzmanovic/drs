@@ -9,6 +9,7 @@ import Topbar from "./_components/Topbar";
 import Loading from "./_components/Loading";
 import { ToastProvider } from "./_context/ToastContext";
 import ErrorBoundary from "./_components/ErrorBoundary";
+import { HealthProvider } from "./_context/HealthContext";
 
 const inter = Inter({
 	variable: "--font-inter",
@@ -57,7 +58,9 @@ export default function RootLayout({
 			<body className={`${inter.variable} antialiased bg-gray-50 min-h-screen`}>
 				<ToastProvider>
 					<UserProvider>
-						<AppLayout>{children}</AppLayout>
+						<HealthProvider>
+							<AppLayout>{children}</AppLayout>
+						</HealthProvider>
 					</UserProvider>
 				</ToastProvider>
 			</body>

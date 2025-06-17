@@ -2,6 +2,8 @@ import React from "react";
 import clsx from "clsx";
 import Link from "next/link";
 import { Loader } from "lucide-react";
+import { useHealth } from "../_context/HealthContext";
+import { SERVICE_TYPES, ServiceType } from "../_lib/health";
 
 type CommonProps = {
 	children: React.ReactNode;
@@ -10,6 +12,8 @@ type CommonProps = {
 	fullWidth?: boolean;
 	loading?: boolean;
 	className?: string;
+	requiredService?: ServiceType;
+	disabledMessage?: string;
 };
 
 type ActionAsButton = CommonProps &
@@ -40,15 +44,30 @@ export default function Action(props: ActionProps) {
 		fullWidth = false,
 		loading = false,
 		className = "",
+		requiredService,
+		disabledMessage = "This service is currently unavailable",
 		...rest
 	} = props;
+
+	const { isUserServiceHealthy, isSurveyServiceHealthy } = useHealth();
+
+	const isServiceDown =
+		requiredService &&
+		((requiredService === SERVICE_TYPES.USER && !isUserServiceHealthy) ||
+			(requiredService === SERVICE_TYPES.SURVEY && !isSurveyServiceHealthy));
 
 	const sizeClasses = getSizeClasses(size);
 
 	const isDisabled =
 		"href" in props && props.href
-			? loading // Only loading disables a link
-			: !!(props as ActionAsButton).disabled || loading;
+			? loading || isServiceDown
+			: !!(props as ActionAsButton).disabled || loading || isServiceDown;
+
+	const tooltipMessage = isServiceDown
+		? disabledMessage
+		: isDisabled && (props as ActionAsButton).title
+			? (props as ActionAsButton).title
+			: undefined;
 
 	const classes = clsx(
 		"border flex items-center justify-center gap-2 font-medium transition-colors relative",
@@ -81,6 +100,7 @@ export default function Action(props: ActionProps) {
 				className={classes}
 				tabIndex={isDisabled ? -1 : 0}
 				aria-disabled={isDisabled}
+				title={tooltipMessage}
 				{...linkProps}
 				onClick={(e) => {
 					if (isDisabled) {
@@ -103,6 +123,7 @@ export default function Action(props: ActionProps) {
 			type={buttonProps.type || "button"}
 			disabled={isDisabled}
 			className={classes}
+			title={tooltipMessage}
 			{...buttonProps}
 		>
 			{loading && spinner}

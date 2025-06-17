@@ -13,10 +13,14 @@ import { Clipboard } from "lucide-react";
 import { Inbox } from "lucide-react";
 import { SurveyPieChart } from "./SurveyPieChart";
 import { SurveyDailyChart } from "./SurveyDailyChart";
+import { useHealth } from "../../../_context/HealthContext";
+import ServiceUnavailable from "../../../_components/ServiceUnavailable";
+import { SERVICE_TYPES } from "../../../_lib/health";
 
 export default function SurveyDetailPage() {
 	const params = useParams<{ id: string }>();
 	const id = params.id;
+	const { isSurveyServiceHealthy } = useHealth();
 
 	const [survey, setSurvey] = useState<Survey | null>(null);
 	const [results, setResults] = useState<SurveyResultResponse | null>(null);
@@ -85,6 +89,12 @@ export default function SurveyDetailPage() {
 			<h1 className="text-3xl font-bold mb-6 text-center">
 				<span className="text-blue-600">{survey.name}</span> Details
 			</h1>
+
+			<ServiceUnavailable
+				serviceName={SERVICE_TYPES.SURVEY}
+				message="The survey service is currently unavailable. You can view survey details, but some features may not work properly until the service is back online."
+			/>
+
 			<div className="mb-6">
 				<SurveyDetails survey={survey} />
 				<div className="flex items-center gap-2 mt-2">
@@ -98,13 +108,15 @@ export default function SurveyDetailPage() {
 						label={null}
 						inputSize="md"
 						wrapperClassName="flex-1"
+						disabled={!isSurveyServiceHealthy}
 					/>
 					<Action
 						type="button"
 						variant="secondary"
 						size="md"
 						onClick={handleCopy}
-						disabled={!shareUrl}
+						disabled={!shareUrl || !isSurveyServiceHealthy}
+						requiredService={SERVICE_TYPES.SURVEY}
 					>
 						<Clipboard size={16} />
 						{copied ? "Copied!" : "Copy link"}

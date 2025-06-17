@@ -2,6 +2,8 @@ import sys
 import logging
 
 from flask import Flask
+from flask_cors import CORS
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from .core.cors import setup_cors
 from .core.db import setup_db
@@ -19,6 +21,9 @@ from .routes.surveys_get import surveys_get_blueprint
 # Create a Flask app
 app = Flask(__name__)
 app.config.from_prefixed_env()
+
+# Set up proxy handling
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 
 # Configure logger to log to stdout
 handler = logging.StreamHandler(sys.stdout)

@@ -7,13 +7,16 @@ import Alert from "../_components/Alert";
 import { useForm } from "../_hooks/useForm";
 import { useToast } from "../_context/ToastContext";
 import AuthService from "../_lib/auth";
+import { SERVICE_TYPES } from "../_lib/health";
 
 export default function LoginForm({
 	onUserUpdated,
 	onSuccess,
+	disabled = false,
 }: {
 	onUserUpdated: () => Promise<void>;
 	onSuccess: () => void;
+	disabled?: boolean;
 }) {
 	const { showToast } = useToast();
 
@@ -61,7 +64,7 @@ export default function LoginForm({
 					placeholder="john.doe@email.com"
 					value={values.email}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={formErrors.email}
 				/>
 				<Input
@@ -73,11 +76,18 @@ export default function LoginForm({
 					placeholder="p@ssw0rd"
 					value={values.password}
 					onChange={handleChange}
-					disabled={loading}
+					disabled={loading || disabled}
 					error={formErrors.password}
 				/>
 			</div>
-			<Action type="submit" fullWidth loading={loading}>
+			<Action
+				type="submit"
+				fullWidth
+				loading={loading}
+				disabled={disabled}
+				requiredService={disabled ? SERVICE_TYPES.USER : undefined}
+				disabledMessage="Login is currently unavailable"
+			>
 				Log In
 			</Action>
 			{error && <Alert type="error">{error}</Alert>}

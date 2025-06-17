@@ -6,12 +6,12 @@ from ..core.db import db
 health_blueprint = Blueprint("health_routes", __name__)
 
 
-@health_blueprint.route("/health/live", methods=["GET"])
+@health_blueprint.route("/health/live", methods=["GET", "OPTIONS"])
 def health_live():
     return jsonify({"status": "alive"}), 200
 
 
-@health_blueprint.route("/health/ready", methods=["GET"])
+@health_blueprint.route("/health/ready", methods=["GET", "OPTIONS"])
 def health_ready():
     try:
         db.session.execute(text("SELECT 1"))
