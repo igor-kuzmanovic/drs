@@ -1,145 +1,143 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useUser } from "../_context/UserContext";
 import { useHealth } from "../_context/HealthContext";
 import SurveysTable from "./SurveysTable";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useToast } from "../_context/ToastContext";
+import { useSearchParams } from "next/navigation";
+import { TOAST_TYPES, useToast } from "../_context/ToastContext";
 import { Survey } from "../_lib/models";
 import SurveyService from "../_lib/survey";
 import Loading from "../_components/Loading";
 import ServiceUnavailable from "../_components/ServiceUnavailable";
 import { SERVICE_TYPES } from "../_lib/health";
+import { printError } from "../_lib/error";
 
 const PAGE_SIZE = 20;
 
 export default function Page() {
-	const { user } = useUser();
 	const { isSurveyServiceHealthy } = useHealth();
 	const searchParams = useSearchParams();
-	const router = useRouter();
 	const { showToast } = useToast();
 
 	const [surveys, setSurveys] = useState<Survey[]>([]);
 	const [total, setTotal] = useState(0);
 	const [loading, setLoading] = useState(false);
+	const [searchName, setSearchName] = useState("");
+	const [currentPage, setCurrentPage] = useState(1);
 
-	// Get search parameters
-	const name = useMemo(() => searchParams.get("name") || "", [searchParams]);
-	const page = useMemo(
-		() => parseInt(searchParams.get("page") || "1", 10),
-		[searchParams],
+	const fetchSurveys = useCallback(
+		(name: string, page: number) => {
+			setLoading(true);
+			SurveyService.getSurveys({ name, page, pageSize: PAGE_SIZE })
+				.then((data) => {
+					setSurveys(data.items);
+					setTotal(data.total);
+				})
+				.catch((err) => {
+					showToast(printError(err), TOAST_TYPES.ERROR);
+					setSurveys([]);
+					setTotal(0);
+				})
+				.finally(() => setLoading(false));
+		},
+		[showToast],
 	);
 
-	// Define fetchSurveys first (to be used in other callbacks)
-	const fetchSurveys = useCallback(async () => {
-		if (!user) return;
-
-		setLoading(true);
-		try {
-			const data = await SurveyService.getSurveys({
-				name,
-				page,
-				pageSize: PAGE_SIZE,
-			});
-
-			setSurveys(data.items);
-			setTotal(data.total);
-		} catch (err) {
-			showToast(err instanceof Error ? err.message : String(err), "error");
-			setSurveys([]);
-			setTotal(0);
-		} finally {
-			setLoading(false);
-		}
-	}, [user, name, page, showToast]);
-
-	// Navigation helpers
-	const handleSearch = useCallback(
-		(searchValue: string) => {
+	const updateUrlAndFetch = useCallback(
+		(name: string, page: number) => {
 			const params = new URLSearchParams(searchParams.toString());
-			if (searchValue) {
-				params.set("name", searchValue);
+
+			if (name) {
+				params.set("name", name);
 			} else {
 				params.delete("name");
 			}
-			params.set("page", "1");
-			router.replace(`?${params.toString()}`);
+
+			params.set("page", String(page));
+			window.history.replaceState(null, "", `?${params.toString()}`);
+
+			setSearchName(name);
+			setCurrentPage(page);
+			fetchSurveys(name, page);
 		},
-		[router, searchParams],
+		[fetchSurveys, searchParams],
+	);
+
+	const handleSearch = useCallback(
+		(searchValue: string) => updateUrlAndFetch(searchValue, 1),
+		[updateUrlAndFetch],
 	);
 
 	const handlePageChange = useCallback(
-		(newPage: number) => {
-			const params = new URLSearchParams(searchParams.toString());
-			params.set("page", String(newPage));
-			router.replace(`?${params.toString()}`);
-		},
-		[router, searchParams],
+		(newPage: number) => updateUrlAndFetch(searchName, newPage),
+		[searchName, updateUrlAndFetch],
 	);
 
-	// Survey action handlers
-	const handleTerminate = useCallback(
-		async (id: string) => {
-			if (!confirm("Are you sure you want to terminate this survey?")) return;
+	const handleApiAction = useCallback(
+		async (
+			action: (id: string) => Promise<unknown>,
+			id: string,
+			confirmMessage: string,
+			successMessage: string,
+		) => {
+			if (!confirm(confirmMessage)) return;
 
 			try {
-				await SurveyService.terminateSurvey(id);
-				showToast("Survey terminated successfully", "success");
-				fetchSurveys();
+				await action(id);
+				showToast(successMessage, TOAST_TYPES.SUCCESS);
+				fetchSurveys(searchName, currentPage);
 			} catch (err) {
-				showToast(err instanceof Error ? err.message : String(err), "error");
+				showToast(printError(err), TOAST_TYPES.ERROR);
 			}
 		},
-		[showToast, fetchSurveys],
+		[fetchSurveys, showToast, searchName, currentPage],
+	);
+
+	const handleTerminate = useCallback(
+		(id: string) =>
+			handleApiAction(
+				SurveyService.terminateSurvey,
+				id,
+				"Are you sure you want to terminate this survey?",
+				"Survey terminated successfully",
+			),
+		[handleApiAction],
 	);
 
 	const handleDelete = useCallback(
-		async (id: string) => {
-			if (
-				!confirm(
-					"Are you sure you want to delete this survey? This cannot be undone.",
-				)
-			)
-				return;
-
-			try {
-				await SurveyService.deleteSurvey(id);
-				showToast("Survey deleted successfully", "success");
-				fetchSurveys();
-			} catch (err) {
-				showToast(err instanceof Error ? err.message : String(err), "error");
-			}
-		},
-		[showToast, fetchSurveys],
+		(id: string) =>
+			handleApiAction(
+				SurveyService.deleteSurvey,
+				id,
+				"Are you sure you want to delete this survey? This cannot be undone.",
+				"Survey deleted successfully",
+			),
+		[handleApiAction],
 	);
 
 	const handleRetryFailedEmails = useCallback(
-		async (id: string) => {
-			if (
-				!confirm(
-					"Are you sure you want to retry sending failed emails for this survey? This may take some time.",
-				)
-			)
-				return;
-
-			try {
-				await SurveyService.retrySurveyFailedEmails(id);
-				showToast("Retry started for failed emails", "success");
-				fetchSurveys();
-			} catch (err) {
-				showToast(err instanceof Error ? err.message : String(err), "error");
-			}
-		},
-		[showToast, fetchSurveys],
+		(id: string) =>
+			handleApiAction(
+				SurveyService.retrySurveyFailedEmails,
+				id,
+				"Are you sure you want to retry sending failed emails for this survey? This may take some time.",
+				"Retry started for failed emails",
+			),
+		[handleApiAction],
 	);
 
-	// Initial data load
 	useEffect(() => {
-		fetchSurveys();
-	}, [fetchSurveys]);
+		const params = new URLSearchParams(window.location.search);
+		const urlName = params.get("name") || "";
+		const urlPage = parseInt(params.get("page") || "1", 10);
+
+		if (window.location.search === "" || window.location.search === "?") {
+			updateUrlAndFetch("", 1);
+		} else {
+			updateUrlAndFetch(urlName, urlPage);
+		}
+	}, [updateUrlAndFetch]);
 
 	return (
 		<div className="flex flex-col gap-8 min-h-[calc(100vh-64px)]">
@@ -165,9 +163,9 @@ export default function Page() {
 						onTerminate={handleTerminate}
 						onDelete={handleDelete}
 						onRetryFailedEmails={handleRetryFailedEmails}
-						searchValue={name}
+						searchValue={searchName}
 						onSearch={handleSearch}
-						page={page}
+						page={currentPage}
 						pageSize={PAGE_SIZE}
 						total={total}
 						onPageChange={handlePageChange}
