@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { SurveyAnswer, SurveyResultResponse } from "../../../_lib/models";
+import { SURVEY_ANSWER, SurveyResultResponse } from "../../../_lib/models";
 
 export default function SurveyResultsTable({
 	responses,
@@ -26,11 +26,11 @@ export default function SurveyResultsTable({
 								<td className="p-2">
 									{(() => {
 										switch (resp.answer) {
-											case SurveyAnswer.Yes:
+											case SURVEY_ANSWER.YES:
 												return "Yes";
-											case SurveyAnswer.No:
+											case SURVEY_ANSWER.NO:
 												return "No";
-											case SurveyAnswer.CantAnswer:
+											case SURVEY_ANSWER.CANT_ANSWER:
 												return "Can't answer";
 											default:
 												return resp.answer;

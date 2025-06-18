@@ -9,7 +9,7 @@ import { useForm } from "../../_hooks/useForm";
 import { TOAST_TYPES, useToast } from "../../_context/ToastContext";
 import { useHealth } from "../../_context/HealthContext";
 import SurveyService from "../../_lib/survey";
-import { SurveyAnswer, SurveyAnswerType } from "../../_lib/models";
+import { SURVEY_ANSWER, SurveyAnswerType } from "../../_lib/models";
 import { SERVICE_TYPES } from "../../_lib/health";
 import { printError } from "../../_lib/error";
 
@@ -82,9 +82,9 @@ export function SurveyRespondForm({
 	useEffect(() => {
 		if (
 			token &&
-			(values.answer === SurveyAnswer.Yes ||
-				values.answer === SurveyAnswer.No ||
-				values.answer === SurveyAnswer.CantAnswer) &&
+			(values.answer === SURVEY_ANSWER.YES ||
+				values.answer === SURVEY_ANSWER.NO ||
+				values.answer === SURVEY_ANSWER.CANT_ANSWER) &&
 			!submitted &&
 			!autoSubmitted.current
 		) {
@@ -121,27 +121,27 @@ export function SurveyRespondForm({
 					id="answer-yes"
 					name="answer"
 					label="Yes"
-					value={SurveyAnswer.Yes}
-					checked={values.answer === SurveyAnswer.Yes}
-					onChange={() => setValue("answer", SurveyAnswer.Yes)}
+					value={SURVEY_ANSWER.YES}
+					checked={values.answer === SURVEY_ANSWER.YES}
+					onChange={() => setValue("answer", SURVEY_ANSWER.YES)}
 					disabled={isDisabled || !!prefillAnswer}
 				/>
 				<Radio
 					id="answer-no"
 					name="answer"
 					label="No"
-					value={SurveyAnswer.No}
-					checked={values.answer === SurveyAnswer.No}
-					onChange={() => setValue("answer", SurveyAnswer.No)}
+					value={SURVEY_ANSWER.NO}
+					checked={values.answer === SURVEY_ANSWER.NO}
+					onChange={() => setValue("answer", SURVEY_ANSWER.NO)}
 					disabled={isDisabled || !!prefillAnswer}
 				/>
 				<Radio
 					id="answer-cant"
 					name="answer"
 					label="Can't answer"
-					value={SurveyAnswer.CantAnswer}
-					checked={values.answer === SurveyAnswer.CantAnswer}
-					onChange={() => setValue("answer", SurveyAnswer.CantAnswer)}
+					value={SURVEY_ANSWER.CANT_ANSWER}
+					checked={values.answer === SURVEY_ANSWER.CANT_ANSWER}
+					onChange={() => setValue("answer", SURVEY_ANSWER.CANT_ANSWER)}
 					disabled={isDisabled || !!prefillAnswer}
 				/>
 			</div>

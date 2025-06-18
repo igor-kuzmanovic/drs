@@ -45,20 +45,27 @@ export default function SignupForm({
 	const { showToast } = useToast();
 
 	const validate = (vals: FormValues) => {
-		const errs: Partial<FormValues> = {};
-		if (vals.firstName.length <= 2) errs.firstName = "Invalid first name";
-		if (vals.lastName.length <= 2) errs.lastName = "Invalid last name";
-		if (vals.address.length <= 2) errs.address = "Invalid address";
-		if (vals.city.length <= 2) errs.city = "Invalid city";
-		if (vals.country.length <= 2) errs.country = "Invalid country";
-		if (vals.phone.length <= 2) errs.phone = "Invalid phone";
-		if (vals.email.length <= 2) errs.email = "Invalid email";
-		if (vals.password.length <= 2) errs.password = "Invalid password";
+		const errs: Record<string, string> = {};
+		if (vals.firstName.length <= 2)
+			errs.firstName = "First name must be at least 3 characters";
+		if (vals.lastName.length <= 2)
+			errs.lastName = "Last name must be at least 3 characters";
+		if (vals.address.length <= 2)
+			errs.address = "Address must be at least 3 characters";
+		if (vals.city.length <= 2) errs.city = "City must be at least 3 characters";
+		if (vals.country.length <= 2)
+			errs.country = "Country must be at least 3 characters";
+		if (vals.phone.length <= 2)
+			errs.phone = "Phone must be at least 3 characters";
+		if (vals.email.length <= 2)
+			errs.email = "Please enter a valid email address";
+		if (vals.password.length <= 2)
+			errs.password = "Password must be at least 3 characters";
 		if (
 			vals.passwordConfirm.length <= 2 ||
 			vals.passwordConfirm !== vals.password
 		)
-			errs.passwordConfirm = "Invalid confirm password";
+			errs.passwordConfirm = "Passwords do not match";
 		return errs;
 	};
 

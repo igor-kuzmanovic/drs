@@ -1,12 +1,12 @@
 import clsx from "clsx";
-import { SurveyStatusType, SurveyStatus } from "../_lib/models";
+import { SurveyStatusType, SURVEY_STATUS } from "../_lib/models";
 
 export function StatusBadge({ status }: { status: SurveyStatusType }) {
 	const color = (() => {
 		switch (status) {
-			case SurveyStatus.Active:
+			case SURVEY_STATUS.ACTIVE:
 				return "bg-green-100 text-green-800 border-green-300";
-			case SurveyStatus.Closed:
+			case SURVEY_STATUS.CLOSED:
 				return "bg-gray-100 text-gray-700 border-gray-300";
 			default:
 				return "bg-gray-100 text-gray-700 border-gray-300";

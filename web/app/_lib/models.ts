@@ -72,20 +72,22 @@ export type PublicSurvey = {
 	updatedAt: string;
 };
 
-export const SurveyStatus = {
-	Active: "ACTIVE",
-	Closed: "CLOSED",
+export const SURVEY_STATUS = {
+	ACTIVE: "ACTIVE",
+	CLOSED: "CLOSED",
 } as const;
 
-export type SurveyStatusType = (typeof SurveyStatus)[keyof typeof SurveyStatus];
+export type SurveyStatusType =
+	(typeof SURVEY_STATUS)[keyof typeof SURVEY_STATUS];
 
-export const SurveyAnswer = {
-	Yes: "YES",
-	No: "NO",
-	CantAnswer: "CANT_ANSWER",
+export const SURVEY_ANSWER = {
+	YES: "YES",
+	NO: "NO",
+	CANT_ANSWER: "CANT_ANSWER",
 } as const;
 
-export type SurveyAnswerType = (typeof SurveyAnswer)[keyof typeof SurveyAnswer];
+export type SurveyAnswerType =
+	(typeof SURVEY_ANSWER)[keyof typeof SURVEY_ANSWER];
 
 export type SurveyRespondRequest =
 	| { email: string; answer: SurveyAnswerType }

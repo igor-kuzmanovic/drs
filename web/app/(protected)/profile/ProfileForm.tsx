@@ -44,15 +44,20 @@ export default function ProfileForm({
 	const { showToast } = useToast();
 
 	const validate = (vals: FormValues) => {
-		const errs: Partial<FormValues> = {};
-		if (vals.firstName.length < 3) errs.firstName = "Invalid first name";
-		if (vals.lastName.length < 3) errs.lastName = "Invalid last name";
-		if (vals.address.length < 3) errs.address = "Invalid address";
-		if (vals.city.length < 3) errs.city = "Invalid city";
-		if (vals.country.length < 3) errs.country = "Invalid country";
-		if (vals.phone.length < 3) errs.phone = "Invalid phone";
+		const errs: Record<string, string> = {};
+		if (vals.firstName.length < 3)
+			errs.firstName = "First name must be at least 3 characters";
+		if (vals.lastName.length < 3)
+			errs.lastName = "Last name must be at least 3 characters";
+		if (vals.address.length < 3)
+			errs.address = "Address must be at least 3 characters";
+		if (vals.city.length < 3) errs.city = "City must be at least 3 characters";
+		if (vals.country.length < 3)
+			errs.country = "Country must be at least 3 characters";
+		if (vals.phone.length < 3)
+			errs.phone = "Phone must be at least 3 characters";
 		if (vals.password && vals.password.length < 3)
-			errs.password = "Password too short";
+			errs.password = "Password must be at least 3 characters";
 		if (vals.password && vals.password !== vals.passwordConfirm)
 			errs.passwordConfirm = "Passwords do not match";
 		return errs;

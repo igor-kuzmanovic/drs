@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import Action from "../_components/Action";
 import Loading from "../_components/Loading";
 import Input from "../_components/Input";
-import { Survey, SurveyStatus } from "../_lib/models";
+import { Survey, SURVEY_STATUS } from "../_lib/models";
 import { StatusBadge } from "../_components/StatusBadge";
 import Pagination from "../_components/Pagination";
 import { SERVICE_TYPES } from "../_lib/health";
@@ -199,7 +199,7 @@ export default function SurveysTable({
 											>
 												View
 											</Action>
-											{survey.status !== SurveyStatus.Closed ? (
+											{survey.status !== SURVEY_STATUS.CLOSED ? (
 												<>
 													<Action
 														variant="secondary"
@@ -246,7 +246,7 @@ export default function SurveysTable({
 													loading={deletingId === survey.id}
 													disabled={
 														deletingId !== null ||
-														survey.status !== SurveyStatus.Closed ||
+														survey.status !== SURVEY_STATUS.CLOSED ||
 														deletingId === survey.id ||
 														terminatingId === survey.id ||
 														disabled

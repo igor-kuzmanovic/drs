@@ -2,7 +2,7 @@
 
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { PublicSurvey, SurveyStatus } from "../../_lib/models";
+import { PublicSurvey, SURVEY_STATUS } from "../../_lib/models";
 import SurveyService from "../../_lib/survey";
 import Loading from "../../_components/Loading";
 import { SurveyRespondForm } from "./SurveyRespondForm";
@@ -41,7 +41,7 @@ export default function RespondSurveyPage() {
 		);
 	if (!survey)
 		return <div className="text-center text-lg mt-12">Survey not found.</div>;
-	if (survey.status === SurveyStatus.Closed) {
+	if (survey.status === SURVEY_STATUS.CLOSED) {
 		return (
 			<div className="flex flex-col items-center justify-center min-h-[60vh]">
 				<h1 className="text-3xl font-bold mb-4 text-center">{survey.name}</h1>
