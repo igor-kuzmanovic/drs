@@ -1,4 +1,5 @@
 import { useState, ChangeEvent, FormEvent } from "react";
+import { printError } from "../_lib/error";
 
 type ValidationFunction<T> = (values: T) => Partial<Record<keyof T, string>>;
 
@@ -46,13 +47,7 @@ export function useForm<T extends Record<string, unknown>>({
 		try {
 			await onSubmit(values);
 		} catch (err) {
-			if (typeof err === "string") {
-				setError(err);
-			} else if (err instanceof Error) {
-				setError(err.message);
-			} else {
-				setError("An unknown error occurred");
-			}
+			setError(printError(err));
 		} finally {
 			setLoading(false);
 		}

@@ -10,8 +10,9 @@ import {
 import { User } from "../_lib/models";
 import AuthService from "../_lib/auth";
 import UserService from "../_lib/user";
-import { useToast } from "./ToastContext";
+import { TOAST_TYPES, useToast } from "./ToastContext";
 import { useRouter } from "next/navigation";
+import { printError } from "../_lib/error";
 
 type UserContextType = {
 	user: User | null;
@@ -58,21 +59,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 			) {
 				AuthService.removeToken();
 				setUser(null);
-				showToast("Session expired. Please log in again.", "error");
+				showToast("Session expired. Please log in again.", TOAST_TYPES.ERROR);
 				router.replace("/login");
 			} else {
 				setUser(null);
-				const errorMessage =
-					err &&
-					typeof err === "object" &&
-					"data" in err &&
-					typeof err.data === "object" &&
-					err.data &&
-					"error" in err.data
-						? String(err.data.error)
-						: "Failed to load user data";
+				const errorMessage = printError(err);
 				setError(errorMessage);
-				showToast(errorMessage, "error");
+				showToast(errorMessage, TOAST_TYPES.ERROR);
 			}
 		} finally {
 			setLoading(false);

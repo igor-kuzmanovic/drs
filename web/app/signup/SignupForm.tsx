@@ -6,7 +6,7 @@ import Action from "../_components/Action";
 import Alert from "../_components/Alert";
 import { useForm } from "../_hooks/useForm";
 import AuthService from "../_lib/auth";
-import { useToast } from "../_context/ToastContext";
+import { TOAST_TYPES, useToast } from "../_context/ToastContext";
 import { SERVICE_TYPES } from "../_lib/health";
 
 type FormValues = {
@@ -69,7 +69,7 @@ export default function SignupForm({
 			onSubmit: async (formValues) => {
 				await AuthService.signup(formValues);
 				await onUserUpdated();
-				showToast("Signup successful!", "success");
+				showToast("Signup successful!", TOAST_TYPES.SUCCESS);
 				onSuccess();
 			},
 		});

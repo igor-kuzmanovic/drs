@@ -6,11 +6,12 @@ import Radio from "../../_components/Radio";
 import Action from "../../_components/Action";
 import Alert from "../../_components/Alert";
 import { useForm } from "../../_hooks/useForm";
-import { useToast } from "../../_context/ToastContext";
+import { TOAST_TYPES, useToast } from "../../_context/ToastContext";
 import { useHealth } from "../../_context/HealthContext";
 import SurveyService from "../../_lib/survey";
 import { SurveyAnswer, SurveyAnswerType } from "../../_lib/models";
 import { SERVICE_TYPES } from "../../_lib/health";
+import { printError } from "../../_lib/error";
 
 export function SurveyRespondForm({
 	surveyId,
@@ -64,12 +65,13 @@ export function SurveyRespondForm({
 					});
 				}
 
-				showToast("Thank you for your response!", "success");
+				showToast("Thank you for your response!", TOAST_TYPES.SUCCESS);
 				setSubmitted(true);
 			} catch (err) {
 				if (err instanceof Error && err.message === "Already responded") {
 					setSubmitted(true);
 				} else {
+					showToast(printError(err), TOAST_TYPES.ERROR);
 					throw err;
 				}
 			}

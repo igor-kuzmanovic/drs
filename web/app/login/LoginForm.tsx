@@ -5,7 +5,7 @@ import Input from "../_components/Input";
 import Action from "../_components/Action";
 import Alert from "../_components/Alert";
 import { useForm } from "../_hooks/useForm";
-import { useToast } from "../_context/ToastContext";
+import { TOAST_TYPES, useToast } from "../_context/ToastContext";
 import AuthService from "../_lib/auth";
 import { SERVICE_TYPES } from "../_lib/health";
 
@@ -44,7 +44,7 @@ export default function LoginForm({
 				password: values.password,
 			});
 			await onUserUpdated();
-			showToast("Login successful", "success");
+			showToast("Login successful", TOAST_TYPES.SUCCESS);
 			onSuccess();
 		},
 	});

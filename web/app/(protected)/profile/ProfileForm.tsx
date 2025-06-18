@@ -5,7 +5,7 @@ import Input from "../../_components/Input";
 import Action from "../../_components/Action";
 import Alert from "../../_components/Alert";
 import { useForm } from "../../_hooks/useForm";
-import { useToast } from "../../_context/ToastContext";
+import { TOAST_TYPES, useToast } from "../../_context/ToastContext";
 import { User } from "../../_lib/models";
 import UserService from "../../_lib/user";
 import { SERVICE_TYPES } from "../../_lib/health";
@@ -81,7 +81,7 @@ export default function ProfileForm({
 			};
 
 			await UserService.updateUser(updateData);
-			showToast("Profile updated successfully!", "success");
+			showToast("Profile updated successfully!", TOAST_TYPES.SUCCESS);
 			onUserUpdated();
 			setValues({ ...formValues, password: "", passwordConfirm: "" });
 		},

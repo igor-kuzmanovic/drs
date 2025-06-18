@@ -9,7 +9,7 @@ import Alert from "../../../_components/Alert";
 import EmailChips from "../../../_components/EmailChips";
 import { useForm } from "../../../_hooks/useForm";
 import SurveyService from "../../../_lib/survey";
-import { useToast } from "../../../_context/ToastContext";
+import { TOAST_TYPES, useToast } from "../../../_context/ToastContext";
 import { useHealth } from "../../../_context/HealthContext";
 import { SERVICE_TYPES } from "../../../_lib/health";
 
@@ -80,7 +80,7 @@ export default function CreateSurveyForm({
 				recipients: values.recipients,
 			});
 
-			showToast("Survey created successfully", "success");
+			showToast("Survey created successfully", TOAST_TYPES.SUCCESS);
 			onSuccess();
 		},
 	});

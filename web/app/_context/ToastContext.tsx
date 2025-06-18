@@ -5,9 +5,9 @@ import { X as CloseIcon, CheckCircle, AlertCircle, Info } from "lucide-react";
 import { createPortal } from "react-dom";
 
 export const TOAST_TYPES = {
-	success: "success",
-	error: "error",
-	info: "info",
+	SUCCESS: "success",
+	ERROR: "error",
+	INFO: "info",
 } as const;
 
 type ToastType = (typeof TOAST_TYPES)[keyof typeof TOAST_TYPES];
@@ -88,22 +88,22 @@ const ToastItem: React.FC<{ toast: Toast; onClose: () => void }> = ({
 
 	const getIcon = () => {
 		switch (type) {
-			case TOAST_TYPES.success:
+			case TOAST_TYPES.SUCCESS:
 				return <CheckCircle className="text-green-500" size={20} />;
-			case TOAST_TYPES.error:
+			case TOAST_TYPES.ERROR:
 				return <AlertCircle className="text-red-500" size={20} />;
-			case TOAST_TYPES.info:
+			case TOAST_TYPES.INFO:
 				return <Info className="text-blue-500" size={20} />;
 		}
 	};
 
 	const getBgColor = () => {
 		switch (type) {
-			case TOAST_TYPES.success:
+			case TOAST_TYPES.SUCCESS:
 				return "bg-green-50 border-green-400";
-			case TOAST_TYPES.error:
+			case TOAST_TYPES.ERROR:
 				return "bg-red-50 border-red-400";
-			case TOAST_TYPES.info:
+			case TOAST_TYPES.INFO:
 				return "bg-blue-50 border-blue-400";
 		}
 	};
