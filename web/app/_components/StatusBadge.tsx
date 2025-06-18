@@ -1,3 +1,5 @@
+"use client";
+
 import clsx from "clsx";
 import { SurveyStatusType, SURVEY_STATUS } from "../_lib/models";
 
