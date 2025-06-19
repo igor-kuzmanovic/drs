@@ -21,18 +21,6 @@ type FormValues = {
 	passwordConfirm: string;
 };
 
-const initialValues: FormValues = {
-	firstName: "",
-	lastName: "",
-	address: "",
-	city: "",
-	country: "",
-	phone: "",
-	email: "",
-	password: "",
-	passwordConfirm: "",
-};
-
 export default function SignupForm({
 	onUserUpdated,
 	onSuccess,
@@ -44,37 +32,46 @@ export default function SignupForm({
 }) {
 	const { showToast } = useToast();
 
-	const validate = (vals: FormValues) => {
-		const errs: Record<string, string> = {};
-		if (vals.firstName.length <= 2)
-			errs.firstName = "First name must be at least 3 characters";
-		if (vals.lastName.length <= 2)
-			errs.lastName = "Last name must be at least 3 characters";
-		if (vals.address.length <= 2)
-			errs.address = "Address must be at least 3 characters";
-		if (vals.city.length <= 2) errs.city = "City must be at least 3 characters";
-		if (vals.country.length <= 2)
-			errs.country = "Country must be at least 3 characters";
-		if (vals.phone.length <= 2)
-			errs.phone = "Phone must be at least 3 characters";
-		if (vals.email.length <= 2)
-			errs.email = "Please enter a valid email address";
-		if (vals.password.length <= 2)
-			errs.password = "Password must be at least 3 characters";
-		if (
-			vals.passwordConfirm.length <= 2 ||
-			vals.passwordConfirm !== vals.password
-		)
-			errs.passwordConfirm = "Passwords do not match";
-		return errs;
-	};
-
-	const { values, errors, loading, error, handleChange, handleSubmit } =
+	const { values, formErrors, loading, error, handleChange, handleSubmit } =
 		useForm<FormValues>({
-			initialValues,
-			validate,
-			onSubmit: async (formValues) => {
-				await AuthService.signup(formValues);
+			initialValues: {
+				firstName: "",
+				lastName: "",
+				address: "",
+				city: "",
+				country: "",
+				phone: "",
+				email: "",
+				password: "",
+				passwordConfirm: "",
+			},
+			validate: (values: FormValues) => {
+				const errors: Record<string, string> = {};
+				if (values.firstName.length <= 2)
+					errors.firstName = "First name must be at least 3 characters";
+				if (values.lastName.length <= 2)
+					errors.lastName = "Last name must be at least 3 characters";
+				if (values.address.length <= 2)
+					errors.address = "Address must be at least 3 characters";
+				if (values.city.length <= 2)
+					errors.city = "City must be at least 3 characters";
+				if (values.country.length <= 2)
+					errors.country = "Country must be at least 3 characters";
+				if (values.phone.length <= 2)
+					errors.phone = "Phone must be at least 3 characters";
+				if (values.email.length <= 2)
+					errors.email = "Please enter a valid email address";
+				if (values.password.length <= 2)
+					errors.password = "Password must be at least 3 characters";
+				if (
+					values.passwordConfirm.length <= 2 ||
+					values.passwordConfirm !== values.password
+				)
+					errors.passwordConfirm = "Passwords do not match";
+				return errors;
+			},
+			onSubmit: async (values) => {
+				await AuthService.signup(values);
 				await onUserUpdated();
 				showToast("Signup successful!", TOAST_TYPES.SUCCESS);
 				onSuccess();
@@ -98,7 +95,7 @@ export default function SignupForm({
 					value={values.email}
 					onChange={handleChange}
 					disabled={loading || disabled}
-					error={errors.email}
+					error={formErrors.email}
 				/>
 				<Input
 					id="password"
@@ -110,7 +107,7 @@ export default function SignupForm({
 					value={values.password}
 					onChange={handleChange}
 					disabled={loading || disabled}
-					error={errors.password}
+					error={formErrors.password}
 				/>
 				<Input
 					id="passwordConfirm"
@@ -122,7 +119,7 @@ export default function SignupForm({
 					value={values.passwordConfirm}
 					onChange={handleChange}
 					disabled={loading || disabled}
-					error={errors.passwordConfirm}
+					error={formErrors.passwordConfirm}
 				/>
 				<Input
 					id="firstName"
@@ -133,7 +130,7 @@ export default function SignupForm({
 					value={values.firstName}
 					onChange={handleChange}
 					disabled={loading || disabled}
-					error={errors.firstName}
+					error={formErrors.firstName}
 				/>
 				<Input
 					id="lastName"
@@ -144,7 +141,7 @@ export default function SignupForm({
 					value={values.lastName}
 					onChange={handleChange}
 					disabled={loading || disabled}
-					error={errors.lastName}
+					error={formErrors.lastName}
 				/>
 				<Input
 					id="address"
@@ -155,7 +152,7 @@ export default function SignupForm({
 					value={values.address}
 					onChange={handleChange}
 					disabled={loading || disabled}
-					error={errors.address}
+					error={formErrors.address}
 				/>
 				<Input
 					id="city"
@@ -166,7 +163,7 @@ export default function SignupForm({
 					value={values.city}
 					onChange={handleChange}
 					disabled={loading || disabled}
-					error={errors.city}
+					error={formErrors.city}
 				/>
 				<Input
 					id="country"
@@ -177,7 +174,7 @@ export default function SignupForm({
 					value={values.country}
 					onChange={handleChange}
 					disabled={loading || disabled}
-					error={errors.country}
+					error={formErrors.country}
 				/>
 				<Input
 					id="phone"
@@ -188,7 +185,7 @@ export default function SignupForm({
 					value={values.phone}
 					onChange={handleChange}
 					disabled={loading || disabled}
-					error={errors.phone}
+					error={formErrors.phone}
 				/>
 			</div>
 			<Action
@@ -201,7 +198,12 @@ export default function SignupForm({
 			>
 				Submit
 			</Action>
-			{error && <Alert type="error">{error}</Alert>}
+			{Object.keys(formErrors).length > 0 && (
+				<Alert type="error">Please correct the errors above.</Alert>
+			)}
+			{error && Object.keys(formErrors).length === 0 && (
+				<Alert type="error">{error}</Alert>
+			)}
 		</form>
 	);
 }

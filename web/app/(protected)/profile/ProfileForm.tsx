@@ -21,17 +21,6 @@ type FormValues = {
 	passwordConfirm: string;
 };
 
-const getInitialValues = (user: User): FormValues => ({
-	firstName: user.firstName || "",
-	lastName: user.lastName || "",
-	address: user.address || "",
-	city: user.city || "",
-	country: user.country || "",
-	phone: user.phone || "",
-	password: "",
-	passwordConfirm: "",
-});
-
 export default function ProfileForm({
 	user,
 	onUserUpdated,
@@ -43,52 +32,58 @@ export default function ProfileForm({
 }) {
 	const { showToast } = useToast();
 
-	const validate = (vals: FormValues) => {
-		const errs: Record<string, string> = {};
-		if (vals.firstName.length < 3)
-			errs.firstName = "First name must be at least 3 characters";
-		if (vals.lastName.length < 3)
-			errs.lastName = "Last name must be at least 3 characters";
-		if (vals.address.length < 3)
-			errs.address = "Address must be at least 3 characters";
-		if (vals.city.length < 3) errs.city = "City must be at least 3 characters";
-		if (vals.country.length < 3)
-			errs.country = "Country must be at least 3 characters";
-		if (vals.phone.length < 3)
-			errs.phone = "Phone must be at least 3 characters";
-		if (vals.password && vals.password.length < 3)
-			errs.password = "Password must be at least 3 characters";
-		if (vals.password && vals.password !== vals.passwordConfirm)
-			errs.passwordConfirm = "Passwords do not match";
-		return errs;
-	};
-
 	const {
 		values,
-		errors,
-		error,
+		formErrors,
 		loading,
+		error,
 		handleChange,
 		handleSubmit,
 		setValues,
 	} = useForm<FormValues>({
-		initialValues: getInitialValues(user),
-		validate,
-		onSubmit: async (formValues) => {
-			const updateData = {
-				firstName: formValues.firstName,
-				lastName: formValues.lastName,
-				address: formValues.address,
-				city: formValues.city,
-				country: formValues.country,
-				phone: formValues.phone,
-				password: formValues.password ? formValues.password : undefined,
-			};
-
-			await UserService.updateUser(updateData);
+		initialValues: {
+			firstName: user.firstName || "",
+			lastName: user.lastName || "",
+			address: user.address || "",
+			city: user.city || "",
+			country: user.country || "",
+			phone: user.phone || "",
+			password: "",
+			passwordConfirm: "",
+		},
+		validate: (values: FormValues) => {
+			const errors: Record<string, string> = {};
+			if (values.firstName.length < 3)
+				errors.firstName = "First name must be at least 3 characters";
+			if (values.lastName.length < 3)
+				errors.lastName = "Last name must be at least 3 characters";
+			if (values.address.length < 3)
+				errors.address = "Address must be at least 3 characters";
+			if (values.city.length < 3)
+				errors.city = "City must be at least 3 characters";
+			if (values.country.length < 3)
+				errors.country = "Country must be at least 3 characters";
+			if (values.phone.length < 3)
+				errors.phone = "Phone must be at least 3 characters";
+			if (values.password && values.password.length < 3)
+				errors.password = "Password must be at least 3 characters";
+			if (values.password && values.password !== values.passwordConfirm)
+				errors.passwordConfirm = "Passwords do not match";
+			return errors;
+		},
+		onSubmit: async (values) => {
+			await UserService.updateUser({
+				firstName: values.firstName,
+				lastName: values.lastName,
+				address: values.address,
+				city: values.city,
+				country: values.country,
+				phone: values.phone,
+				password: values.password ? values.password : undefined,
+			});
 			showToast("Profile updated successfully!", TOAST_TYPES.SUCCESS);
 			onUserUpdated();
-			setValues({ ...formValues, password: "", passwordConfirm: "" });
+			setValues({ ...values, password: "", passwordConfirm: "" });
 		},
 	});
 
@@ -108,7 +103,7 @@ export default function ProfileForm({
 					value={values.firstName}
 					onChange={handleChange}
 					disabled={loading || disabled}
-					error={errors.firstName}
+					error={formErrors.firstName}
 				/>
 				<Input
 					id="lastName"
@@ -119,7 +114,7 @@ export default function ProfileForm({
 					value={values.lastName}
 					onChange={handleChange}
 					disabled={loading || disabled}
-					error={errors.lastName}
+					error={formErrors.lastName}
 				/>
 				<Input
 					id="address"
@@ -130,7 +125,7 @@ export default function ProfileForm({
 					value={values.address}
 					onChange={handleChange}
 					disabled={loading || disabled}
-					error={errors.address}
+					error={formErrors.address}
 				/>
 				<Input
 					id="city"
@@ -141,7 +136,7 @@ export default function ProfileForm({
 					value={values.city}
 					onChange={handleChange}
 					disabled={loading || disabled}
-					error={errors.city}
+					error={formErrors.city}
 				/>
 				<Input
 					id="country"
@@ -152,7 +147,7 @@ export default function ProfileForm({
 					value={values.country}
 					onChange={handleChange}
 					disabled={loading || disabled}
-					error={errors.country}
+					error={formErrors.country}
 				/>
 				<Input
 					id="phone"
@@ -163,7 +158,7 @@ export default function ProfileForm({
 					value={values.phone}
 					onChange={handleChange}
 					disabled={loading || disabled}
-					error={errors.phone}
+					error={formErrors.phone}
 				/>
 				<Input
 					id="password"
@@ -175,7 +170,7 @@ export default function ProfileForm({
 					value={values.password}
 					onChange={handleChange}
 					disabled={loading || disabled}
-					error={errors.password}
+					error={formErrors.password}
 				/>
 				<Input
 					id="passwordConfirm"
@@ -187,7 +182,7 @@ export default function ProfileForm({
 					value={values.passwordConfirm}
 					onChange={handleChange}
 					disabled={loading || disabled}
-					error={errors.passwordConfirm}
+					error={formErrors.passwordConfirm}
 				/>
 			</div>
 			<Action
@@ -200,7 +195,12 @@ export default function ProfileForm({
 			>
 				Save Changes
 			</Action>
-			{error && <Alert type="error">{error}</Alert>}
+			{Object.keys(formErrors).length > 0 && (
+				<Alert type="error">Please correct the errors above.</Alert>
+			)}
+			{error && Object.keys(formErrors).length === 0 && (
+				<Alert type="error">{error}</Alert>
+			)}
 		</form>
 	);
 }

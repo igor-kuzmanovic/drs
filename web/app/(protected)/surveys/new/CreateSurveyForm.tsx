@@ -21,14 +21,6 @@ type FormValues = {
 	isAnonymous: boolean;
 };
 
-const initialValues: FormValues = {
-	name: "",
-	question: "",
-	endDate: "",
-	recipients: [],
-	isAnonymous: false,
-};
-
 export default function CreateSurveyForm({
 	onSuccess,
 	onCancel,
@@ -43,15 +35,21 @@ export default function CreateSurveyForm({
 
 	const {
 		values,
-		errors: formErrors,
+		formErrors,
 		loading,
 		error,
 		handleChange,
 		handleSubmit,
 		setValue,
-	} = useForm({
-		initialValues,
-		validate: (values) => {
+	} = useForm<FormValues>({
+		initialValues: {
+			name: "",
+			question: "",
+			endDate: "",
+			recipients: [],
+			isAnonymous: false,
+		},
+		validate: (values: FormValues) => {
 			const errors: Record<string, string> = {};
 			if (!values.name) errors.name = "Name is required";
 			if (!values.question) errors.question = "Question is required";
@@ -159,7 +157,12 @@ export default function CreateSurveyForm({
 					Create Survey
 				</Action>
 			</div>
-			{error && <Alert type="error">{error}</Alert>}
+			{Object.keys(formErrors).length > 0 && (
+				<Alert type="error">Please correct the errors above.</Alert>
+			)}
+			{error && Object.keys(formErrors).length === 0 && (
+				<Alert type="error">{error}</Alert>
+			)}
 		</form>
 	);
 }

@@ -43,11 +43,12 @@ export interface ValidationError extends BadRequestHttpError {
 	data: {
 		error: string;
 		messages?: {
-			input: object;
-			loc: (string | number)[];
-			msg: string;
-			type: string;
-			url: string;
+			input?: unknown;
+			loc?: (string | number)[];
+			msg?: string;
+			type?: string;
+			url?: string;
+			ctx?: Record<string, unknown>;
 		}[];
 	};
 }

@@ -6,12 +6,18 @@ import Radio from "../../_components/Radio";
 import Action from "../../_components/Action";
 import Alert from "../../_components/Alert";
 import { useForm } from "../../_hooks/useForm";
+import { CheckCircle } from "lucide-react";
 import { TOAST_TYPES, useToast } from "../../_context/ToastContext";
 import { useHealth } from "../../_context/HealthContext";
 import SurveyService from "../../_lib/survey";
 import { SURVEY_ANSWER, SurveyAnswerType } from "../../_lib/models";
 import { SERVICE_TYPES } from "../../_lib/health";
 import { printError } from "../../_lib/error";
+
+type FormValues = {
+	email: string;
+	answer: SurveyAnswerType | "";
+};
 
 export function SurveyRespondForm({
 	surveyId,
@@ -30,53 +36,53 @@ export function SurveyRespondForm({
 }) {
 	const effectiveEmail = prefillEmail;
 	const [submitted, setSubmitted] = useState(false);
+	const [successMessage, setSuccessMessage] = useState("");
 	const autoSubmitted = useRef(false);
 	const { showToast } = useToast();
 	const { isSurveyServiceHealthy } = useHealth();
 
-	const initialValues = {
-		email: effectiveEmail,
-		answer: (prefillAnswer as SurveyAnswerType) || "",
-	};
-
-	const { values, error, loading, handleSubmit, setValue } = useForm({
-		initialValues,
-		validate: (values) => {
-			const errors: Record<string, string> = {};
-			if (!isAnonymous && !token && !values.email) {
-				errors.email = "Email is required.";
-			}
-			if (!values.answer) {
-				errors.answer = "Please select an answer.";
-			}
-			return errors;
-		},
-		onSubmit: async (values) => {
-			try {
-				if (token) {
-					await SurveyService.respondSurvey(surveyId, {
-						token,
-						answer: values.answer as SurveyAnswerType,
-					});
-				} else {
-					await SurveyService.respondSurvey(surveyId, {
-						email: values.email,
-						answer: values.answer as SurveyAnswerType,
-					});
+	const { values, formErrors, loading, error, handleSubmit, setValue } =
+		useForm<FormValues>({
+			initialValues: {
+				email: effectiveEmail,
+				answer: (prefillAnswer as SurveyAnswerType) || "",
+			},
+			validate: (values: FormValues) => {
+				const errors: Record<string, string> = {};
+				if (!isAnonymous && !token && !values.email) {
+					errors.email = "Email is required.";
 				}
+				if (!values.answer) {
+					errors.answer = "Please select an answer.";
+				}
+				return errors;
+			},
+			onSubmit: async (values) => {
+				try {
+					if (token) {
+						await SurveyService.respondSurvey(surveyId, {
+							token,
+							answer: values.answer as SurveyAnswerType,
+						});
+					} else {
+						await SurveyService.respondSurvey(surveyId, {
+							email: values.email,
+							answer: values.answer as SurveyAnswerType,
+						});
+					}
 
-				showToast("Thank you for your response!", TOAST_TYPES.SUCCESS);
-				setSubmitted(true);
-			} catch (err) {
-				if (err instanceof Error && err.message === "Already responded") {
+					setSuccessMessage("Thank you for your response!");
 					setSubmitted(true);
-				} else {
-					showToast(printError(err), TOAST_TYPES.ERROR);
-					throw err;
+				} catch (err) {
+					if (err instanceof Error && err.message === "Already responded") {
+						setSuccessMessage("You have already responded to this survey.");
+						setSubmitted(true);
+					} else {
+						throw err;
+					}
 				}
-			}
-		},
-	});
+			},
+		});
 
 	// Auto-submit only if token and answer are present
 	useEffect(() => {
@@ -97,6 +103,24 @@ export function SurveyRespondForm({
 	const isDisabled =
 		loading || submitted || disabled || !isSurveyServiceHealthy;
 
+	if (submitted && successMessage) {
+		return (
+			<div className="flex flex-col items-center justify-center py-8 px-4">
+				<div className="bg-green-50 border-l-4 border-green-500 p-6 rounded-lg shadow-md w-full max-w-md">
+					<div className="flex items-center">
+						<div className="flex-shrink-0">
+							<CheckCircle className="h-8 w-8 text-green-500" />
+						</div>
+						<div className="ml-3">
+							<h3 className="text-lg font-medium text-green-800">Success!</h3>
+							<div className="mt-2 text-green-700">{successMessage}</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<form
 			onSubmit={handleSubmit}
@@ -114,36 +138,42 @@ export function SurveyRespondForm({
 					onChange={(e) => setValue("email", e.target.value)}
 					disabled={isDisabled}
 					readOnly={!!effectiveEmail}
+					error={formErrors.email}
 				/>
 			)}
 			<div className="flex flex-col gap-2">
-				<Radio
-					id="answer-yes"
-					name="answer"
-					label="Yes"
-					value={SURVEY_ANSWER.YES}
-					checked={values.answer === SURVEY_ANSWER.YES}
-					onChange={() => setValue("answer", SURVEY_ANSWER.YES)}
-					disabled={isDisabled || !!prefillAnswer}
-				/>
-				<Radio
-					id="answer-no"
-					name="answer"
-					label="No"
-					value={SURVEY_ANSWER.NO}
-					checked={values.answer === SURVEY_ANSWER.NO}
-					onChange={() => setValue("answer", SURVEY_ANSWER.NO)}
-					disabled={isDisabled || !!prefillAnswer}
-				/>
-				<Radio
-					id="answer-cant"
-					name="answer"
-					label="Can't answer"
-					value={SURVEY_ANSWER.CANT_ANSWER}
-					checked={values.answer === SURVEY_ANSWER.CANT_ANSWER}
-					onChange={() => setValue("answer", SURVEY_ANSWER.CANT_ANSWER)}
-					disabled={isDisabled || !!prefillAnswer}
-				/>
+				<div>
+					<Radio
+						id="answer-yes"
+						name="answer"
+						label="Yes"
+						value={SURVEY_ANSWER.YES}
+						checked={values.answer === SURVEY_ANSWER.YES}
+						onChange={() => setValue("answer", SURVEY_ANSWER.YES)}
+						disabled={isDisabled || !!prefillAnswer}
+					/>
+					<Radio
+						id="answer-no"
+						name="answer"
+						label="No"
+						value={SURVEY_ANSWER.NO}
+						checked={values.answer === SURVEY_ANSWER.NO}
+						onChange={() => setValue("answer", SURVEY_ANSWER.NO)}
+						disabled={isDisabled || !!prefillAnswer}
+					/>
+					<Radio
+						id="answer-cant"
+						name="answer"
+						label="Can't answer"
+						value={SURVEY_ANSWER.CANT_ANSWER}
+						checked={values.answer === SURVEY_ANSWER.CANT_ANSWER}
+						onChange={() => setValue("answer", SURVEY_ANSWER.CANT_ANSWER)}
+						disabled={isDisabled || !!prefillAnswer}
+					/>
+					{formErrors.answer && (
+						<div className="text-red-600 text-xs mt-1">{formErrors.answer}</div>
+					)}
+				</div>
 			</div>
 			<Action
 				type="submit"
@@ -157,7 +187,12 @@ export function SurveyRespondForm({
 			>
 				Submit
 			</Action>
-			{error && <Alert type="error">{error}</Alert>}
+			{Object.keys(formErrors).length > 0 && (
+				<Alert type="error">Please correct the errors above.</Alert>
+			)}
+			{error && Object.keys(formErrors).length === 0 && (
+				<Alert type="error">{error}</Alert>
+			)}
 		</form>
 	);
 }

@@ -9,6 +9,11 @@ import { TOAST_TYPES, useToast } from "../_context/ToastContext";
 import AuthService from "../_lib/auth";
 import { SERVICE_TYPES } from "../_lib/health";
 
+type FormValues = {
+	email: string;
+	password: string;
+};
+
 export default function LoginForm({
 	onUserUpdated,
 	onSuccess,
@@ -20,34 +25,28 @@ export default function LoginForm({
 }) {
 	const { showToast } = useToast();
 
-	const {
-		values,
-		errors: formErrors,
-		loading,
-		error,
-		handleChange,
-		handleSubmit,
-	} = useForm({
-		initialValues: {
-			email: "",
-			password: "",
-		},
-		validate: (values) => {
-			const errors: Record<string, string> = {};
-			if (!values.email) errors.email = "Email is required";
-			if (!values.password) errors.password = "Password is required";
-			return errors;
-		},
-		onSubmit: async (values) => {
-			await AuthService.login({
-				email: values.email,
-				password: values.password,
-			});
-			await onUserUpdated();
-			showToast("Login successful", TOAST_TYPES.SUCCESS);
-			onSuccess();
-		},
-	});
+	const { values, formErrors, loading, error, handleChange, handleSubmit } =
+		useForm<FormValues>({
+			initialValues: {
+				email: "",
+				password: "",
+			},
+			validate: (values: FormValues) => {
+				const errors: Record<string, string> = {};
+				if (!values.email) errors.email = "Email is required";
+				if (!values.password) errors.password = "Password is required";
+				return errors;
+			},
+			onSubmit: async (values) => {
+				await AuthService.login({
+					email: values.email,
+					password: values.password,
+				});
+				await onUserUpdated();
+				showToast("Login successful", TOAST_TYPES.SUCCESS);
+				onSuccess();
+			},
+		});
 
 	return (
 		<form
@@ -90,7 +89,12 @@ export default function LoginForm({
 			>
 				Log In
 			</Action>
-			{error && <Alert type="error">{error}</Alert>}
+			{Object.keys(formErrors).length > 0 && (
+				<Alert type="error">Please correct the errors above.</Alert>
+			)}
+			{error && Object.keys(formErrors).length === 0 && (
+				<Alert type="error">{error}</Alert>
+			)}
 		</form>
 	);
 }

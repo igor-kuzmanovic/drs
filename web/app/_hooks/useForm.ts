@@ -1,9 +1,10 @@
 import { useState, ChangeEvent, FormEvent } from "react";
-import { printError } from "../_lib/error";
+import { printError, isValidationError } from "../_lib/error";
+import { capitalizeFirstLetter } from "../_lib/utils";
 
 type ValidationFunction<T> = (values: T) => Partial<Record<keyof T, string>>;
 
-interface UseFormOptions<T> {
+interface UseFormOptions<T extends Record<string, unknown>> {
 	initialValues: T;
 	validate?: ValidationFunction<T>;
 	onSubmit: (values: T) => Promise<void>;
@@ -15,7 +16,9 @@ export function useForm<T extends Record<string, unknown>>({
 	onSubmit,
 }: UseFormOptions<T>) {
 	const [values, setValues] = useState<T>(initialValues);
-	const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
+	const [formErrors, setFormErrors] = useState<
+		Partial<Record<keyof T, string>>
+	>({});
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -27,19 +30,17 @@ export function useForm<T extends Record<string, unknown>>({
 			type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
 
 		setValues({ ...values, [name]: newValue });
-
-		if (errors[name as keyof T]) {
-			setErrors({ ...errors, [name]: undefined });
-		}
+		setFormErrors({});
 	};
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
 		setError(null);
+		setFormErrors({});
 
 		if (validate) {
 			const validationErrors = validate(values);
-			setErrors(validationErrors);
+			setFormErrors(validationErrors);
 			if (Object.keys(validationErrors).length > 0) return;
 		}
 
@@ -47,7 +48,28 @@ export function useForm<T extends Record<string, unknown>>({
 		try {
 			await onSubmit(values);
 		} catch (err) {
-			setError(printError(err));
+			if (isValidationError(err) && err.data.messages?.length) {
+				const fieldErrors: Partial<Record<keyof T, string>> = {};
+
+				err.data.messages.forEach((message) => {
+					if (message.loc && message.loc.length > 0) {
+						const fieldName = message.loc[0];
+						if (typeof fieldName === "string" && fieldName in values) {
+							fieldErrors[fieldName as keyof T] = capitalizeFirstLetter(
+								message.msg || "Invalid value",
+							);
+						}
+					}
+				});
+
+				if (Object.keys(fieldErrors).length > 0) {
+					setFormErrors(fieldErrors);
+				} else {
+					setError(printError(err));
+				}
+			} else {
+				setError(printError(err));
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -55,14 +77,12 @@ export function useForm<T extends Record<string, unknown>>({
 
 	const setValue = <K extends keyof T>(field: K, value: T[K]) => {
 		setValues({ ...values, [field]: value });
-		if (errors[field]) {
-			setErrors({ ...errors, [field]: undefined });
-		}
+		setFormErrors({});
 	};
 
 	return {
 		values,
-		errors,
+		formErrors,
 		loading,
 		error,
 		handleChange,

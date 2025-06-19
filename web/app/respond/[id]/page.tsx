@@ -39,13 +39,27 @@ export default function RespondSurveyPage() {
 				<Loading />
 			</div>
 		);
+
 	if (!survey)
-		return <div className="text-center text-lg mt-12">Survey not found.</div>;
+		return (
+			<div className="flex flex-col gap-6">
+				<h1 className="text-center text-3xl font-bold">
+					<span className="text-blue-600">Survey</span> Not Found
+				</h1>
+				<div className="text-red-700 text-lg font-semibold bg-red-100 px-6 py-4 text-center">
+					The survey you&apos;re looking for doesn&apos;t exist or has been
+					removed.
+				</div>
+			</div>
+		);
+
 	if (survey.status === SURVEY_STATUS.CLOSED) {
 		return (
-			<div className="flex flex-col items-center justify-center min-h-[60vh]">
-				<h1 className="text-3xl font-bold mb-4 text-center">{survey.name}</h1>
-				<div className="text-red-700 text-lg font-semibold bg-red-100 px-6 py-4">
+			<div className="flex flex-col gap-6">
+				<h1 className="text-center text-3xl font-bold">
+					<span className="text-blue-600">{survey.name}</span>
+				</h1>
+				<div className="text-red-700 text-lg font-semibold bg-red-100 px-6 py-4 text-center">
 					This survey is closed. You can no longer submit a response.
 				</div>
 			</div>
@@ -53,27 +67,25 @@ export default function RespondSurveyPage() {
 	}
 
 	return (
-		<div className="flex flex-col gap-8 items-center justify-center min-h-[60vh]">
-			<div className="w-full max-w-md">
-				<h1 className="text-3xl font-bold mb-2 text-center">{survey.name}</h1>
-				<p className="text-lg text-gray-700 mb-6 text-center">
-					{survey.question}
-				</p>
+		<div className="flex flex-col gap-6">
+			<h1 className="text-center text-3xl font-bold">
+				<span className="text-blue-600">{survey.name}</span>
+			</h1>
+			<p className="text-lg text-gray-700 text-center">{survey.question}</p>
 
-				<ServiceUnavailable
-					serviceName={SERVICE_TYPES.SURVEY}
-					message="Survey response submission is currently unavailable. Please try again later."
-				/>
+			<ServiceUnavailable
+				serviceName={SERVICE_TYPES.SURVEY}
+				message="Survey response submission is currently unavailable. Please try again later."
+			/>
 
-				<SurveyRespondForm
-					surveyId={id}
-					isAnonymous={survey.isAnonymous}
-					prefillEmail={prefillEmail}
-					prefillAnswer={prefillAnswer}
-					token={token}
-					disabled={!isSurveyServiceHealthy}
-				/>
-			</div>
+			<SurveyRespondForm
+				surveyId={id}
+				isAnonymous={survey.isAnonymous}
+				prefillEmail={prefillEmail}
+				prefillAnswer={prefillAnswer}
+				token={token}
+				disabled={!isSurveyServiceHealthy}
+			/>
 		</div>
 	);
 }
