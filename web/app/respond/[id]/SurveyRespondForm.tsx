@@ -141,8 +141,11 @@ export function SurveyRespondForm({
 					error={formErrors.email}
 				/>
 			)}
-			<div className="flex flex-col gap-2">
-				<div>
+			<div className="flex flex-col">
+				<h3 className="text-base font-medium text-gray-700 mb-2">
+					Your answer:
+				</h3>
+				<div className="space-y-1">
 					<Radio
 						id="answer-yes"
 						name="answer"

@@ -41,10 +41,30 @@ SURVEY_INVITE_EMAIL_TEMPLATE = """
     <p style="font-size: 1rem; color: #334155; margin-bottom: 16px;">
       {survey_question}
     </p>
-    <div style="margin: 24px 0; display: flex; gap: 12px; justify-content: center;">
-      <a href="{yes_link}" style="padding:10px 20px;background:#22c55e;color:white;text-decoration:none;border-radius:6px;font-weight:600;">Yes</a>
-      <a href="{no_link}" style="padding:10px 20px;background:#ef4444;color:white;text-decoration:none;border-radius:6px;font-weight:600;">No</a>
-      <a href="{cant_link}" style="padding:10px 20px;background:#64748b;color:white;text-decoration:none;border-radius:6px;font-weight:600;">Can't answer</a>
+    <p style="font-size: 1rem; color: #4b5563; margin-bottom: 8px; font-weight: 500;">
+      Your answer:
+    </p>
+    <div style="margin: 16px 0; display: flex; flex-direction: column; gap: 10px;">
+      <a href="{yes_link}" style="display: block; padding: 16px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; color: #0369a1; text-decoration: none; font-weight: 500; font-size: 1rem; text-align: left; transition: all 0.2s;">
+        <span style="display: inline-flex; align-items: center;">
+          <span style="display: inline-block; width: 16px; height: 16px; border-radius: 50%; border: 2px solid #0ea5e9; margin-right: 12px; position: relative;"></span>
+          Yes
+        </span>
+      </a>
+
+      <a href="{no_link}" style="display: block; padding: 16px; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; color: #be123c; text-decoration: none; font-weight: 500; font-size: 1rem; text-align: left; transition: all 0.2s;">
+        <span style="display: inline-flex; align-items: center;">
+          <span style="display: inline-block; width: 16px; height: 16px; border-radius: 50%; border: 2px solid #f43f5e; margin-right: 12px; position: relative;"></span>
+          No
+        </span>
+      </a>
+
+      <a href="{cant_link}" style="display: block; padding: 16px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; color: #475569; text-decoration: none; font-weight: 500; font-size: 1rem; text-align: left; transition: all 0.2s;">
+        <span style="display: inline-flex; align-items: center;">
+          <span style="display: inline-block; width: 16px; height: 16px; border-radius: 50%; border: 2px solid #64748b; margin-right: 12px; position: relative;"></span>
+          Can't answer
+        </span>
+      </a>
     </div>
     <p style="font-size:0.95rem; color:#64748b; margin-top: 24px;">
       If the buttons above do not work, copy and paste this link into your browser:<br>
