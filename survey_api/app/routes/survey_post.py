@@ -34,7 +34,7 @@ class PostSurveyResponse(PydanticBaseModel):
 
 @validate_token
 @survey_post_blueprint.route("/surveys", methods=["POST"])
-def post():
+def survey_post():
     try:
         data = PostSurveyRequest.model_validate(request.json)
     except ValidationError as e:

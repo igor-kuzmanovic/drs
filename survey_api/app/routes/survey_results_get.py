@@ -7,7 +7,7 @@ from ..core.models import Survey, SurveyAnswer
 from ..core.pydantic import PydanticBaseModel
 from ..core.survey_service import get_detailed_responses
 
-survey_results_blueprint = Blueprint("survey_results_routes", __name__)
+survey_results_get_blueprint = Blueprint("survey_results_get_routes", __name__)
 
 
 class SurveyResponseInfo(PydanticBaseModel):
@@ -16,7 +16,7 @@ class SurveyResponseInfo(PydanticBaseModel):
     answeredAt: datetime
 
 
-class GetSurveyResultsResponse(PydanticBaseModel):
+class SurveyResultsGetResponse(PydanticBaseModel):
     surveyId: UUID4
     results: dict
     totalResponses: int
@@ -24,8 +24,8 @@ class GetSurveyResultsResponse(PydanticBaseModel):
 
 
 @validate_token
-@survey_results_blueprint.route("/surveys/<uuid:survey_id>/results", methods=["GET"])
-def get_survey_results(survey_id):
+@survey_results_get_blueprint.route("/surveys/<uuid:survey_id>/results", methods=["GET"])
+def survey_results_get(survey_id):
     user_id = get_user_id_from_token()
     if not user_id:
         return jsonify({"error": "Invalid token"}), 401
@@ -49,7 +49,7 @@ def get_survey_results(survey_id):
 
     total_responses = sum(results.values())
 
-    response_data = GetSurveyResultsResponse(
+    response_data = SurveyResultsGetResponse(
         surveyId=survey.id,
         results=results,
         totalResponses=total_responses,
@@ -59,4 +59,4 @@ def get_survey_results(survey_id):
     return jsonify(response_data.model_dump()), 200
 
 
-__all__ = ["survey_results_blueprint"]
+__all__ = ["survey_results_get_blueprint"]

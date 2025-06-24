@@ -10,7 +10,7 @@ survey_delete_blueprint = Blueprint("survey_delete_routes", __name__)
 
 @validate_token
 @survey_delete_blueprint.route("/surveys/<uuid:survey_id>", methods=["DELETE"])
-def delete_survey(survey_id: UUID4):
+def survey_delete(survey_id: UUID4):
     user_id = get_user_id_from_token()
     if not user_id:
         return jsonify({"error": "Invalid token"}), 401

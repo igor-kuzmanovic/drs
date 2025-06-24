@@ -5,7 +5,7 @@ from ..auth.jwt import generate_jwt
 from ..core.pydantic import PydanticBaseModel
 from ..core.user_service import check_user_credentials, handle_validation_error
 
-auth_login_blueprint = Blueprint("auth_login_routes", __name__)
+login_blueprint = Blueprint("login_routes", __name__)
 
 
 class LoginRequest(PydanticBaseModel):
@@ -17,7 +17,7 @@ class LoginResponse(PydanticBaseModel):
     token: str
 
 
-@auth_login_blueprint.route("/auth/login", methods=["POST"])
+@login_blueprint.route("/login", methods=["POST"])
 def login():
     try:
         data = LoginRequest.model_validate(request.json)
@@ -41,4 +41,4 @@ def login():
     return jsonify(response), 200
 
 
-__all__ = ["auth_login_blueprint"]
+__all__ = ["login_blueprint"]

@@ -6,7 +6,7 @@ import {
 	SurveyResultResponse,
 	PublicSurvey,
 	SurveyRespondRequest,
-	SurveyRespondResponse,
+	SurveyRespondResponse as SurveyResponseResponse,
 } from "./models";
 import { SERVICE_TYPES } from "./health";
 
@@ -79,14 +79,14 @@ export const SurveyService = {
 		);
 	},
 
-	respondSurvey: async (
+	postSurveyResponse: async (
 		surveyId: string,
 		data: SurveyRespondRequest,
-	): Promise<SurveyRespondResponse> => {
+	): Promise<SurveyResponseResponse> => {
 		return withHealthCheck(
 			() =>
-				surveyApiClient.post<SurveyRespondResponse>(
-					`/api/surveys/${surveyId}/respond`,
+				surveyApiClient.post<SurveyResponseResponse>(
+					`/api/surveys/${surveyId}/response`,
 					data,
 				),
 			SERVICE_TYPES.SURVEY,

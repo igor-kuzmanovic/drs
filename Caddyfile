@@ -24,13 +24,7 @@ https://api.localhost {
     }
   }
 
-  handle /api/user* {
-    reverse_proxy user_api:5000 {
-      health_uri /health/ready
-    }
-  }
-
-  handle /api/auth* {
+  handle /api/login* {
     reverse_proxy user_api:5000 {
       health_uri /health/ready
     }

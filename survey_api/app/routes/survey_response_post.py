@@ -7,19 +7,19 @@ from ..core.models import SurveyResponse, SurveyStatus, Recipient
 from ..core.pydantic import PydanticBaseModel
 from ..core.survey_service import get_survey_by_id_public, handle_validation_error
 
-survey_respond_blueprint = Blueprint("survey_respond_routes", __name__)
+survey_response_post_blueprint = Blueprint("survey_response_post_routes", __name__)
 
 
-class SurveyRespondRequest(PydanticBaseModel):
+class SurveyResponseRequest(PydanticBaseModel):
     token: str | None = None
     email: EmailStr | None = None
     answer: str = Field(pattern="^(YES|NO|CANT_ANSWER)$")
 
 
-@survey_respond_blueprint.route("/surveys/<uuid:survey_id>/respond", methods=["POST"])
-def respond(survey_id):
+@survey_response_post_blueprint.route("/surveys/<uuid:survey_id>/response", methods=["POST"])
+def response(survey_id):
     try:
-        data = SurveyRespondRequest.model_validate(request.json)
+        data = SurveyResponseRequest.model_validate(request.json)
     except ValidationError as e:
         error_response = handle_validation_error(e)
         return jsonify(error_response[0]), error_response[1]
@@ -60,4 +60,4 @@ def respond(survey_id):
     return jsonify({"message": "Response recorded"}), 201
 
 
-__all__ = ["survey_respond_blueprint"]
+__all__ = ["survey_response_post_blueprint"]

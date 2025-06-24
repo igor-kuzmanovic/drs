@@ -5,16 +5,16 @@ from ..auth.jwt import validate_token, get_user_id_from_token
 from ..core.models import SurveyStatus
 from ..core.survey_service import get_survey_by_id, retry_failed_survey_emails
 
-survey_retry_failed_emails_blueprint = Blueprint(
-    "survey_retry_failed_emails_routes", __name__
+survey_retry_failed_emails_post_blueprint = Blueprint(
+    "survey_retry_failed_emails_post_routes", __name__
 )
 
 
 @validate_token
-@survey_retry_failed_emails_blueprint.route(
+@survey_retry_failed_emails_post_blueprint.route(
     "/surveys/<uuid:survey_id>/retry-failed-emails", methods=["POST"]
 )
-def retry_failed_emails(survey_id: UUID4):
+def survey_retry_failed_emails_post(survey_id: UUID4):
     user_id = get_user_id_from_token()
     if not user_id:
         return jsonify({"error": "Invalid token"}), 401
@@ -31,4 +31,4 @@ def retry_failed_emails(survey_id: UUID4):
     return jsonify({"message": "Retry started"}), 200
 
 
-__all__ = ["survey_retry_failed_emails_blueprint"]
+__all__ = ["survey_retry_failed_emails_post_blueprint"]

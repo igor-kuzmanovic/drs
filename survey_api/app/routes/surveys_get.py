@@ -17,7 +17,7 @@ from ..core.survey_service import (
 surveys_get_blueprint = Blueprint("surveys_get_routes", __name__)
 
 
-class GetSurveysResponse(PydanticBaseModel):
+class SurveysGetResponse(PydanticBaseModel):
     id: UUID4
     name: str
     question: str
@@ -34,7 +34,7 @@ class GetSurveysResponse(PydanticBaseModel):
 
 @validate_token
 @surveys_get_blueprint.route("/surveys", methods=["GET"])
-def get_surveys():
+def surveys_get():
     user_id = get_user_id_from_token()
     if not user_id:
         return jsonify({"error": "Invalid token"}), 401
@@ -65,7 +65,7 @@ def get_surveys():
 
         email_status_summary = get_email_status_summary(survey.id)
 
-        survey_response = GetSurveysResponse(
+        survey_response = SurveysGetResponse(
             id=survey.id,
             name=survey.name,
             question=survey.question,

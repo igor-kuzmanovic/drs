@@ -4,14 +4,14 @@ from pydantic import UUID4
 from ..auth.jwt import validate_token, get_user_id_from_token
 from ..core.survey_service import get_survey_by_id, terminate_survey
 
-survey_terminate_blueprint = Blueprint("survey_terminate_routes", __name__)
+survey_terminate_post_blueprint = Blueprint("survey_terminate_post_routes", __name__)
 
 
 @validate_token
-@survey_terminate_blueprint.route(
+@survey_terminate_post_blueprint.route(
     "/surveys/<uuid:survey_id>/terminate", methods=["POST"]
 )
-def terminate_survey_route(survey_id: UUID4):
+def survey_terminate_post(survey_id: UUID4):
     user_id = get_user_id_from_token()
     if not user_id:
         return jsonify({"error": "Invalid token"}), 401
@@ -28,4 +28,4 @@ def terminate_survey_route(survey_id: UUID4):
     return jsonify({"message": "Survey terminated"}), 200
 
 
-__all__ = ["survey_terminate_blueprint"]
+__all__ = ["survey_terminate_post_blueprint"]

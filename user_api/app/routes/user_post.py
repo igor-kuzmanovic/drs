@@ -14,7 +14,7 @@ from ..core.user_service import UserBaseModel, user_to_response_dict, handle_val
 user_post_blueprint = Blueprint("user_post_routes", __name__)
 
 
-class PostUserRequest(UserBaseModel):
+class UserPostRequest(UserBaseModel):
     email: EmailStr
     password: SecretStr = Field(min_length=8)
     passwordConfirm: SecretStr = Field(min_length=8)
@@ -32,9 +32,9 @@ class PostUserRequest(UserBaseModel):
 
 
 @user_post_blueprint.route("/users", methods=["POST"])
-def post():
+def user_post():
     try:
-        data = PostUserRequest.model_validate(request.json)
+        data = UserPostRequest.model_validate(request.json)
     except ValidationError as e:
         error_response = handle_validation_error(e)
         return jsonify(error_response[0]), error_response[1]

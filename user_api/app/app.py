@@ -8,11 +8,11 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from .core.cors import setup_cors
 from .core.db import setup_db
 from .core.error import setup_error_handlers
-from .routes.auth_login import auth_login_blueprint
+from .routes.login import auth_login_blueprint
 from .routes.health import health_blueprint
-from .routes.user_get import user_get_blueprint
+from .routes.users_me_get import user_get_blueprint
 from .routes.user_post import user_post_blueprint
-from .routes.user_put import user_put_blueprint
+from .routes.user_me_put import user_me_put_blueprint
 
 # Create a Flask app
 app = Flask(__name__)
@@ -40,7 +40,7 @@ app.register_blueprint(health_blueprint)
 app.register_blueprint(auth_login_blueprint, url_prefix="/api")
 app.register_blueprint(user_get_blueprint, url_prefix="/api")
 app.register_blueprint(user_post_blueprint, url_prefix="/api")
-app.register_blueprint(user_put_blueprint, url_prefix="/api")
+app.register_blueprint(user_me_put_blueprint, url_prefix="/api")
 
 # Set up error handling
 setup_error_handlers(app)

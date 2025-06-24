@@ -60,12 +60,12 @@ export function SurveyRespondForm({
 			onSubmit: async (values) => {
 				try {
 					if (token) {
-						await SurveyService.respondSurvey(surveyId, {
+						await SurveyService.postSurveyResponse(surveyId, {
 							token,
 							answer: values.answer as SurveyAnswerType,
 						});
 					} else {
-						await SurveyService.respondSurvey(surveyId, {
+						await SurveyService.postSurveyResponse(surveyId, {
 							email: values.email,
 							answer: values.answer as SurveyAnswerType,
 						});

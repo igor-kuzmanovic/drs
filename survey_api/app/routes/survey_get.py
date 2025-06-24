@@ -17,7 +17,7 @@ from ..core.survey_service import (
 survey_get_blueprint = Blueprint("survey_get_routes", __name__)
 
 
-class GetSurveyResponse(PydanticBaseModel):
+class SurveyGetResponse(PydanticBaseModel):
     id: UUID4
     name: str
     question: str
@@ -32,7 +32,7 @@ class GetSurveyResponse(PydanticBaseModel):
     emailStatus: List[EmailTaskInfo]
 
 
-class GetSurveyPublicResponse(PydanticBaseModel):
+class SurveyPublicGetResponse(PydanticBaseModel):
     id: UUID4
     name: str
     question: str
@@ -45,7 +45,7 @@ class GetSurveyPublicResponse(PydanticBaseModel):
 
 @survey_get_blueprint.route("/surveys/<uuid:survey_id>", methods=["GET"])
 @validate_token
-def get_survey(survey_id: UUID4):
+def survey_get(survey_id: UUID4):
     user_id = get_user_id_from_token()
     survey = Survey.query.filter_by(id=survey_id, owner_id=user_id).first()
     if not survey:
@@ -56,7 +56,7 @@ def get_survey(survey_id: UUID4):
 
     results, respondent_emails = get_survey_results(survey)
 
-    response_data = GetSurveyResponse(
+    response_data = SurveyGetResponse(
         id=survey.id,
         name=survey.name,
         question=survey.question,
@@ -75,14 +75,14 @@ def get_survey(survey_id: UUID4):
 
 
 @survey_get_blueprint.route("/surveys/<uuid:survey_id>/public", methods=["GET"])
-def get_survey_public(survey_id):
+def survey_public_get(survey_id):
     survey: Optional[Survey] = Survey.query.filter_by(id=survey_id).first()
     if not survey:
         return jsonify({"error": "Survey not found"}), 404
 
     check_and_update_survey_status(survey)
 
-    response_data = GetSurveyPublicResponse(
+    response_data = SurveyPublicGetResponse(
         id=survey.id,
         name=survey.name,
         question=survey.question,
