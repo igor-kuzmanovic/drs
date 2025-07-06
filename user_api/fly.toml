@@ -1,0 +1,25 @@
+# fly.toml app configuration file generated for user-api-icy-tree-7311 on 2025-07-06T19:02:34+02:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'user-api-icy-tree-7311'
+primary_region = 'cdg'
+
+[build]
+
+[http_service]
+  internal_port = 5000
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[deploy]
+  release_command = "flask --app app.app db upgrade"

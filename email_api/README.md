@@ -22,7 +22,3 @@ Flask-based API for sending emails.
 - Add to `requirements.in`
 - Run:  
   `docker compose exec email_api pip-compile`
-
-## Production
-
-- Deploy using Docker or to Heroku (see `DEPLOY.md`).

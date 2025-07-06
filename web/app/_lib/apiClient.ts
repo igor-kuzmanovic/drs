@@ -35,7 +35,9 @@ export class ApiClient {
 		const { noAuth, ...fetchOptions } = options;
 
 		try {
-			const response = await fetch(`${this.baseUrl}${endpoint}`, {
+			const response = await fetch(endpoint.startsWith("http://") || endpoint.startsWith("https://")
+	? endpoint
+	: `${this.baseUrl}${endpoint}`, {
 				...fetchOptions,
 				headers,
 			});

@@ -36,3 +36,15 @@ docker compose up --build
 
 - Build and start all services: `docker compose up --build`
 - Stop all services: `docker compose down`
+
+## Potential Improvements
+
+- Event system to mark surveys as expired when they are accessed
+- Forgot password
+- Templating engine for emails
+- Rate limiting
+- Notifications for survey owners when responses are received
+- Token refreshing
+- Implement soft deletion
+- Share code between services
+- Resend failed survey ended emails

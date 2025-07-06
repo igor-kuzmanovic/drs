@@ -25,9 +25,4 @@ Next.js frontend for Survey Master.
 
 ## Production
 
-- Build and start:
-
-  ```sh
-  npm run build
-  npm start
-  ```
+- See `DEPLOY_EXAMPLE.md`

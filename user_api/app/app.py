@@ -8,9 +8,9 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from .core.cors import setup_cors
 from .core.db import setup_db
 from .core.error import setup_error_handlers
-from .routes.login import auth_login_blueprint
+from .routes.login import login_blueprint
 from .routes.health import health_blueprint
-from .routes.users_me_get import user_get_blueprint
+from .routes.user_me_get import user_me_get_blueprint
 from .routes.user_post import user_post_blueprint
 from .routes.user_me_put import user_me_put_blueprint
 
@@ -37,8 +37,8 @@ setup_cors(app)
 
 # Register blueprints
 app.register_blueprint(health_blueprint)
-app.register_blueprint(auth_login_blueprint, url_prefix="/api")
-app.register_blueprint(user_get_blueprint, url_prefix="/api")
+app.register_blueprint(login_blueprint, url_prefix="/api")
+app.register_blueprint(user_me_get_blueprint, url_prefix="/api")
 app.register_blueprint(user_post_blueprint, url_prefix="/api")
 app.register_blueprint(user_me_put_blueprint, url_prefix="/api")
 

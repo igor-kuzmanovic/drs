@@ -8,8 +8,8 @@ export const SERVICE_TYPES = {
 export type ServiceType = (typeof SERVICE_TYPES)[keyof typeof SERVICE_TYPES];
 
 export const HEALTH_ENDPOINTS = {
-	USER: "/health/user",
-	SURVEY: "/health/survey",
+	USER: process.env.NEXT_PUBLIC_SURVEY_API_HEALTH_ENDPOINT!,
+	SURVEY: process.env.NEXT_PUBLIC_SURVEY_API_HEALTH_ENDPOINT!,
 } as const;
 
 export interface ServiceHealth {

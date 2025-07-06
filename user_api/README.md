@@ -34,4 +34,4 @@ Flask-based API for user management.
 
 ## Production
 
-- Deploy using Docker or to Heroku (see `DEPLOY.md`).
+- See `DEPLOY_EXAMPLE.md`
