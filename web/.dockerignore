@@ -1,42 +1,34 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Node modules
+node_modules/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+# Next.js build output
+.next/
 
-# testing
-/coverage
+# Production build output (if separate)
+out/
 
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-!.env.example
+# Env files (optional: exclude if you don't want env files in context)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# vercel
-.vercel
+# VSCode settings
+.vscode/
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# System files
+.DS_Store
+
+# Git repo
+.git/
+.gitignore
+
+# Docker files themselves (optional)
+docker-compose.yaml
+Dockerfile
