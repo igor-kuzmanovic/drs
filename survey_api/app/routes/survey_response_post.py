@@ -12,7 +12,7 @@ survey_response_post_blueprint = Blueprint("survey_response_post_routes", __name
 
 class SurveyResponseRequest(PydanticBaseModel):
     token: str | None = None
-    email: EmailStr | None = None
+    email: EmailStr | str | None = None
     answer: str = Field(pattern="^(YES|NO|CANT_ANSWER)$")
 
 
@@ -40,18 +40,21 @@ def response(survey_id):
         recipient_email = recipient.email
     elif data.email:
         recipient_email = data.email
+    elif survey.is_anonymous:
+        recipient_email = None
     else:
         return jsonify({"error": "Token or email required"}), 400
 
-    existing = SurveyResponse.query.filter_by(
-        survey_id=survey_id, recipient_email=recipient_email
-    ).first()
-    if existing:
-        return jsonify({"error": "Already responded"}), 400
+    if recipient_email:
+        existing = SurveyResponse.query.filter_by(
+            survey_id=survey_id, recipient_email=recipient_email
+        ).first()
+        if existing:
+            return jsonify({"error": "Already responded"}), 400
 
     response = SurveyResponse(
         survey_id=survey_id,
-        recipient_email=recipient_email,
+        recipient_email=recipient_email if recipient_email else "",
         answer=data.answer,
         answered_at=datetime.now(timezone.utc),
     )
