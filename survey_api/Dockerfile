@@ -18,7 +18,8 @@ RUN pip install --upgrade pip \
 # Copy the application code
 COPY . .
 
-# Copy and set permissions for entrypoint
+# Copy the startup script
+COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
 # Set environment variables

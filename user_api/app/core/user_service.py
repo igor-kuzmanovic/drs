@@ -78,7 +78,7 @@ def update_user_from_dict(user: User, data: Dict[str, Any]) -> None:
 def check_user_credentials(email: str, password: str) -> Tuple[Optional[User], Optional[Tuple[Dict, int]]]:
     user = db.session.query(User).filter_by(email=email).first()
     if user is None or not check_password_hash(user.password, password):
-        return None, ({"error": "Invalid email or password"}, 401)
+        return None, ({"error": "Invalid email or password"}, 400)
     return user, None
 
 __all__ = [
